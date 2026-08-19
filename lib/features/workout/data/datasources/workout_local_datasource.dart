@@ -40,11 +40,13 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   @override
   Future<void> saveSession(WorkoutSession session) async {
     await sessionBox.put(session.dateKey, _toHiveModel(session));
+    await sessionBox.flush();
   }
 
   @override
   Future<void> deleteSession(String dateKey) async {
     await sessionBox.delete(dateKey);
+    await sessionBox.flush();
   }
 
   @override

@@ -6,6 +6,7 @@ import '../../domain/entities/exercise_log.dart';
 import '../../domain/entities/exercise_set_log.dart';
 import '../../domain/entities/workout_definition.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../utils/video_launcher.dart';
 import 'exercise_set_row.dart';
 
 class ExerciseLogCard extends StatefulWidget {
@@ -151,15 +152,10 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       Icons.play_circle_outline,
                       color: AppColors.primaryBlue,
                     ),
-                    onPressed: () async {
-                      final url = Uri.parse(performedExercise.videoUrl!);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                    },
+                    onPressed: () => VideoLauncher.launch(
+                      context,
+                      performedExercise.videoUrl!,
+                    ),
                   ),
               ],
             ),

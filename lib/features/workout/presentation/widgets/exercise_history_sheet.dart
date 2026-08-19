@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/usecases/get_exercise_history.dart';
 
@@ -170,6 +172,36 @@ class ExerciseHistorySheet extends StatelessWidget {
                             );
                           }).toList(),
                         ),
+                      if (entry.log.imagePath != null) ...[
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.fullScreenImage,
+                              arguments: {
+                                'imagePath': entry.log.imagePath,
+                                'title': '$exerciseName • ${entry.dateKey}',
+                              },
+                            );
+                          },
+                          child: Container(
+                            height: 60,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(entry.log.imagePath!),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   );
                 },

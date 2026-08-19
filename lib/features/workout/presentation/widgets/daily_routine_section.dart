@@ -7,6 +7,7 @@ import '../cubit/workout_state.dart';
 import '../../data/datasources/workout_catalog.dart';
 import '../../../../core/utils/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../utils/video_launcher.dart';
 
 class DailyRoutineSection extends StatelessWidget {
   const DailyRoutineSection({super.key});
@@ -83,15 +84,10 @@ class _DailyRoutineCard extends StatelessWidget {
                       size: 20,
                       color: AppColors.primaryBlue,
                     ),
-                    onPressed: () async {
-                      final url = Uri.parse(exercise.videoUrl!);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                    },
+                    onPressed: () => VideoLauncher.launch(
+                      context,
+                      exercise.videoUrl!,
+                    ),
                   ),
               ],
             ),

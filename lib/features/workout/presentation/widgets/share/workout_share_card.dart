@@ -85,110 +85,125 @@ class WorkoutShareCard extends StatelessWidget {
               ],
             ),
           ),
-          ...session.exerciseLogs.entries.map((entry) {
-            final log = entry.value;
-            final isPerformed =
-                log.isPerformed || log.sets.any((s) => s.isPerformed);
-            if (!isPerformed) return const SizedBox.shrink();
-
-            final exercise = WorkoutCatalog.getExerciseById(
-              log.performedExerciseId,
+          ...(() {
+            final dailyRoutine = WorkoutCatalog.getDailyRoutine();
+            final workoutDef = WorkoutCatalog.workouts.firstWhere(
+              (w) => w.type == session.workoutType,
+              orElse: () => WorkoutCatalog.workouts.first,
             );
 
-            List<String> performances = [];
-            bool hasReps = false;
+            final orderedExerciseIds = [
+              ...dailyRoutine.exercises.map((e) => e.exerciseId),
+              ...workoutDef.exercises.map((e) => e.exerciseId),
+            ];
 
-            if (log.sets.isNotEmpty) {
-              final performedSets = log.sets
-                  .where((s) => s.isPerformed)
-                  .toList();
-              for (final s in performedSets) {
-                String p = '';
-                if (s.weightKg != null) {
-                  final w = WeightConverter.convert(
-                    s.weightKg!,
-                    WeightUnit.kg,
-                    log.displayUnit,
-                  );
-                  p = WeightConverter.format(w);
-                  if (s.actualReps != null) {
-                    p += '×${s.actualReps}';
+            return orderedExerciseIds.map((plannedId) {
+              final log = session.exerciseLogs[plannedId];
+              if (log == null) return const SizedBox.shrink();
+
+              final isPerformed =
+                  log.isPerformed || log.sets.any((s) => s.isPerformed);
+              if (!isPerformed) return const SizedBox.shrink();
+
+              final exercise = WorkoutCatalog.getExerciseById(
+                log.performedExerciseId,
+              );
+
+              List<String> performances = [];
+              bool hasReps = false;
+
+              if (log.sets.isNotEmpty) {
+                for (int i = 0; i < log.sets.length; i++) {
+                  final s = log.sets[i];
+                  if (!s.isPerformed) continue;
+
+                  String p = 'S${i + 1}: ';
+                  if (s.weightKg != null) {
+                    final w = WeightConverter.convert(
+                      s.weightKg!,
+                      WeightUnit.kg,
+                      log.displayUnit,
+                    );
+                    p += WeightConverter.format(w);
+                    if (s.actualReps != null) {
+                      p += '×${s.actualReps}';
+                      hasReps = true;
+                    } else {
+                      p += ' ${log.displayUnit.name}';
+                    }
+                  } else if (s.actualReps != null) {
+                    p += '${s.actualReps}r';
                     hasReps = true;
                   } else {
-                    p += ' ${log.displayUnit.name}';
+                    p += '✓';
                   }
-                } else if (s.actualReps != null) {
-                  p = '${s.actualReps}r';
-                  hasReps = true;
-                } else {
-                  p = '✓';
+                  performances.add(p);
                 }
-                performances.add(p);
+              } else if (log.weightKg != null) {
+                final w = WeightConverter.convert(
+                  log.weightKg!,
+                  WeightUnit.kg,
+                  log.displayUnit,
+                );
+                performances.add(
+                  '${WeightConverter.format(w)} ${log.displayUnit.name}',
+                );
               }
-            } else if (log.weightKg != null) {
-              final w = WeightConverter.convert(
-                log.weightKg!,
-                WeightUnit.kg,
-                log.displayUnit,
-              );
-              performances.add(
-                '${WeightConverter.format(w)} ${log.displayUnit.name}',
-              );
-            }
 
-            final performanceText = performances.join(' | ');
+              final performanceText = performances.join(' | ');
 
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.white10)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      exercise.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.white10)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        exercise.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          performanceText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.right,
-                        ),
-                        if (hasReps &&
-                            !performanceText.contains(log.displayUnit.name))
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
                           Text(
-                            log.displayUnit.name,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              fontSize: 9,
+                            performanceText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.right,
                           ),
-                      ],
+                          if (hasReps &&
+                              !performanceText.contains(log.displayUnit.name))
+                            Text(
+                              log.displayUnit.name,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                  ],
+                ),
+              );
+            });
+          })(),
           const SizedBox(height: 24),
           const Align(
             alignment: Alignment.centerRight,

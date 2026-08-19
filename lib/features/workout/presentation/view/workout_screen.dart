@@ -38,22 +38,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   void _showReviewDialog(int count) {
+    final workoutCubit = context.read<WorkoutCubit>();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Review Workout'),
         content: Text(
           'You have $count exercise(s) not marked as performed. Do you want to save anyway?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              context.read<WorkoutCubit>().saveWorkout(forceSave: true);
+              Navigator.pop(dialogContext);
+              workoutCubit.saveWorkout(forceSave: true);
             },
             child: const Text('Save Anyway'),
           ),
@@ -136,8 +137,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           }
         } else if (state.status == WorkoutStatus.saved) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Workout saved successfully!')),
+            const SnackBar(content: Text('Workout saved and finished!')),
           );
+          _handleShare(state);
         }
       },
       child: BlocBuilder<WorkoutCubit, WorkoutState>(
@@ -193,29 +195,24 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.download_outlined),
-                    onPressed: () => WorkoutShareService.saveToGallery(
-                      context,
-                      WorkoutSession(
-                        dateKey: state.dateKey,
-                        workoutType: state.workoutType,
-                        exerciseLogs: state.exerciseLogs,
-                        displayUnit: state.displayUnit,
-                      ),
-                    ),
-                    tooltip: 'Save To Gallery',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.share_outlined),
-                    onPressed: () => _handleShare(state),
-                    tooltip: 'Share Workout',
-                  ),
-                  const WeightUnitSelector(),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     IconButton(
+              //       icon: const Icon(Icons.download_outlined),
+              //       onPressed: () => WorkoutShareService.saveToGallery(
+              //         context,
+              //         WorkoutSession(
+              //           dateKey: state.dateKey,
+              //           workoutType: state.workoutType,
+              //           exerciseLogs: state.exerciseLogs,
+              //           displayUnit: state.displayUnit,
+              //         ),
+              //       ),
+              //       tooltip: 'Save To Gallery',
+              //     ),
+              //     const WeightUnitSelector(),
+              //   ],
+              // ),
             ],
           ),
           const SizedBox(height: 8),
