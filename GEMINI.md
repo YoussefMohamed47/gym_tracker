@@ -108,3 +108,14 @@ Rules below only cover things that OVERRIDE defaults or encode project decisions
 - Dispose controllers and focus nodes in `StatefulWidget.dispose()`
 - Prefer small, composed widgets to minimize rebuild scope
 - Use `BlocBuilder`/`BlocSelector` on the smallest widget that needs the state — never at the top of the tree
+
+## 8) Persistence & Database (Hive CE)
+- **Source of Truth**: Use Hive CE for structured persistent data (Workouts, Reports, Settings).
+- **Deprecation**: SharedPreferences is for transient/legacy data only; migrate structured data to Hive.
+- **Abstraction**: Cubits/UI never access Hive boxes directly; use Repository/Data Source abstractions in the data layer.
+- **Typed Storage**: Use typed Hive models/adapters. No giant JSON strings in Hive.
+- **Organization**: Prefer aggregate-based persistence (e.g., `WorkoutSession` as a root).
+- **Static Data**: Canonical catalogs (exercises, schedules) stay in code, not Hive.
+- **Media**: Store file paths/references in Hive, not raw bytes.
+- **Migration**: SharedPreferences-to-Hive migrations must be deterministic, idempotent, and failure-safe. Never delete legacy data before successful migration.
+- **Schema Evolution**: Hive TypeAdapter field IDs are persistent contracts. Adding/removing fields must preserve backwards compatibility.

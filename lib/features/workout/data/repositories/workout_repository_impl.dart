@@ -3,7 +3,6 @@ import '../../domain/entities/exercise_log.dart';
 import '../../domain/entities/workout_session.dart';
 import '../../domain/repositories/workout_repository.dart';
 import '../datasources/workout_local_datasource.dart';
-import '../models/workout_session_model.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final WorkoutLocalDataSource localDataSource;
@@ -27,7 +26,7 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
 
   @override
   Future<void> saveSession(WorkoutSession session) async {
-    await localDataSource.saveSession(WorkoutSessionModel.fromEntity(session));
+    await localDataSource.saveSession(session);
   }
 
   @override

@@ -42,10 +42,12 @@
 
 - [ ] **Feature Preservation**: No regressions in Daily Report or History; data compatibility maintained.
 - [ ] **Architecture**: Follows feature-first (data/domain/presentation) with Bloc/Cubit and GetIt.
-- [ ] **Local-First**: No unauthorized cloud/API dependencies; local persistence prioritized.
-- [ ] **Data Integrity**: Stable date identities; user files in persistent storage.
+- [ ] **Local-First**: Hive CE as source of truth for structured data; no unauthorized cloud/API dependencies.
+- [ ] **Data Integrity**: Stable date identities; user files in persistent storage; KG values canonical.
+- [ ] **Persistence**: Presentation/Cubit avoid direct Hive access; typed storage used (no giant JSON); schema evolution respected.
+- [ ] **Migration**: SharedPref-to-Hive is deterministic, idempotent, and failure-safe.
 - [ ] **UI Identity**: Material 3; #1A46A0 brand color; mobile-optimized layout.
-- [ ] **Testing**: Business logic and state transitions are unit-testable.
+- [ ] **Testing**: Business logic, state transitions, and persistence (round-trips/migration) are unit-testable.
 - [ ] **Simplicity**: No unnecessary packages or over-engineered abstractions.
 
 ## Project Structure

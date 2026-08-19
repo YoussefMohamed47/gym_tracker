@@ -132,6 +132,7 @@
 
 ## Constitution Alignment
 
-- [ ] Feature complies with **Local-First** principle (no unsanctioned APIs).
+- [ ] Feature complies with **Local-First** principle (Hive CE as source of truth).
 - [ ] UI/UX follows **Material 3** and **#1A46A0** brand identity.
-- [ ] Data handling respects **Data Integrity** (stable identities, persistent storage).
+- [ ] Data handling respects **Data Integrity** and **Structured Persistence** (typed storage, repository abstraction, schema evolution).
+- [ ] **Migration** requirements (if applicable) are failure-safe and idempotent.

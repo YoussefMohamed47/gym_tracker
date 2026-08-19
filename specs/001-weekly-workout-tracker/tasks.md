@@ -1,160 +1,94 @@
-# Tasks: Weekly Workout Tracker (EVOLUTION V2)
+# Tasks: Weekly Workout Tracker (EVOLUTION V3)
 
 **Input**: Design documents from `/specs/001-weekly-workout-tracker/`
 
-**Prerequisites**: plan.md (V2), spec.md (V2), data-model.md (V2), research.md (V2)
+**Prerequisites**: plan.md (V3), spec.md (V3), data-model.md (V3)
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing. Foundational migration and data model tasks are prioritized to unblock all UI work.
-
----
-
-## Phase 1: Setup (Shared Infrastructure)
-
-**Purpose**: Project initialization and basic structure
-
-- [ ] T001 Update `pubspec.yaml` with latest stable `url_launcher` and `image_picker` dependencies
-- [ ] T002 Ensure project directory structure matches feature-first architecture in `lib/features/workout/`
-- [ ] T003 [P] Add #1A46A0 brand color constant in `lib/core/utils/colors.dart` (if not present)
+**Organization**: Tasks are grouped by logical layer to ensure dependency-safe evolution of the repetition tracking feature.
 
 ---
 
-## Phase 2: Foundational (V2 Data Model & Migration - BLOCKING)
+## Phase 8: Evolution V3 - Actual Reps Per Set (Blocking)
 
-**Purpose**: Core infrastructure that MUST be complete before ANY V2 user story can be implemented.
+**Purpose**: Evolve the domain and persistence layers to support repetition tracking while maintaining Hive schema stability.
 
-- [ ] T004 Implement `ExerciseSetLog` entity in `lib/features/workout/domain/entities/exercise_set_log.dart`
-- [ ] T005 [P] Implement `ExerciseSetLogModel` (JSON) in `lib/features/workout/data/models/exercise_set_log_model.dart`
-- [ ] T006 [P] Update `ExerciseLog` entity to support `List<ExerciseSetLog> sets` in `lib/features/workout/domain/entities/exercise_log.dart`
-- [ ] T007 [P] Implement polymorphic JSON deserialization in `ExerciseLogModel.fromJson` to handle V1 (`weightKg`) and V2 (`sets`) in `lib/features/workout/data/models/exercise_log_model.dart`
-- [ ] T008 [P] Implement unit tests for V1/V2 JSON compatibility in `test/features/workout/data/models/exercise_log_model_test.dart`
-- [ ] T009 Update `WorkoutSession` model to support the new `ExerciseLog` structure in `lib/features/workout/data/models/workout_session_model.dart`
-- [ ] T010 [P] Implement high-precision KG weight storage at the set level in `lib/features/workout/data/models/exercise_set_log_model.dart`
-- [ ] T011 Update `WorkoutLocalDataSource` to support versioned schema reads in `lib/features/workout/data/datasources/workout_local_datasource.dart`
+- [ ] T040 Update `ExerciseSetLog` domain entity with `actualReps` field in `lib/features/workout/domain/entities/exercise_set_log.dart`
+- [ ] T041 [P] Add `actualReps` to `ExerciseSetLogHiveModel` using **NEW Field ID 3** in `lib/features/workout/data/models/exercise_set_log_hive_model.dart`
+- [ ] T042 Generate Hive adapters: `flutter pub run build_runner build --delete-conflicting-outputs`
+- [ ] T043 [P] Implement backwards compatibility tests covering the full historical upgrade path: legacy SharedPreferences workout JSON -> existing legacy migrator -> Hive WorkoutSession aggregate -> WorkoutSetLog records compatible with V3.
+    - [ ] Case 1: Old Hive per-set record (weightKg=50, actualReps absent) -> V3 result (actualReps=null)
+    - [ ] Case 2: Legacy SP single-weight record -> V3 history remains legacy weight only
+    - [ ] Case 3: Legacy SP per-set record without reps -> V3 result (actualReps=null)
+    - [ ] Case 4: New V3 Hive record (weight + reps) -> round-trip integrity
+    - [ ] Verify stale SharedPreferences data never overwrites existing valid Hive data.
+- [ ] T044 Update `WorkoutLocalDataSource` mappers to support `actualReps` in `lib/features/workout/data/datasources/workout_local_datasource.dart`
+- [ ] T045 [P] Update `WorkoutRepositoryImpl` to include reps in previous-exercise lookup and history in `lib/features/workout/data/repositories/workout_repository_impl.dart`
 
-**Checkpoint**: Foundation ready - legacy data can be read, and new set-level data can be persisted.
-
----
-
-## Phase 3: User Story 3 - Daily Routine Correctness (Priority: P1) 🎯
-
-**Goal**: Fix the "Unknown Exercise" bug and ensure routine is strictly data-driven from the catalog.
-
-**Independent Test**: Daily Routine contains exactly 5 canonical exercises with functional video links and no placeholders.
-
-- [ ] T012 [P] Identify and remove hardcoded placeholder routine ID strings in `lib/features/workout/presentation/cubit/workout_cubit.dart`
-- [ ] T013 [P] Correct `WorkoutCatalog.getDailyRoutine()` to return EXACTLY the 5 exercises: SLR, Clam shell, neurodynamic sciatic nerve, Trunk rotation, Double knee to chest in `lib/features/workout/data/datasources/workout_catalog.dart`
-- [ ] T014 [P] Verify `WorkoutCatalog` regression tests match the canonical Sama Fit PDF specs in `test/features/workout/data/datasources/workout_catalog_test.dart`
-- [ ] T015 Update `WorkoutCubit` to resolve the routine solely via `WorkoutCatalog.getDailyRoutine()`
+**Checkpoint**: V3 Foundation ready - persistence and repository layers support repetition tracking.
 
 ---
 
-## Phase 4: User Story 1 - Per-Set Workout Flow (Priority: P1) 🎯 MVP
+## Phase 9: V3 Logic & State Management
 
-**Goal**: Record independent weights and performance for EACH prescribed set.
+**Purpose**: Update the business logic to handle dual-data prefill (Weight + Reps) and auto-performance triggers.
 
-**Independent Test**: 3-set exercise allows entering 3 weights, marking each as done, and saving to history.
-
-### Tests for User Story 1 (REQUIRED) ⚠️
-
-- [ ] T016 [US1] Unit test for per-set weight mapping (Set N prefills from Previous Set N) in `test/features/workout/domain/repositories/workout_repository_test.dart`
-- [ ] T017 [US1] Unit test for partial completion logic (Exercise is performed if >=1 set is done) in `test/features/workout/presentation/cubit/workout_cubit_test.dart`
-
-### Implementation for User Story 1
-
-- [ ] T018 [US1] Update `WorkoutState` to store per-set draft data in `lib/features/workout/presentation/cubit/workout_state.dart`
-- [ ] T019 [P] [US1] Implement `ExerciseSetRow` widget with numeric input, "Last" label, and performance toggle in `lib/features/workout/presentation/widgets/exercise_set_row.dart`
-- [ ] T020 [P] [US1] Redesign `ExerciseCard` to include set rows and prescribed meta in `lib/features/workout/presentation/widgets/exercise_card.dart`
-- [ ] T021 [US1] Revise `WorkoutCubit` to handle per-set weight/performed state updates in `lib/features/workout/presentation/cubit/workout_cubit.dart`
-- [ ] T022 [US1] Implement numeric keyboard focus management (Next moves to next set input) in `lib/features/workout/presentation/widgets/exercise_set_row.dart`
-- [ ] T023 [US1] Implement alternative set draft isolation (switching back and forth preserves independent set arrays) in `lib/features/workout/presentation/cubit/workout_cubit.dart`
-- [ ] T024 [US1] Redesign `WorkoutScreen` with sticky header, 7-day week selector, and sticky save bar in `lib/features/workout/presentation/view/workout_screen.dart`
-
-**Checkpoint**: Core V2 per-set logging is functional.
+- [ ] T046 [US1] Update `WorkoutCubit` to handle `actualReps` updates and auto-performed state in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T047 [US1] Implement per-set reps prefill logic (matching set index) in `WorkoutCubit._createInitialLog` in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T048 [P] [US1] Implement independent rep draft preservation for alternatives in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T049 [US1] Unit test for V3 Cubit transitions (reps update, prefill, partial completion) in `test/features/workout/presentation/cubit/workout_cubit_test.dart`
 
 ---
 
-## Phase 5: User Story 2 - Exercise History & Reference (Priority: P2)
+## Phase 10: V3 UI Evolution & Interaction
 
-**Goal**: View previous session dates and per-set history directly within the workout context.
+**Purpose**: Redesign the logging UI to support dual-input focus flow and duration-based exercises.
 
-**Independent Test**: Tapping History opens a bottom sheet showing multiple dated sessions with set breakdowns.
-
-- [ ] T025 [P] [US2] Implement `GetExerciseHistory` use case to retrieve multiple dated performances in `lib/features/workout/domain/usecases/get_exercise_history.dart`
-- [ ] T026 [US2] Create `ExerciseHistoryBottomSheet` showing per-set history list in `lib/features/workout/presentation/widgets/exercise_history_sheet.dart`
-- [ ] T027 [US2] Update `ExerciseCard` to display "Previous Workout Date" label in `lib/features/workout/presentation/widgets/exercise_card.dart`
-- [ ] T028 [US2] Integrate `ExerciseHistoryBottomSheet` into `ExerciseCard` actions
-
----
-
-## Phase 6: User Story 4 - Legacy Data Integrity (Priority: P2)
-
-**Goal**: Seamlessly handle V1 single-weight history records.
-
-**Independent Test**: Historical V1 session displays "Legacy single-weight record" and can initialize today's sets.
-
-- [ ] T029 [US4] Implement "Legacy Working Weight" UI reference for V1 previous sessions in `lib/features/workout/presentation/widgets/exercise_card.dart`
-- [ ] T030 [US4] Implement "Use legacy weight for all sets" draft initialization action in `lib/features/workout/presentation/cubit/workout_cubit.dart`
-- [ ] T031 [US4] Verify sharing handles legacy V1 logs by showing single weight instead of set list in `lib/features/workout/presentation/widgets/share/workout_share_card.dart`
+- [ ] T050 [P] [US1] Update `ExerciseSetRow` for Actual Reps input in `lib/features/workout/presentation/widgets/exercise_set_row.dart`
+    - [ ] Add integer-only Actual Reps input for repetition-based sets.
+    - [ ] Use the approved integer numeric keyboard.
+    - [ ] Blank remains valid.
+    - [ ] Reject zero, negative, decimal, or otherwise invalid rep values.
+    - [ ] Display the approved inline validation message: "Reps must be greater than 0"
+    - [ ] Do not silently clear, clamp, or replace invalid input.
+    - [ ] Invalid reps must not be persisted.
+    - [ ] Preserve logical Weight → Reps focus flow.
+    - [ ] Preserve narrow-screen responsiveness and accessibility semantics.
+- [ ] T051 [US1] Implement dual-input focus behavior (Weight -> Reps -> Next Set Weight) in `lib/features/workout/presentation/widgets/exercise_log_card.dart`
+- [ ] T052 [US1] Implement conditional rep-input visibility based on prescription (Duration-based exercises omit reps) in `lib/features/workout/presentation/widgets/exercise_log_card.dart`
+- [ ] T053 [P] [US1] Update `ExerciseHistorySheet` to display `weight × reps` per set with legacy handling in `lib/features/workout/presentation/widgets/exercise_history_sheet.dart`
+- [ ] T054 [P] [US1] Update Daily Routine UI to support numeric reps for repetition movements in `lib/features/workout/presentation/widgets/daily_routine_section.dart`
 
 ---
 
-## Phase 7: Polish & Cross-Cutting Concerns
+## Phase 11: V3 Sharing & Final Polish
 
-**Purpose**: Final quality checks and cross-feature integration.
+**Purpose**: Update sharing templates to reflect training volume accurately.
 
-- [ ] T032 Update `WorkoutShareCard` to display per-set values (e.g., "50 | 50 | 47.5") for V2 sessions
-- [ ] T033 [P] Verify text scaling and Material 3 brand identity consistency across all redesigned UI
-- [ ] T034 [P] Verify existing photo/report navigation remains functional
-- [ ] T035 [P] Verify compliance with Project Constitution principles
-- [ ] T036 Run `dart format .`
-- [ ] T037 Run `flutter analyze`
-- [ ] T038 Run all tests (`flutter test`)
-- [ ] T039 Execute manual UX verification via `quickstart.md`
+- [ ] T055 [P] Update `WorkoutShareCard` with detailed `S1: 52.5 kg × 10` format and legacy weight-only fallback in `lib/features/workout/presentation/widgets/share/workout_share_card.dart`
+- [ ] T056 [P] Update `WeeklyWorkoutShareCard` with compact `52.5kg×10` performance format in `lib/features/workout/presentation/widgets/share/weekly_workout_share_card.dart`
+- [ ] T057 [P] Verify `weight × reps` sharing format for bodyweight repetition exercises (e.g., "12 reps")
+- [ ] T058 [P] Verify KG/LB unit conversion only affects weight, never reps.
+
+---
+
+## Phase 12: V3 Quality Assurance
+
+- [ ] T059 Run `dart format .`
+- [ ] T060 Run `flutter analyze`
+- [ ] T061 Run all tests (`flutter test`) covering model, repository, cubit, and sharing
+- [ ] T062 Execute manual verification for:
+    - [ ] 2-set rep tracking
+    - [ ] 5-set Daily Routine reps
+    - [ ] Duration-based exercise (no reps)
+    - [ ] Alternative switching preservation
+    - [ ] Legacy session sharing (no crash, no "null" labels)
 
 ---
 
 ## Dependencies & Execution Order
 
-### Phase Dependencies
-
-- **Setup (Phase 1)**: No dependencies.
-- **Foundational (Phase 2)**: Depends on Setup. BLOCKS all UI work.
-- **Daily Routine (Phase 3)**: Can run in parallel with Foundational.
-- **User Stories (Phase 4-6)**: Depends on Foundational completion.
-- **Polish (Phase 7)**: Depends on all user stories.
-
-### User Story Dependencies
-
-- **US1 (MVP)**: Must be first UI story.
-- **US2, US4**: Depend on US1 foundation (ExerciseCard redesign).
-
----
-
-## Parallel Execution Opportunities
-
-- All Phase 1 tasks.
-- Foundational tasks (T005-T008, T010).
-- Daily Routine identification (T012-T014) can start during Foundation.
-- Redesigning widgets (T019, T020) can start once domain entities (T004, T006) are stable.
-- Polish phase verification tasks.
-
----
-
-## Implementation Strategy
-
-### Revision First (Foundation + US3)
-
-1. Complete Phase 2: Foundational (Migration safety is priority).
-2. Complete Phase 3: Daily Routine fix (Low risk, high impact bug fix).
-
-### Incremental Evolution (US1)
-
-1. Redesign `ExerciseCard` and `WorkoutScreen` structure.
-2. Implement per-set logic in `WorkoutCubit`.
-3. **STOP and VALIDATE**: Verify 3-set exercises log correctly and V1 history doesn't crash.
-
-### Contextual Polish (US2 + US4)
-
-1. Add History Bottom Sheet.
-2. Add Legacy reference actions.
-3. Update Sharing.
+1. **Phase 8 (Foundation)**: MUST be completed first. BLOCKS all logic and UI work.
+2. **T042 (Adapter Generation)**: Depends on T041. MUST run before T043.
+3. **Phase 9 (Cubit)**: Depends on Phase 8.
+4. **Phase 10 (UI)**: Depends on Phase 9.
+5. **Phase 11 (Sharing)**: Can run in parallel with Phase 10.

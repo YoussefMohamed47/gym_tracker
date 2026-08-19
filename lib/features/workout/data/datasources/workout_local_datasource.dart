@@ -1,77 +1,55 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_ce/hive.dart';
 import '../../../../core/utils/weight_converter.dart';
-import '../models/workout_session_model.dart';
+import '../../../../core/storage/hive/models/app_settings_hive_model.dart';
+import '../models/workout_session_hive_model.dart';
+import '../models/exercise_log_hive_model.dart';
+import '../models/exercise_set_log_hive_model.dart';
+import '../../domain/entities/workout_session.dart';
+import '../../domain/entities/workout_type.dart';
+import '../../domain/entities/exercise_log.dart';
+import '../../domain/entities/exercise_set_log.dart';
 
 abstract class WorkoutLocalDataSource {
-  Future<WorkoutSessionModel?> getSessionForDate(String dateKey);
-  Future<void> saveSession(WorkoutSessionModel session);
+  Future<WorkoutSession?> getSessionForDate(String dateKey);
+  Future<void> saveSession(WorkoutSession session);
   Future<void> deleteSession(String dateKey);
-  Future<List<WorkoutSessionModel>> getHistory();
+  Future<List<WorkoutSession>> getHistory();
 
   Future<WeightUnit> getPreferredUnit();
   Future<void> setPreferredUnit(WeightUnit unit);
 }
 
 class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
-  final SharedPreferences sharedPreferences;
+  final Box<WorkoutSessionHiveModel> sessionBox;
+  final Box<AppSettingsHiveModel> settingsBox;
 
-  static const String historyKey = 'WORKOUT_HISTORY_V1';
   static const String unitPreferenceKey = 'WORKOUT_UNIT_PREFERENCE';
 
-  WorkoutLocalDataSourceImpl({required this.sharedPreferences});
+  WorkoutLocalDataSourceImpl({
+    required this.sessionBox,
+    required this.settingsBox,
+  });
 
   @override
-  Future<WorkoutSessionModel?> getSessionForDate(String dateKey) async {
-    final historyJson = sharedPreferences.getString(historyKey);
-    if (historyJson == null) return null;
-
-    final Map<String, dynamic> history = json.decode(historyJson);
-    final sessionJson = history[dateKey];
-    if (sessionJson == null) return null;
-
-    return WorkoutSessionModel.fromJson(
-      dateKey,
-      sessionJson as Map<String, dynamic>,
-    );
+  Future<WorkoutSession?> getSessionForDate(String dateKey) async {
+    final model = sessionBox.get(dateKey);
+    if (model == null) return null;
+    return _fromHiveModel(model);
   }
 
   @override
-  Future<void> saveSession(WorkoutSessionModel session) async {
-    final historyJson = sharedPreferences.getString(historyKey);
-    final Map<String, dynamic> history = historyJson != null
-        ? json.decode(historyJson)
-        : {};
-
-    history[session.dateKey] = session.toJson();
-    await sharedPreferences.setString(historyKey, json.encode(history));
+  Future<void> saveSession(WorkoutSession session) async {
+    await sessionBox.put(session.dateKey, _toHiveModel(session));
   }
 
   @override
   Future<void> deleteSession(String dateKey) async {
-    final historyJson = sharedPreferences.getString(historyKey);
-    if (historyJson == null) return;
-
-    final Map<String, dynamic> history = json.decode(historyJson);
-    if (history.containsKey(dateKey)) {
-      history.remove(dateKey);
-      await sharedPreferences.setString(historyKey, json.encode(history));
-    }
+    await sessionBox.delete(dateKey);
   }
 
   @override
-  Future<List<WorkoutSessionModel>> getHistory() async {
-    final historyJson = sharedPreferences.getString(historyKey);
-    if (historyJson == null) return [];
-
-    final Map<String, dynamic> history = json.decode(historyJson);
-    final sessions = history.entries.map((entry) {
-      return WorkoutSessionModel.fromJson(
-        entry.key,
-        entry.value as Map<String, dynamic>,
-      );
-    }).toList();
-
+  Future<List<WorkoutSession>> getHistory() async {
+    final sessions = sessionBox.values.map(_fromHiveModel).toList();
     // Sort by dateKey descending (newest first)
     sessions.sort((a, b) => b.dateKey.compareTo(a.dateKey));
     return sessions;
@@ -79,7 +57,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
 
   @override
   Future<WeightUnit> getPreferredUnit() async {
-    final unitString = sharedPreferences.getString(unitPreferenceKey);
+    final unitString = settingsBox.get('current')?.weightUnit;
     if (unitString == null) return WeightUnit.kg;
     return WeightUnit.values.firstWhere(
       (e) => e.name == unitString,
@@ -89,6 +67,80 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
 
   @override
   Future<void> setPreferredUnit(WeightUnit unit) async {
-    await sharedPreferences.setString(unitPreferenceKey, unit.name);
+    await settingsBox.put(
+      'current',
+      AppSettingsHiveModel(weightUnit: unit.name),
+    );
+  }
+
+  WorkoutSessionHiveModel _toHiveModel(WorkoutSession session) {
+    return WorkoutSessionHiveModel(
+      dateKey: session.dateKey,
+      workoutType: session.workoutType.name,
+      displayUnit: session.displayUnit.name,
+      exerciseLogs: session.exerciseLogs.values.map((log) {
+        final sets = <ExerciseSetLogHiveModel>[];
+        for (int i = 0; i < log.sets.length; i++) {
+          final s = log.sets[i];
+          sets.add(
+            ExerciseSetLogHiveModel(
+              setIndex: i,
+              weightKg: s.weightKg ?? 0.0,
+              isPerformed: s.isPerformed,
+              actualReps: s.actualReps,
+            ),
+          );
+        }
+        return ExerciseLogHiveModel(
+          plannedExerciseId: log.plannedExerciseId,
+          performedExerciseId: log.performedExerciseId,
+          sets: sets,
+          weightKg: log.weightKg,
+          isPerformed: log.isPerformed,
+          imagePath: log.imagePath,
+          timestamp: log.timestamp,
+          displayUnit: log.displayUnit.name,
+        );
+      }).toList(),
+    );
+  }
+
+  WorkoutSession _fromHiveModel(WorkoutSessionHiveModel model) {
+    final logs = <String, ExerciseLog>{};
+    for (final logModel in model.exerciseLogs) {
+      logs[logModel.plannedExerciseId] = ExerciseLog(
+        plannedExerciseId: logModel.plannedExerciseId,
+        performedExerciseId: logModel.performedExerciseId,
+        sets: logModel.sets
+            .map(
+              (s) => ExerciseSetLog(
+                weightKg: s.weightKg,
+                actualReps: s.actualReps,
+                isPerformed: s.isPerformed,
+              ),
+            )
+            .toList(),
+        weightKg: logModel.weightKg,
+        isPerformed: logModel.isPerformed,
+        imagePath: logModel.imagePath,
+        timestamp: logModel.timestamp,
+        displayUnit: WeightUnit.values.firstWhere(
+          (e) => e.name == logModel.displayUnit,
+          orElse: () => WeightUnit.kg,
+        ),
+      );
+    }
+
+    return WorkoutSession(
+      dateKey: model.dateKey,
+      workoutType: WorkoutType.values.firstWhere(
+        (e) => e.name == model.workoutType,
+      ),
+      displayUnit: WeightUnit.values.firstWhere(
+        (e) => e.name == model.displayUnit,
+        orElse: () => WeightUnit.kg,
+      ),
+      exerciseLogs: logs,
+    );
   }
 }

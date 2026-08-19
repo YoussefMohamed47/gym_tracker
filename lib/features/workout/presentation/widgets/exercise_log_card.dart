@@ -3,6 +3,7 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/exercise_log.dart';
+import '../../domain/entities/exercise_set_log.dart';
 import '../../domain/entities/workout_definition.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'exercise_set_row.dart';
@@ -12,7 +13,9 @@ class ExerciseLogCard extends StatefulWidget {
   final ExerciseSlot slot;
   final WeightUnit displayUnit;
   final String? previousDate;
+  final List<ExerciseSetLog>? previousSets;
   final Function(int setIndex, double? weight) onWeightChanged;
+  final Function(int setIndex, int? reps) onRepsChanged;
   final Function(int setIndex) onToggleSetPerformed;
   final Function(WeightUnit unit) onUnitChanged;
   final VoidCallback onSelectAlternative;
@@ -26,7 +29,9 @@ class ExerciseLogCard extends StatefulWidget {
     required this.slot,
     required this.displayUnit,
     this.previousDate,
+    this.previousSets,
     required this.onWeightChanged,
+    required this.onRepsChanged,
     required this.onToggleSetPerformed,
     required this.onUnitChanged,
     required this.onSelectAlternative,
@@ -40,31 +45,46 @@ class ExerciseLogCard extends StatefulWidget {
 }
 
 class _ExerciseLogCardState extends State<ExerciseLogCard> {
-  late List<FocusNode> _focusNodes;
+  late List<FocusNode> _weightFocusNodes;
+  late List<FocusNode> _repsFocusNodes;
 
   @override
   void initState() {
     super.initState();
-    _focusNodes = List.generate(widget.log.sets.length, (index) => FocusNode());
+    _initFocusNodes();
+  }
+
+  void _initFocusNodes() {
+    _weightFocusNodes = List.generate(
+      widget.log.sets.length,
+      (index) => FocusNode(),
+    );
+    _repsFocusNodes = List.generate(
+      widget.log.sets.length,
+      (index) => FocusNode(),
+    );
   }
 
   @override
   void didUpdateWidget(ExerciseLogCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.log.sets.length != widget.log.sets.length) {
-      for (final node in _focusNodes) {
+      for (final node in _weightFocusNodes) {
         node.dispose();
       }
-      _focusNodes = List.generate(
-        widget.log.sets.length,
-        (index) => FocusNode(),
-      );
+      for (final node in _repsFocusNodes) {
+        node.dispose();
+      }
+      _initFocusNodes();
     }
   }
 
   @override
   void dispose() {
-    for (final node in _focusNodes) {
+    for (final node in _weightFocusNodes) {
+      node.dispose();
+    }
+    for (final node in _repsFocusNodes) {
       node.dispose();
     }
     super.dispose();
@@ -80,6 +100,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
     );
     final isAlternative =
         widget.log.plannedExerciseId != widget.log.performedExerciseId;
+
+    // Check if it's a duration-based exercise
+    final isDurationBased = widget.slot.prescribedReps.contains('s');
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -143,7 +166,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
 
             // Prescription Info
             Text(
-              '${widget.slot.prescribedSets} sets • ${widget.slot.prescribedReps} reps • Rest ${widget.slot.prescribedRest}',
+              '${widget.slot.prescribedSets} sets • ${widget.slot.prescribedReps} • Rest ${widget.slot.prescribedRest}',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
@@ -164,7 +187,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               ),
 
             // Legacy Action
-            if (widget.log.weightKg != null)
+            if (widget.log.weightKg != null && widget.log.sets.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: InkWell(
@@ -208,7 +231,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               child: Row(
                 children: [
                   const SizedBox(
-                    width: 40,
+                    width: 32,
                     child: Text(
                       'SET',
                       textAlign: TextAlign.center,
@@ -220,7 +243,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                     ),
                   ),
                   const Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Text(
                       'LAST',
                       textAlign: TextAlign.center,
@@ -234,7 +257,19 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                   const Expanded(
                     flex: 3,
                     child: Text(
-                      'TODAY',
+                      'WEIGHT',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    flex: 3,
+                    child: Text(
+                      'REPS',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
@@ -244,7 +279,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                     ),
                   ),
                   const SizedBox(
-                    width: 60,
+                    width: 48,
                     child: Text(
                       'DONE',
                       textAlign: TextAlign.center,
@@ -265,17 +300,27 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                 index: index,
                 setLog: widget.log.sets[index],
                 previousSetLog:
-                    null, // We'll pass this correctly if we update ExerciseLog to store it
+                    (widget.previousSets != null &&
+                        widget.previousSets!.length > index)
+                    ? widget.previousSets![index]
+                    : null,
                 displayUnit: widget.log.displayUnit,
+                isRepsAllowed: !isDurationBased,
                 onWeightChanged: (w) => widget.onWeightChanged(index, w),
+                onRepsChanged: (r) => widget.onRepsChanged(index, r),
                 onTogglePerformed: () => widget.onToggleSetPerformed(index),
-                focusNode: _focusNodes[index],
-                textInputAction: index == widget.log.sets.length - 1
-                    ? TextInputAction.done
-                    : TextInputAction.next,
-                onFieldSubmitted: () {
+                weightFocusNode: _weightFocusNodes[index],
+                repsFocusNode: _repsFocusNodes[index],
+                onWeightSubmitted: () {
+                  if (!isDurationBased) {
+                    _repsFocusNodes[index].requestFocus();
+                  } else if (index < widget.log.sets.length - 1) {
+                    _weightFocusNodes[index + 1].requestFocus();
+                  }
+                },
+                onRepsSubmitted: () {
                   if (index < widget.log.sets.length - 1) {
-                    _focusNodes[index + 1].requestFocus();
+                    _weightFocusNodes[index + 1].requestFocus();
                   }
                 },
               );

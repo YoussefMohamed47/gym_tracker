@@ -102,15 +102,21 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     final List<ExerciseSetLog> sets = [];
     for (int i = 0; i < prescribedSets; i++) {
       double? weightKg;
+      int? actualReps;
       if (prevLog != null && prevLog.sets.length > i) {
         weightKg = prevLog.sets[i].weightKg;
+        actualReps = prevLog.sets[i].actualReps;
       }
       // Note: Legacy prefill (if prevLog.sets is empty but prevLog.weightKg exists)
-      // is handled in the UI/Cubit action if needed, or we can seed here if preferred.
-      // Spec says: "show the legacy previous working weight as a reference... Provide a lightweight action... 'Use 50 kg for all sets'".
-      // So we don't automatically seed all sets from legacy weight here.
+      // is handled in the UI/Cubit action if needed.
 
-      sets.add(ExerciseSetLog(weightKg: weightKg, isPerformed: false));
+      sets.add(
+        ExerciseSetLog(
+          weightKg: weightKg,
+          actualReps: actualReps,
+          isPerformed: false,
+        ),
+      );
     }
 
     return ExerciseLog(
@@ -134,10 +140,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
       final altDrafts = _updateAltDraft(plannedId, updatedLog);
 
-      emit(state.copyWith(
-        exerciseLogs: logs,
-        alternativeDrafts: altDrafts,
-      ));
+      emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
     }
   }
 
@@ -175,6 +178,30 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
+  void updateSetReps(String plannedId, int setIndex, int? reps) {
+    final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
+    final log = logs[plannedId];
+
+    if (log != null && log.sets.length > setIndex) {
+      final updatedSets = List<ExerciseSetLog>.from(log.sets);
+      updatedSets[setIndex] = updatedSets[setIndex].copyWith(
+        actualReps: reps,
+        isPerformed: reps != null, // Auto-mark as performed
+      );
+
+      final updatedLog = log.copyWith(
+        sets: updatedSets,
+        timestamp: DateTime.now(),
+      );
+
+      logs[plannedId] = updatedLog;
+
+      final altDrafts = _updateAltDraft(plannedId, updatedLog);
+
+      emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
+    }
+  }
+
   void toggleSetPerformed(String plannedId, int setIndex) {
     final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
     final log = logs[plannedId];
@@ -205,11 +232,14 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     final altDrafts = state.alternativeDrafts.map(
       (k, v) => MapEntry(k, Map<String, ExerciseLog>.from(v)),
     );
-    final plannedDrafts =
-        Map<String, ExerciseLog>.from(altDrafts[plannedId] ?? {});
+    final plannedDrafts = Map<String, ExerciseLog>.from(
+      altDrafts[plannedId] ?? {},
+    );
     plannedDrafts[updatedLog.performedExerciseId] = updatedLog;
 
-    final updatedAltDrafts = Map<String, Map<String, ExerciseLog>>.from(altDrafts);
+    final updatedAltDrafts = Map<String, Map<String, ExerciseLog>>.from(
+      altDrafts,
+    );
     updatedAltDrafts[plannedId] = plannedDrafts;
 
     return updatedAltDrafts;
@@ -344,8 +374,10 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   void setPreferredUnit(WeightUnit unit) async {
     await repository.setPreferredUnit(unit);
 
-    final logs = state.exerciseLogs.map((k, v) => MapEntry(k, v.copyWith(displayUnit: unit)));
-    
+    final logs = state.exerciseLogs.map(
+      (k, v) => MapEntry(k, v.copyWith(displayUnit: unit)),
+    );
+
     // Also update all drafts to keep them consistent with the new preference
     final altDrafts = state.alternativeDrafts.map(
       (k, v) => MapEntry(
@@ -354,11 +386,13 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       ),
     );
 
-    emit(state.copyWith(
-      displayUnit: unit,
-      exerciseLogs: logs,
-      alternativeDrafts: altDrafts,
-    ));
+    emit(
+      state.copyWith(
+        displayUnit: unit,
+        exerciseLogs: logs,
+        alternativeDrafts: altDrafts,
+      ),
+    );
   }
 
   void navigateWeek(int weeks) {

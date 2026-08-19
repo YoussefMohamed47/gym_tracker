@@ -70,7 +70,7 @@ class WorkoutShareCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
                     'PERFORMANCE',
                     textAlign: TextAlign.right,
@@ -95,43 +95,48 @@ class WorkoutShareCard extends StatelessWidget {
               log.performedExerciseId,
             );
 
-            String performanceText = '';
-            bool isBodyweight = false;
+            List<String> performances = [];
+            bool hasReps = false;
 
             if (log.sets.isNotEmpty) {
-              final performedSets =
-                  log.sets.where((s) => s.isPerformed).toList();
-              isBodyweight = performedSets.every((s) => s.weightKg == null);
-
-              if (isBodyweight) {
-                performanceText = '${performedSets.length} sets';
-              } else {
-                performanceText = performedSets.map((e) {
-                  final weight = e.weightKg != null
-                      ? WeightConverter.convert(
-                          e.weightKg!,
-                          WeightUnit.kg,
-                          log.displayUnit,
-                        )
-                      : null;
-                  return weight != null ? WeightConverter.format(weight) : '-';
-                }).join(' | ');
+              final performedSets = log.sets
+                  .where((s) => s.isPerformed)
+                  .toList();
+              for (final s in performedSets) {
+                String p = '';
+                if (s.weightKg != null) {
+                  final w = WeightConverter.convert(
+                    s.weightKg!,
+                    WeightUnit.kg,
+                    log.displayUnit,
+                  );
+                  p = WeightConverter.format(w);
+                  if (s.actualReps != null) {
+                    p += '×${s.actualReps}';
+                    hasReps = true;
+                  } else {
+                    p += ' ${log.displayUnit.name}';
+                  }
+                } else if (s.actualReps != null) {
+                  p = '${s.actualReps}r';
+                  hasReps = true;
+                } else {
+                  p = '✓';
+                }
+                performances.add(p);
               }
             } else if (log.weightKg != null) {
-              final weight = WeightConverter.convert(
+              final w = WeightConverter.convert(
                 log.weightKg!,
                 WeightUnit.kg,
                 log.displayUnit,
               );
-              performanceText = WeightConverter.format(weight);
+              performances.add(
+                '${WeightConverter.format(w)} ${log.displayUnit.name}',
+              );
             }
 
-            final unitStr = log.displayUnit == WeightUnit.kg ? 'kg' : 'lb';
-            if (performanceText.isNotEmpty &&
-                !isBodyweight &&
-                !performanceText.contains('sets')) {
-              performanceText += ' $unitStr';
-            }
+            final performanceText = performances.join(' | ');
 
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -154,7 +159,7 @@ class WorkoutShareCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -162,14 +167,15 @@ class WorkoutShareCard extends StatelessWidget {
                           performanceText,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.right,
                         ),
-                        if (isBodyweight)
+                        if (hasReps &&
+                            !performanceText.contains(log.displayUnit.name))
                           Text(
-                            'Bodyweight',
+                            log.displayUnit.name,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 9,

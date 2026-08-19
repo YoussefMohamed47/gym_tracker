@@ -120,7 +120,7 @@ class ExerciseHistorySheet extends StatelessWidget {
                       else
                         Wrap(
                           spacing: 8,
-                          runSpacing: 4,
+                          runSpacing: 8,
                           children: entry.log.sets.asMap().entries.map((
                             setEntry,
                           ) {
@@ -137,19 +137,35 @@ class ExerciseHistorySheet extends StatelessWidget {
                                     displayUnit,
                                   )
                                 : null;
+                            final reps = setLog.actualReps;
+
+                            String label = '';
+                            if (weight != null) {
+                              label =
+                                  '${WeightConverter.format(weight)} ${displayUnit.name}';
+                              if (reps != null) label += ' × $reps';
+                            } else if (reps != null) {
+                              label = '$reps reps';
+                            } else {
+                              label = 'Performed';
+                            }
 
                             return Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 10,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(4),
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[200]!),
                               ),
                               child: Text(
-                                'S${setIndex + 1}: ${weight != null ? WeightConverter.format(weight) : "BW"}',
-                                style: const TextStyle(fontSize: 12),
+                                'S${setIndex + 1}: $label',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             );
                           }).toList(),

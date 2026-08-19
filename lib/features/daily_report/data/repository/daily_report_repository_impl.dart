@@ -3,11 +3,11 @@ import '../../../../core/error/api_result.dart';
 import '../../domain/model/daily_report.dart';
 import '../../domain/repository/daily_report_repository.dart';
 import '../service/image_service.dart';
-import '../service/local_data_source.dart';
+import '../datasources/daily_report_local_datasource.dart';
 
 class DailyReportRepositoryImpl implements DailyReportRepository {
   final ImageService imageService;
-  final LocalDataSource localDataSource;
+  final DailyReportLocalDataSource localDataSource;
 
   DailyReportRepositoryImpl({
     required this.imageService,

@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gym_tracker_report/core/error/api_result.dart';
+import 'package:gym_tracker_report/features/daily_report/data/datasources/daily_report_local_datasource.dart';
 import 'package:gym_tracker_report/features/daily_report/data/repository/daily_report_repository_impl.dart';
 import 'package:gym_tracker_report/features/daily_report/data/service/image_service.dart';
-import 'package:gym_tracker_report/features/daily_report/data/service/local_data_source.dart';
 import 'package:gym_tracker_report/features/daily_report/domain/model/daily_report.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockImageService extends Mock implements ImageService {}
 
-class MockLocalDataSource extends Mock implements LocalDataSource {}
+class MockLocalDataSource extends Mock implements DailyReportLocalDataSource {}
 
 void main() {
   late DailyReportRepositoryImpl repository;
@@ -112,6 +112,36 @@ void main() {
       when(() => mockLocalDataSource.getReportHistory()).thenThrow(Exception());
       // act
       final result = await repository.getReportHistory();
+      // assert
+      expect(result, isA<ApiFailure>());
+    });
+  });
+
+  group('deleteReport', () {
+    const tId = '1';
+
+    test(
+      'should return ApiSuccess when local data source deletes successfully',
+      () async {
+        // arrange
+        when(
+          () => mockLocalDataSource.deleteReport(any()),
+        ).thenAnswer((_) async => {});
+        // act
+        final result = await repository.deleteReport(tId);
+        // assert
+        expect(result, const ApiSuccess<void>(null));
+        verify(() => mockLocalDataSource.deleteReport(tId));
+      },
+    );
+
+    test('should return ApiFailure when local data source throws', () async {
+      // arrange
+      when(
+        () => mockLocalDataSource.deleteReport(any()),
+      ).thenThrow(Exception());
+      // act
+      final result = await repository.deleteReport(tId);
       // assert
       expect(result, isA<ApiFailure>());
     });

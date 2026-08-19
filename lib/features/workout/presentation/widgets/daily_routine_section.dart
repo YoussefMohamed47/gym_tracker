@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/workout_definition.dart';
 import '../cubit/workout_cubit.dart';
@@ -43,6 +44,7 @@ class _DailyRoutineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final exercise = WorkoutCatalog.getExerciseById(slot.exerciseId);
+    final isRepBased = !slot.prescribedReps.contains('s');
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -101,10 +103,22 @@ class _DailyRoutineCard extends StatelessWidget {
 
                 return Wrap(
                   spacing: 8,
-                  runSpacing: 8,
+                  runSpacing: 12,
                   children: List.generate(slot.prescribedSets, (index) {
-                    final isPerformed =
-                        log.sets.length > index && log.sets[index].isPerformed;
+                    final setLog = log.sets.length > index
+                        ? log.sets[index]
+                        : null;
+                    final isPerformed = setLog?.isPerformed ?? false;
+
+                    if (isRepBased) {
+                      return _RepBasedRoutineSet(
+                        exerciseId: slot.exerciseId,
+                        index: index,
+                        actualReps: setLog?.actualReps,
+                        isPerformed: isPerformed,
+                      );
+                    }
+
                     return InkWell(
                       onTap: () => context
                           .read<WorkoutCubit>()
@@ -158,6 +172,133 @@ class _DailyRoutineCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RepBasedRoutineSet extends StatefulWidget {
+  final String exerciseId;
+  final int index;
+  final int? actualReps;
+  final bool isPerformed;
+
+  const _RepBasedRoutineSet({
+    required this.exerciseId,
+    required this.index,
+    this.actualReps,
+    required this.isPerformed,
+  });
+
+  @override
+  State<_RepBasedRoutineSet> createState() => _RepBasedRoutineSetState();
+}
+
+class _RepBasedRoutineSetState extends State<_RepBasedRoutineSet> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.actualReps?.toString() ?? '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(_RepBasedRoutineSet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.actualReps != widget.actualReps) {
+      final newText = widget.actualReps?.toString() ?? '';
+      if (_controller.text != newText) {
+        _controller.text = newText;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: widget.isPerformed
+            ? AppColors.primaryBlue.withValues(alpha: 0.05)
+            : Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: widget.isPerformed ? AppColors.primaryBlue : Colors.grey[300]!,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'S${widget.index + 1}',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: widget.isPerformed
+                      ? AppColors.primaryBlue
+                      : Colors.grey[600],
+                ),
+              ),
+              GestureDetector(
+                onTap: () => context.read<WorkoutCubit>().toggleSetPerformed(
+                  widget.exerciseId,
+                  widget.index,
+                ),
+                child: Icon(
+                  widget.isPerformed
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  size: 14,
+                  color: widget.isPerformed
+                      ? AppColors.primaryBlue
+                      : Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          TextField(
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+              border: InputBorder.none,
+              hintText: '0',
+            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            onChanged: (value) {
+              final reps = int.tryParse(value);
+              if (reps != null && reps > 0) {
+                context.read<WorkoutCubit>().updateSetReps(
+                  widget.exerciseId,
+                  widget.index,
+                  reps,
+                );
+              } else if (value.isEmpty) {
+                context.read<WorkoutCubit>().updateSetReps(
+                  widget.exerciseId,
+                  widget.index,
+                  null,
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

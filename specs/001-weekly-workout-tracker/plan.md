@@ -1,4 +1,4 @@
-# Implementation Plan: Weekly Workout Tracker (EVOLUTION V2)
+# Implementation Plan: Weekly Workout Tracker (EVOLUTION V3)
 
 **Branch**: `001-weekly-workout-tracker` | **Date**: 2026-08-19 | **Spec**: [spec.md](spec.md)
 
@@ -6,7 +6,7 @@
 
 ## Summary
 
-Evolve the existing Workout Tracker from a single-weight exercise model to a high-precision per-set logging system. This revision addresses critical bugs in the Daily Routine resolution, implements a robust legacy data migration strategy, and introduces a modern, polished UI for gym performance logging. The technical approach leverages a versioned JSON schema, independent draft preservation for exercise alternatives, and a modular widget hierarchy for efficient mobile interaction.
+Evolve the existing Workout Tracker from a per-set weight model to a comprehensive repetition tracking system (Actual Reps Per Set - V3). This revision extends the set-level data model to include `actualReps` logged performance while preserving prescribed reps as program metadata. It implements a robust Hive schema evolution strategy (Field ID 3) and introduces a dual-input mobile UI for efficient gym performance logging. The technical approach leverages Hive CE for structured persistence, ensuring that legacy single-weight and per-set records remain readable without data fabrication.
 
 ## Technical Context
 
@@ -19,9 +19,9 @@ Evolve the existing Workout Tracker from a single-weight exercise model to a hig
 - `url_launcher` (Exercise video support)
 - `image_picker` (Progress photo support)
 
-**Storage**: `SharedPreferences` under `WORKOUT_HISTORY_V1`. The JSON structure evolves from exercise-level fields (`weightKg`, `isPerformed`) to a `sets` array containing `ExerciseSetLog` objects.
+**Storage**: Hive CE is the source of truth for WorkoutSession, ExerciseLog, and WorkoutSetLog. SharedPreferences is used only as a legacy migration input for older released installations. New V3 workout writes remain Hive-only. The persistence structure uses typed aggregate records with stable Hive TypeAdapter field IDs.
 
-**Legacy Compatibility**: V2 sessions will use the `sets` array. V1 sessions remain as single-weight records. The repository will handle polymorphic deserialization to ensure zero data loss.
+**Legacy Compatibility**: V3 sessions will use the `actualReps` field (ID 3). V2 Hive records (without reps) and V1 SharedPreferences sessions (single-weight) remain readable. The repository and migrator handle polymorphic deserialization to ensure zero data loss.
 
 **Testing**: 
 - Canonical Daily Routine resolution tests.

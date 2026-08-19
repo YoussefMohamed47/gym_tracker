@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+
+import '../../data/datasources/workout_catalog.dart';
+import '../../domain/entities/workout_session.dart';
+import '../../domain/entities/workout_type.dart';
+import '../../domain/usecases/get_exercise_history.dart';
 import '../cubit/workout_cubit.dart';
 import '../cubit/workout_state.dart';
-import '../widgets/workout_week_header.dart';
-import '../widgets/week_day_selector.dart';
-import '../widgets/exercise_log_card.dart';
-import '../widgets/daily_routine_section.dart';
-import '../widgets/weight_unit_selector.dart';
-import '../widgets/alternative_exercise_bottom_sheet.dart';
-import '../widgets/exercise_history_sheet.dart';
 import '../services/photo_service.dart';
 import '../services/workout_share_service.dart';
-import '../../domain/entities/workout_session.dart';
-import '../../domain/usecases/get_exercise_history.dart';
-import '../../data/datasources/workout_catalog.dart';
-import '../../domain/entities/workout_type.dart';
+import '../widgets/alternative_exercise_bottom_sheet.dart';
+import '../widgets/daily_routine_section.dart';
+import '../widgets/exercise_history_sheet.dart';
+import '../widgets/exercise_log_card.dart';
+import '../widgets/week_day_selector.dart';
+import '../widgets/weight_unit_selector.dart';
+import '../widgets/workout_week_header.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -195,6 +196,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               Row(
                 children: [
                   IconButton(
+                    icon: const Icon(Icons.download_outlined),
+                    onPressed: () => WorkoutShareService.saveToGallery(
+                      context,
+                      WorkoutSession(
+                        dateKey: state.dateKey,
+                        workoutType: state.workoutType,
+                        exerciseLogs: state.exerciseLogs,
+                        displayUnit: state.displayUnit,
+                      ),
+                    ),
+                    tooltip: 'Save To Gallery',
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.share_outlined),
                     onPressed: () => _handleShare(state),
                     tooltip: 'Share Workout',
@@ -358,6 +372,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 setIndex,
                 weight,
                 log.displayUnit,
+              );
+            },
+            onRepsChanged: (setIndex, reps) {
+              context.read<WorkoutCubit>().updateSetReps(
+                slot.exerciseId,
+                setIndex,
+                reps,
               );
             },
             onToggleSetPerformed: (setIndex) {

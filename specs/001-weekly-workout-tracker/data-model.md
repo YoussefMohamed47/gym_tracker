@@ -50,8 +50,9 @@ Record of a single exercise performance.
 - `imagePath`: String? (Path to persistent storage)
 - `timestamp`: DateTime
 
-### ExerciseSetLog (New in V2)
+### ExerciseSetLog (New in V2, Updated in V3)
 - `weightKg`: double?
+- `actualReps`: int? (New in V3)
 - `isPerformed`: bool
 
 ## Identity & Uniqueness
