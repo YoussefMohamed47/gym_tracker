@@ -11,13 +11,16 @@ sealed class HistoryState extends Equatable {
 }
 
 class HistoryInitial extends HistoryState {}
+
 class HistoryLoading extends HistoryState {}
+
 class HistoryLoaded extends HistoryState {
   final List<DailyReport> reports;
   const HistoryLoaded(this.reports);
   @override
   List<Object?> get props => [reports];
 }
+
 class HistoryError extends HistoryState {
   final String message;
   const HistoryError(this.message);

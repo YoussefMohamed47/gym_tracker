@@ -1,54 +1,43 @@
-# Implementation Plan: Weekly Workout Tracker
+# Implementation Plan: Weekly Workout Tracker (EVOLUTION V2)
 
-**Branch**: `001-weekly-workout-tracker` | **Date**: 2026-08-18 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-weekly-workout-tracker` | **Date**: 2026-08-19 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/001-weekly-workout-tracker/spec.md`
+**Input**: Revised requirements for per-set tracking, Daily Routine correction, and UI/UX polish.
 
 ## Summary
 
-Implement a polished weekly workout tracker that digitizes the Sama Fit program. The feature includes weekly navigation, weight recording with KG/LB support, previous-weight prefilling, exercise photos/videos, and curated alternatives.
-
-The technical approach utilizes a feature-first architecture (`lib/features/workout/`) with `flutter_bloc` for state management, `SharedPreferences` for structured data, and `path_provider` for persistent photo storage. Unit conversion logic ensures data integrity by storing a high-precision canonical weight (KG) while providing accurate display values.
+Evolve the existing Workout Tracker from a single-weight exercise model to a high-precision per-set logging system. This revision addresses critical bugs in the Daily Routine resolution, implements a robust legacy data migration strategy, and introduces a modern, polished UI for gym performance logging. The technical approach leverages a versioned JSON schema, independent draft preservation for exercise alternatives, and a modular widget hierarchy for efficient mobile interaction.
 
 ## Technical Context
 
-**Language/Version**: Dart 3.x, Flutter 3.12+ (compatible with SDK ^3.12.2)
+**Language/Version**: Dart 3.x, Flutter 3.12+
 
 **Primary Dependencies**: 
-- `flutter_bloc` (v9.1.0)
-- `get_it` (v8.0.3)
-- `shared_preferences` (v2.5.2)
-- `intl` (v0.20.3)
-- `path_provider` (v2.1.5)
-- `share_plus` (v13.2.0)
-- `url_launcher` (proposed: latest stable ~6.3.0)
-- `image_picker` (proposed: latest stable ~1.1.0)
+- `flutter_bloc` (State management with per-set draft tracking)
+- `get_it` (DI for repositories and use cases)
+- `shared_preferences` (JSON-based persistence with schema evolution)
+- `url_launcher` (Exercise video support)
+- `image_picker` (Progress photo support)
 
-**Storage**: `SharedPreferences` for Workout history and settings; App Documents directory for photos. Identities are string-based `dateKey` (`yyyy-MM-dd`).
+**Storage**: `SharedPreferences` under `WORKOUT_HISTORY_V1`. The JSON structure evolves from exercise-level fields (`weightKg`, `isPerformed`) to a `sets` array containing `ExerciseSetLog` objects.
 
-**Testing**: `flutter_test` with `mocktail` for unit and bloc tests.
+**Legacy Compatibility**: V2 sessions will use the `sets` array. V1 sessions remain as single-weight records. The repository will handle polymorphic deserialization to ensure zero data loss.
 
-**Target Platform**: Mobile (Android/iOS)
-
-**Project Type**: Mobile App
-
-**Performance Goals**: Branded share image generation < 2s; instant unit conversion in UI.
-
-**Constraints**: Local-first (offline capable); Material 3; #1A46A0 brand color.
-
-**Scale/Scope**: ~40 predefined exercises; historical logs for potentially years of use.
+**Testing**: 
+- Canonical Daily Routine resolution tests.
+- JSON serialization/deserialization regression tests (V1 and V2).
+- Set-index prefill mapping logic.
+- Cubit state transitions for multi-set editing.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-- [x] **Feature Preservation**: No regressions in Daily Report or History; data compatibility maintained. (Using separate storage namespace).
-- [x] **Architecture**: Follows feature-first (data/domain/presentation) with Bloc/Cubit and GetIt.
-- [x] **Local-First**: No unauthorized cloud/API dependencies; local persistence prioritized.
-- [x] **Data Integrity**: Stable date identities; user files in persistent storage.
-- [x] **UI Identity**: Material 3; #1A46A0 brand color; mobile-optimized layout.
-- [x] **Testing**: Business logic and state transitions are unit-testable.
-- [x] **Simplicity**: No unnecessary packages or over-engineered abstractions.
+- [x] **Feature Preservation**: Legacy single-weight sessions remain readable and shareable. Daily Report logic is untouched.
+- [x] **Architecture**: strictly follows domain-driven feature-first layers. UI does not own persistence.
+- [x] **Local-First**: No external APIs. All history and photos remain on-device.
+- [x] **Data Integrity**: Canonical KG storage at the set level. Versioned JSON schema.
+- [x] **UI Identity**: Material 3 redesign with the #1A46A0 brand. Optimized for one-handed set logging.
+- [x] **Testing**: Extensive test suite covering migration and per-set edge cases.
+- [x] **Simplicity**: Reuses existing catalog and repository patterns without adding heavy new dependencies.
 
 ## Project Structure
 
@@ -56,65 +45,94 @@ The technical approach utilizes a feature-first architecture (`lib/features/work
 
 ```text
 specs/001-weekly-workout-tracker/
-├── spec.md              # Feature specification
-├── plan.md              # This file
-├── research.md          # Research on alternatives and packages
-├── data-model.md        # Detailed entity definitions
-├── quickstart.md        # End-to-end validation scenarios
+├── spec.md              # Authoritative V2 requirements
+├── plan.md              # This technical design
+├── research.md          # Updated for V2 persistence decisions
+├── data-model.md        # V2 Entities and JSON schema
+├── quickstart.md        # Updated validation scenarios
 └── checklists/
-    └── requirements.md  # Quality checklist
+    └── requirements.md  # Acceptance criteria
 ```
 
 ### Source Code (repository root)
 
 ```text
 lib/
-├── core/
-│   ├── di/
-│   │   └── injection_container.dart  # Registration of new dependencies
-│   ├── router/
-│   │   └── app_router.dart           # Integration of Workout routes
-│   └── utils/
-│       └── weight_converter.dart      # Centralized KG/LB logic
 ├── features/
 │   └── workout/
 │       ├── data/
-│       │   ├── datasources/
-│       │   │   └── workout_local_datasource.dart
 │       │   ├── models/
-│       │   │   ├── workout_session_model.dart
-│       │   │   └── exercise_log_model.dart
+│       │   │   ├── exercise_set_log_model.dart  # [NEW]
+│       │   │   └── exercise_log_model.dart      # [UPDATED] V1/V2 aware
 │       │   └── repositories/
-│       │       └── workout_repository_impl.dart
+│       │       └── workout_repository_impl.dart  # [UPDATED] Per-set lookup
 │       ├── domain/
 │       │   ├── entities/
-│       │   │   ├── workout_session.dart
-│       │   │   ├── exercise_log.dart
-│       │   │   └── workout_type.dart
-│       │   ├── repositories/
-│       │   │   └── workout_repository.dart
+│       │   │   ├── exercise_set_log.dart        # [NEW]
+│       │   │   └── exercise_log.dart            # [UPDATED]
 │       │   └── usecases/
-│       │       ├── get_workout_for_date.dart
-│       │       ├── save_workout_session.dart
-│       │       └── get_previous_exercise_log.dart
+│       │       └── get_exercise_history.dart    # [NEW]
 │       └── presentation/
 │           ├── cubit/
-│           │   ├── workout_cubit.dart
-│           │   └── workout_state.dart
-│           ├── view/
-│           │   ├── workout_screen.dart
-│           │   └── workout_history_screen.dart
-│           └── widgets/
-│               ├── workout_week_header.dart
-│               ├── exercise_log_card.dart
-│               └── share/
-│                   └── workout_share_card.dart
+│           │   ├── workout_cubit.dart           # [UPDATED] Draft management
+│           │   └── workout_state.dart           # [UPDATED]
+│           ├── widgets/
+│           │   ├── exercise_card.dart           # [REDESIGN]
+│           │   ├── exercise_set_row.dart        # [NEW]
+│           │   ├── exercise_history_sheet.dart  # [NEW]
+│           │   └── workout_week_selector.dart   # [REDESIGN]
 ```
 
-**Structure Decision**: Option 1: Single project (DEFAULT). Adhering to existing feature-first patterns.
+## Data Model Revision & Legacy Strategy
 
-## Complexity Tracking
+### 1. ExerciseLog Evolution
+The `ExerciseLog` entity now primarily manages a `List<ExerciseSetLog>`. 
+*   **V2 Storage**: Saves the `sets` array.
+*   **V1 Storage**: Historical records containing `weightKg` and `isPerformed` at the exercise level are treated as "Legacy Reference" data.
+*   **Reading Logic**: The `ExerciseLogModel.fromJson` factory checks for the presence of the `sets` key. If missing, it maps the V1 fields into a virtual summary for UI presentation.
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+### 2. Prefill & History Lookup
+*   **Exact Match**: Set N for today's exercise prefills from Set N of the most recent *same* exercise in the *same* `WorkoutType`.
+*   **Polymorphic History**: The `GetPreviousExerciseLog` use case returns a `PreviousPerformance` object containing the `dateKey` and the log data (either set-based or legacy).
+*   **Legacy Reference**: If the previous session is V1, the UI displays "Previous: 50 kg" as a reference label with a "Use for all sets" action.
 
-*(No violations detected)*
+## UI/UX Redesign Plan
+
+### 1. Workout Screen Hierarchy
+*   **Sticky Header**: Workout name, Week selector, and share/history actions.
+*   **Week Selector**: Compact 7-day strip with status indicators (completed/rest).
+*   **Exercise List**: Scrollable list of `ExerciseCard`s.
+*   **Sticky Save Bar**: Always visible at the bottom with a summary of performed exercises.
+
+### 2. Exercise Card Design
+*   **Top Row**: Exercise Name, Video Icon, Alternative Selector.
+*   **Meta Row**: Prescribed Sets/Reps/Rest, Previous Date label.
+*   **Set Table**: 
+    *   Headers: SET | LAST | TODAY | DONE.
+    *   Rows: Individual `ExerciseSetRow` widgets with numeric inputs.
+*   **Bottom Actions**: History, Photo.
+
+### 3. Input UX
+*   **Numeric Keyboard**: Decimal-friendly.
+*   **Focus Cycle**: Tapping "Done" on the keyboard or a specific "Next" action moves focus to the weight input of the subsequent set.
+*   **Performed State**: Explicit checkbox/toggle for each set.
+
+## Daily Routine Implementation
+*   **Data Source**: `WorkoutCatalog.getDailyRoutine()` is the single source of truth.
+*   **Bug Fix**: Remove all hardcoded ID strings from the Cubit/UI. The Cubit will request the routine from the catalog by ID `daily_routine`.
+*   **Set Handling**: Even non-weight routine exercises display their prescribed sets (e.g., 2 sets for SLR) for completion tracking.
+
+## Sharing Evolution
+*   **Workout Share**: Iterates over performed exercises. For V2 logs, it prints `S1 50 | S2 50 | S3 47.5`. For V1 logs, it prints `50 kg`.
+*   **Week Share**: Condensed view showing training days and total exercises performed.
+
+## Testing Strategy
+*   **Unit**: 
+    *   `WorkoutCatalog` regression (exact routine members).
+    *   `ExerciseLogModel` V1/V2 compatibility.
+    *   `WeightConverter` per-set precision.
+*   **Bloc**:
+    *   Alternative draft preservation (switching back and forth preserves arrays).
+    *   Partial completion save validation.
+*   **Widget**:
+    *   Exercise card set row count validation (2 vs 3 vs 5).

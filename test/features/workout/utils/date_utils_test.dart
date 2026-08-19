@@ -16,8 +16,14 @@ void main() {
 
       expect(weekDays.length, 7);
       expect(weekDays[0].weekday, DateTime.sunday);
-      expect(WorkoutDateUtils.formatDateKey(weekDays[0]), '2026-08-16'); // Sunday
-      expect(WorkoutDateUtils.formatDateKey(weekDays[6]), '2026-08-22'); // Saturday
+      expect(
+        WorkoutDateUtils.formatDateKey(weekDays[0]),
+        '2026-08-16',
+      ); // Sunday
+      expect(
+        WorkoutDateUtils.formatDateKey(weekDays[6]),
+        '2026-08-22',
+      ); // Saturday
       expect(weekDays[6].weekday, DateTime.saturday);
     });
 
@@ -35,13 +41,34 @@ void main() {
 
     test('getWorkoutTypeForDay returns correct types', () {
       // Sun=Pull, Mon=Legs, Tue=Rest, Wed=Upper, Thu=Lower, Fri=Rest, Sat=Push.
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 16)), WorkoutType.pull);
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 17)), WorkoutType.legs);
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 18)), WorkoutType.rest);
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 19)), WorkoutType.upper);
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 20)), WorkoutType.lower);
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 21)), WorkoutType.rest);
-      expect(WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 22)), WorkoutType.push);
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 16)),
+        WorkoutType.pull,
+      );
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 17)),
+        WorkoutType.legs,
+      );
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 18)),
+        WorkoutType.rest,
+      );
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 19)),
+        WorkoutType.upper,
+      );
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 20)),
+        WorkoutType.lower,
+      );
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 21)),
+        WorkoutType.rest,
+      );
+      expect(
+        WorkoutDateUtils.getWorkoutTypeForDay(DateTime(2026, 8, 22)),
+        WorkoutType.push,
+      );
     });
   });
 }

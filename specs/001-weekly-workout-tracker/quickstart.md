@@ -1,62 +1,82 @@
-# Quickstart Validation: Weekly Workout Tracker
+# Quickstart Validation: Weekly Workout Tracker (V2)
 
-This guide defines end-to-end validation scenarios to verify the feature works as specified.
+This guide defines end-to-end validation scenarios to verify the V2 feature (per-set tracking, Daily Routine fix, and history) works as specified.
 
 ## Prerequisites
 - Flutter Environment (SDK ^3.12.2)
 - Android/iOS Emulator or Device
 - Dependencies installed: `flutter pub get`
 
-## Scenario 1: First Workout Log (MVP)
-**Goal**: Verify a user can log and save their first workout.
-1. Open the app and navigate to the **Workout** tab.
-2. Select today's workout (e.g., Saturday - Push).
-3. Enter weights for the first two exercises.
-4. Tap the **Save Workout** button.
+## Scenario 1: Per-Set Logging (P1)
+**Goal**: Verify independent set tracking.
+1. Open a workout (e.g., Saturday - Push).
+2. For the first exercise, enter:
+   - Set 1: 50 kg
+   - Set 2: 52.5 kg
+   - Set 3: 50 kg
+3. Mark all sets as **Done**.
+4. Tap **Save**.
 5. **Success Criteria**:
-   - Navigation bar shows a checkmark/indicator for today.
-   - Restarting the app loads the entered weights for today's date.
+   - Save confirmation reports "1 exercise performed".
+   - Reloading the session shows all 3 distinct weights correctly.
 
-## Scenario 2: Prefill Logic
-**Goal**: Verify previous values are prefilled in the following week.
-1. Save a workout for "Push" on Aug 22 with 50kg for "Chest Press".
-2. Change the system date or navigate to Aug 29 (Next Saturday).
-3. Open the "Push" workout.
+## Scenario 2: Set-Level Prefill & Previous Date
+**Goal**: Verify set N prefills from previous set N and the date is visible.
+1. Save a "Pull" workout on Aug 12 with:
+   - T-Bar Row: S1=50, S2=50, S3=47.5.
+2. Navigate to Aug 19 (Next Wednesday).
+3. Open "Pull" workout.
 4. **Success Criteria**:
-   - "Chest Press" shows "Last: 50 kg".
-   - "Today" field is prefilled with 50 (or similar based on interaction rules).
+   - Exercise card shows "Previous • Aug 12, 2026".
+   - Set 1 shows "Last: 50", Set 2: "Last: 50", Set 3: "Last: 47.5".
+   - Today's inputs are prefilled with these values.
 
-## Scenario 3: Unit Conversion Integrity
-**Goal**: Verify KG/LB toggling does not corrupt data.
-1. Enter `100` while **LB** is selected.
-2. Save the workout.
-3. Toggle the unit selector to **KG**.
+## Scenario 3: Legacy Data Support
+**Goal**: Verify V1 history remains readable.
+1. Open a historical session saved in V1 (where only one weight was recorded).
+2. **Success Criteria**:
+   - Session loads without crashing.
+   - Exercise shows "Working Weight: 50 kg (Legacy single-weight record)".
+3. Start a new session where the *previous* session was V1.
 4. **Success Criteria**:
-   - Value displays `45.36` (approx).
-   - Toggle back to **LB**.
-   - Value displays exactly `100`.
+   - Card shows "Previous reference: 50 kg".
+   - Tapping **Use for all sets** populates today's Set 1, 2, and 3 with 50 kg.
 
-## Scenario 4: Exercise Alternatives
-**Goal**: Verify alternatives maintain separate history.
-1. Open a "Push" workout.
-2. For "Chest Press Machine", tap **Alternative** and select **DB Bench Press**.
-3. Record `20` kg and save.
-4. Navigate to next week's "Push" workout.
-5. **Success Criteria**:
-   - Default "Chest Press Machine" prefill is still from its last machine performance (not the 20kg DB performance).
-   - Selecting "DB Bench Press" alternative pre-fills `20` kg.
+## Scenario 4: Daily Routine Correctness
+**Goal**: Verify the 5-exercise mobility routine.
+1. Select a Rest Day (Tuesday or Friday) or tap **Daily Routine**.
+2. **Success Criteria**:
+   - List contains exactly: SLR, Clam shell, neurodynamic sciatic nerve, Trunk rotation, Double knee to chest.
+   - Zero "Unknown Exercise" entries.
+   - Every item has a functional video link.
+   - SLR shows exactly 2 sets for completion.
+   - Double knee to chest shows exactly 5 sets.
 
-## Scenario 5: Branded Sharing
-**Goal**: Verify share image generation.
-1. Complete a workout with at least 3 exercises.
-2. Tap **Share Workout**.
-3. **Success Criteria**:
-   - Branded image is generated and the platform share sheet appears.
-   - Image contains correct weights, dates, and workout name.
+## Scenario 5: Alternative Draft Preservation
+**Goal**: Verify switching alternatives doesn't lose set data.
+1. Open "Push".
+2. Enter weights for "Chest Press Machine".
+3. Switch to **DB Bench Press** (Alternative).
+4. Enter different weights for DB Bench.
+5. Switch back to **Chest Press Machine**.
+6. **Success Criteria**:
+   - The original "Chest Press Machine" draft weights are still there.
+   - Switching again to **DB Bench Press** restores the DB bench weights.
 
-## Running Tests
-Execute the following commands to verify core logic:
+## Scenario 6: Exercise History View
+**Goal**: Verify the history bottom sheet.
+1. Tap the **History** icon on an exercise card.
+2. **Success Criteria**:
+   - Bottom sheet opens showing a list of previous dates.
+   - Each date shows the per-set breakdown (e.g., "50 | 50 | 47.5 kg").
+
+## Running Validation Tests
+Execute the following to verify core evolution logic:
 ```bash
-flutter test lib/features/workout/domain/entities/weight_converter_test.dart
-flutter test lib/features/workout/presentation/cubit/workout_cubit_test.dart
+# Model compatibility
+flutter test test/features/workout/data/models/exercise_log_model_test.dart
+# Repository prefill mapping
+flutter test test/features/workout/domain/repositories/workout_repository_test.dart
+# Cubit draft preservation
+flutter test test/features/workout/presentation/cubit/workout_cubit_test.dart
 ```

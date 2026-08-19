@@ -4,136 +4,268 @@ import '../../domain/entities/workout_type.dart';
 
 class WorkoutCatalog {
   static const List<ExerciseDefinition> exercises = [
-    // Push Exercises
+    // --- PUSH (Saturday) ---
     ExerciseDefinition(
       id: 'push_chest_press_machine',
-      name: 'Chest Press Machine',
-      videoUrl: 'https://youtu.be/gRvjfajnZlY',
+      name: 'chest press machine',
+      videoUrl: 'https://youtu.be/vnd-GBtTMLI?si=QpCyy_EEtcNHVN10',
       alternatives: ['alt_db_bench_press'],
     ),
     ExerciseDefinition(
       id: 'push_incline_chest_press_machine',
-      name: 'Incline Chest Press Machine',
-      videoUrl: 'https://youtu.be/8iPEnn-ltC8',
+      name: 'Incline chest press machine',
+      videoUrl: 'https://youtu.be/bbbiEEAEsP8?si=Fc0PZfw-NdNg-9ee',
       alternatives: ['alt_db_incline_bench_press'],
     ),
     ExerciseDefinition(
       id: 'push_shoulder_press_machine',
-      name: 'Shoulder Press Machine',
-      videoUrl: 'https://youtu.be/qEwKSRqnuzw',
+      name: 'Shoulder press machine',
+      videoUrl: 'https://youtu.be/MjVDrYPD7Rs?si=AypoYflVjEL4O4g5',
       alternatives: ['alt_db_shoulder_press'],
     ),
     ExerciseDefinition(
-      id: 'push_tricep_pushdown',
-      name: 'Tricep Pushdown',
-      videoUrl: 'https://youtu.be/2-LAMcpzHLU',
+      id: 'push_cable_lateral_raises',
+      name: 'Cable lateral raises',
+      videoUrl: 'https://youtu.be/vFODLn4zEHk?si=bHtMI9YkFJaWVWw5',
     ),
     ExerciseDefinition(
-      id: 'push_lateral_raise',
-      name: 'Lateral Raise',
-      videoUrl: 'https://youtu.be/3VcKaXpzqRo',
+      id: 'push_sa_triceps_over_head_extension',
+      name: 'SA triceps over head extension',
+      videoUrl: 'https://youtu.be/FE_AsjcTImc?si=83uGv-7ZZqMXtlCn',
     ),
+    ExerciseDefinition(
+      id: 'push_triceps_push_down',
+      name: 'Triceps push down',
+      videoUrl: 'https://youtube.com/shorts/WjLJ7zIppXQ?si=2F4GVDQYVmElNolD',
+    ),
+
+    // --- PULL (Sunday) ---
+    ExerciseDefinition(
+      id: 'pull_t_bar_row',
+      name: 'T-bar row',
+      videoUrl: 'https://youtu.be/BVSTYt02SuY?si=V4wqQxy6ryCl9idR',
+      alternatives: ['alt_chest_supported_db_row'],
+    ),
+    ExerciseDefinition(
+      id: 'pull_sa_lat_pull_down',
+      name: 'SA lat pull down',
+      videoUrl: 'https://youtu.be/bCjRRJ2lI8Y?si=iXhhCxKgogimdqyH',
+    ),
+    ExerciseDefinition(
+      id: 'pull_sa_iso_lateral_lat_row',
+      name: 'SA iso-lateral lat row',
+      videoUrl: 'https://youtu.be/SJRCqL85ypE?si=WUQbYJEoANYH6pGe',
+      alternatives: ['alt_sa_db_row'],
+    ),
+    ExerciseDefinition(
+      id: 'pull_cable_rear_delt_fly',
+      name: 'Cable rear delt fly',
+      videoUrl: 'https://youtube.com/shorts/P5CXx_jgTDE?si=qOrErIqzLz2Y4bIk',
+    ),
+    ExerciseDefinition(
+      id: 'pull_sa_db_preacher_bicep_curl',
+      name: 'SA DB preacher bicep curl',
+      videoUrl: 'https://youtube.com/shorts/oHHNXMLvs1c?si=H2RRkomltgOITqGf',
+    ),
+    ExerciseDefinition(
+      id: 'pull_cable_hammer_curl',
+      name: 'Cable hammer curl',
+      videoUrl: 'https://youtube.com/shorts/FO5UpcspYpE?si=qpnKWY_y00v_FGRo',
+    ),
+    ExerciseDefinition(
+      id: 'pull_db_shrugs',
+      name: 'DB shrugs',
+      videoUrl: 'https://youtube.com/shorts/rFsSeClGnNA?si=vLn4ffTmYiezyOah',
+    ),
+
+    // --- LEGS (Monday) ---
+    ExerciseDefinition(
+      id: 'legs_body_weighted_squat',
+      name: 'Body weighted squat',
+      videoUrl: 'https://youtube.com/shorts/-5LhNSMBrEs?si=iQZlcmTllyBih47K',
+    ),
+    ExerciseDefinition(
+      id: 'legs_leg_extension',
+      name: 'Leg extension',
+      videoUrl: 'https://youtube.com/shorts/2zZ3vkPsExQ?si=2VhT0zPCafluamKJ',
+      alternatives: ['alt_goblet_squat'],
+    ),
+    ExerciseDefinition(
+      id: 'legs_adduction_machine',
+      name: 'Adduction machine',
+      videoUrl: 'https://youtu.be/mvIxYwz-Vkg?si=WLG9CIR_9PEBC_0_',
+      alternatives: ['alt_banded_adduction'],
+    ),
+    ExerciseDefinition(
+      id: 'legs_body_weighted_hip_thrust',
+      name: 'Body weighted hip thrust',
+      videoUrl: 'https://youtube.com/shorts/rc9O9xpwqUY?si=new5g778w3nPQjbh',
+    ),
+    ExerciseDefinition(
+      id: 'legs_seated_leg_press_calve_raises',
+      name: 'Seated leg press calve raises',
+      videoUrl: 'https://youtu.be/dhRz1Ns60Zg?si=Snzzr5L6zQnf1-Sy',
+    ),
+    ExerciseDefinition(
+      id: 'legs_child_pose',
+      name: 'Child pose',
+      videoUrl: 'https://youtu.be/_ZX_zTOBgp8?si=XTaRA5V3t5o40T19',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'legs_banded_pallof_twist',
+      name: 'Banded pallof twist',
+      videoUrl: 'https://youtube.com/shorts/KqjqO96zRrw?si=pFdbtJ2aM8mmE4Nc',
+    ),
+
+    // --- UPPER (Wednesday) ---
+    ExerciseDefinition(
+      id: 'upper_chest_fly_machine',
+      name: 'Chest fly machine',
+      videoUrl: 'https://youtube.com/shorts/fEdkcOlW8EA?si=FsrUnpglhF4nnI-8',
+    ),
+    ExerciseDefinition(
+      id: 'upper_cable_pull_over',
+      name: 'Cable pull over',
+      videoUrl: 'https://youtube.com/shorts/lFyE8SXUNg4?si=CV5_3TawaXwW7rFL',
+    ),
+    ExerciseDefinition(
+      id: 'upper_cable_lateral_raises',
+      name: 'Cable lateral raises',
+      videoUrl: 'https://youtube.com/shorts/PTuTD6q4kPY?si=CNDIRM0ILAzC66Hb',
+    ),
+    ExerciseDefinition(
+      id: 'upper_no_cheat_db_bicep_curl',
+      name: 'No cheat DB bicep curl',
+      videoUrl: 'https://youtube.com/shorts/sCn19vd8kVI?si=9F1euEysCBypd3Ia',
+    ),
+    ExerciseDefinition(
+      id: 'upper_sa_triceps_over_head_extension',
+      name: 'SA triceps over head extension',
+      videoUrl: 'https://youtu.be/FE_AsjcTImc?si=83uGv-7ZZqMXtlCn',
+    ),
+    ExerciseDefinition(
+      id: 'upper_reverse_curl',
+      name: 'Reverse curl',
+      videoUrl: 'https://youtu.be/HwB-DevuJjU?si=k8UUoCpggYyUbM6F',
+    ),
+    ExerciseDefinition(
+      id: 'upper_db_shrugs',
+      name: 'DB shrugs',
+      videoUrl: 'https://youtube.com/shorts/rFsSeClGnNA?si=vLn4ffTmYiezyOah',
+    ),
+
+    // --- LOWER (Thursday) ---
+    ExerciseDefinition(
+      id: 'lower_body_weighted_rdl',
+      name: 'Body weighted RDL',
+      videoUrl: 'https://youtu.be/wFF_ZUaaObc?si=UQF6lQOJbX4GnMXW',
+    ),
+    ExerciseDefinition(
+      id: 'lower_seated_leg_curl',
+      name: 'Seated leg curl',
+      videoUrl: 'https://youtube.com/shorts/mh7hFEsTFbw?si=aT4zjtNlxGMq8-NO',
+      alternatives: ['alt_db_leg_curl'],
+    ),
+    ExerciseDefinition(
+      id: 'lower_adduction_machine',
+      name: 'Adduction machine',
+      videoUrl: 'https://youtube.com/shorts/K0tIapJBLS4?si=5dsWYf7V6Fbjscqp',
+      alternatives: ['alt_banded_adduction'],
+    ),
+    ExerciseDefinition(
+      id: 'lower_seated_leg_press_calve_raises',
+      name: 'Seated leg press calve raises',
+      videoUrl: 'https://youtu.be/dhRz1Ns60Zg?si=Snzzr5L6zQnf1-Sy',
+    ),
+    ExerciseDefinition(
+      id: 'lower_dead_bug',
+      name: 'Dead bug',
+      videoUrl: 'https://youtu.be/jbWmbhElf3Q?si=n7rAuGqfLAqz9RJd',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'lower_standing_ql_db_extension',
+      name: 'Standing QL DB extension',
+      videoUrl: 'https://youtu.be/YjuUrq0nir0?si=AfQDXEKjzL98iyLQ',
+    ),
+
+    // --- DAILY ROUTINE ---
+    ExerciseDefinition(
+      id: 'routine_slr',
+      name: 'SLR',
+      videoUrl: 'https://youtu.be/U4L_6JEv9Jg?si=3vqYQvVuYi42hdN3',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'routine_clam_shell',
+      name: 'Clam shell',
+      videoUrl: 'https://youtu.be/DAAjOdwZdks?si=Kpxnx6gcebrxr4d5',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'routine_neurodynamic_sciatic_nerve',
+      name: 'neurodynamic sciatic nerve',
+      videoUrl: 'https://youtube.com/shorts/hvXv_Pm63Gg?si=aNB3AnDleusgf2nZ',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'routine_trunk_rotation',
+      name: 'Trunk rotation',
+      videoUrl: 'https://youtu.be/IhP0LP-wyxQ?si=By5boLC7DGyZH6Hg',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'routine_double_knee_to_chest',
+      name: 'Double knee to chest',
+      videoUrl: 'https://youtu.be/5R7eWaNWO3U?si=qBA8FC2j5sivSn7h',
+      isWeightAllowed: false,
+    ),
+
+    // --- ALTERNATIVES ---
+    ExerciseDefinition(id: 'alt_db_bench_press', name: 'DB Bench Press'),
+    ExerciseDefinition(
+      id: 'alt_db_incline_bench_press',
+      name: 'DB Incline Bench Press',
+    ),
+    ExerciseDefinition(id: 'alt_db_shoulder_press', name: 'DB Shoulder Press'),
+    ExerciseDefinition(
+      id: 'alt_chest_supported_db_row',
+      name: 'Chest Supported DB Row',
+    ),
+    ExerciseDefinition(id: 'alt_sa_db_row', name: 'SA DB Row'),
+    ExerciseDefinition(
+      id: 'alt_goblet_squat',
+      name: 'Goblet Squat (Quad focus)',
+    ),
+    ExerciseDefinition(id: 'alt_db_leg_curl', name: 'DB Leg Curl'),
+    ExerciseDefinition(id: 'alt_banded_adduction', name: 'Banded Adduction'),
+
+    // --- LEGACY / TOMBSTONES ---
     ExerciseDefinition(
       id: 'push_chest_fly',
       name: 'Chest Fly',
       videoUrl: 'https://youtu.be/Z57CtWotzAY',
     ),
-
-    // Pull Exercises
     ExerciseDefinition(
-      id: 'pull_t_bar_row',
-      name: 'T-bar Row',
-      videoUrl: 'https://youtu.be/H75im9fAUMc',
-      alternatives: ['alt_chest_supported_db_row'],
+      id: 'push_lateral_raise',
+      name: 'Lateral Raise (Legacy)',
     ),
     ExerciseDefinition(
-      id: 'pull_sa_iso_lateral_lat_row',
-      name: 'SA Iso-lateral Lat Row',
-      videoUrl: 'https://youtu.be/dFzUjASsWKY',
-      alternatives: ['alt_sa_db_row'],
+      id: 'push_tricep_pushdown',
+      name: 'Tricep Pushdown (Legacy)',
     ),
-    ExerciseDefinition(
-      id: 'pull_lat_pulldown',
-      name: 'Lat Pulldown',
-      videoUrl: 'https://youtu.be/CAwf7n6Luuc',
-    ),
-    ExerciseDefinition(
-      id: 'pull_face_pull',
-      name: 'Face Pull',
-      videoUrl: 'https://youtu.be/V8dZ3pyiCBo',
-    ),
-    ExerciseDefinition(
-      id: 'pull_bicep_curl',
-      name: 'Bicep Curl',
-      videoUrl: 'https://youtu.be/ykJgrLQnKNo',
-    ),
-    ExerciseDefinition(
-      id: 'pull_hammer_curl',
-      name: 'Hammer Curl',
-      videoUrl: 'https://youtu.be/7jadLJKbdd8',
-    ),
+    ExerciseDefinition(id: 'pull_lat_pulldown', name: 'Lat Pulldown (Legacy)'),
+    ExerciseDefinition(id: 'pull_face_pull', name: 'Face Pull (Legacy)'),
+    ExerciseDefinition(id: 'pull_bicep_curl', name: 'Bicep Curl (Legacy)'),
+    ExerciseDefinition(id: 'pull_hammer_curl', name: 'Hammer Curl (Legacy)'),
     ExerciseDefinition(
       id: 'pull_rear_delt_fly',
-      name: 'Rear Delt Fly',
-      videoUrl: 'https://youtu.be/0G2JOZut1Rs',
+      name: 'Rear Delt Fly (Legacy)',
     ),
-
-    // Legs Exercises
-    ExerciseDefinition(
-      id: 'legs_leg_extension',
-      name: 'Leg Extension',
-      videoUrl: 'https://youtu.be/MeIiGifIkVo',
-      alternatives: ['alt_goblet_squat'],
-    ),
-    ExerciseDefinition(
-      id: 'legs_seated_leg_curl',
-      name: 'Seated Leg Curl',
-      videoUrl: 'https://youtu.be/uV0B9z-FqXw',
-      alternatives: ['alt_db_leg_curl'],
-    ),
-    ExerciseDefinition(
-      id: 'legs_adduction_machine',
-      name: 'Adduction Machine',
-      videoUrl: 'https://youtu.be/m9r_3rQ7y4o',
-      alternatives: ['alt_banded_adduction'],
-    ),
-    ExerciseDefinition(
-      id: 'legs_leg_press',
-      name: 'Leg Press',
-      videoUrl: 'https://youtu.be/IZxyjW7MPJQ',
-    ),
-    ExerciseDefinition(
-      id: 'legs_rdl',
-      name: 'Romanian Deadlift',
-      videoUrl: 'https://youtu.be/2SHsk9alBAE',
-    ),
-    ExerciseDefinition(
-      id: 'legs_calf_raise',
-      name: 'Calf Raise',
-      videoUrl: 'https://youtu.be/Y27m4pG2QJ8',
-    ),
-
-    // Alternatives (Standalone Definitions)
-    ExerciseDefinition(id: 'alt_db_bench_press', name: 'DB Bench Press'),
-    ExerciseDefinition(id: 'alt_db_incline_bench_press', name: 'DB Incline Bench Press'),
-    ExerciseDefinition(id: 'alt_db_shoulder_press', name: 'DB Shoulder Press'),
-    ExerciseDefinition(id: 'alt_chest_supported_db_row', name: 'Chest Supported DB Row'),
-    ExerciseDefinition(id: 'alt_sa_db_row', name: 'SA DB Row'),
-    ExerciseDefinition(id: 'alt_goblet_squat', name: 'Goblet Squat (Quad focus)'),
-    ExerciseDefinition(id: 'alt_db_leg_curl', name: 'DB Leg Curl'),
-    ExerciseDefinition(id: 'alt_banded_adduction', name: 'Banded Adduction'),
-
-    // Daily Routine (Special)
-    ExerciseDefinition(
-      id: 'routine_mobility_flow',
-      name: 'Mobility Flow',
-      isWeightAllowed: false,
-    ),
-    ExerciseDefinition(
-      id: 'routine_core_stability',
-      name: 'Core Stability',
-      isWeightAllowed: false,
-    ),
+    ExerciseDefinition(id: 'legs_leg_press', name: 'Leg Press (Legacy)'),
+    ExerciseDefinition(id: 'legs_rdl', name: 'Romanian Deadlift (Legacy)'),
+    ExerciseDefinition(id: 'legs_calf_raise', name: 'Calf Raise (Legacy)'),
   ];
 
   static const List<WorkoutDefinition> workouts = [
@@ -142,13 +274,55 @@ class WorkoutCatalog {
       name: 'Pull',
       type: WorkoutType.pull,
       exercises: [
-        ExerciseSlot(exerciseId: 'pull_t_bar_row', order: 1, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'pull_sa_iso_lateral_lat_row', order: 2, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'pull_lat_pulldown', order: 3, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'pull_face_pull', order: 4, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '60s'),
-        ExerciseSlot(exerciseId: 'pull_bicep_curl', order: 5, prescribedSets: 3, prescribedReps: '10-12', prescribedRest: '60s'),
-        ExerciseSlot(exerciseId: 'pull_hammer_curl', order: 6, prescribedSets: 3, prescribedReps: '10-12', prescribedRest: '60s'),
-        ExerciseSlot(exerciseId: 'pull_rear_delt_fly', order: 7, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '60s'),
+        ExerciseSlot(
+          exerciseId: 'pull_t_bar_row',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'pull_sa_lat_pull_down',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'pull_sa_iso_lateral_lat_row',
+          order: 3,
+          prescribedSets: 2,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'pull_cable_rear_delt_fly',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'pull_sa_db_preacher_bicep_curl',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'pull_cable_hammer_curl',
+          order: 6,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'pull_db_shrugs',
+          order: 7,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
       ],
     ),
     WorkoutDefinition(
@@ -156,12 +330,55 @@ class WorkoutCatalog {
       name: 'Legs',
       type: WorkoutType.legs,
       exercises: [
-        ExerciseSlot(exerciseId: 'legs_leg_extension', order: 1, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'legs_seated_leg_curl', order: 2, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'legs_leg_press', order: 3, prescribedSets: 3, prescribedReps: '10-12', prescribedRest: '120s'),
-        ExerciseSlot(exerciseId: 'legs_rdl', order: 4, prescribedSets: 3, prescribedReps: '8-10', prescribedRest: '120s'),
-        ExerciseSlot(exerciseId: 'legs_adduction_machine', order: 5, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '60s'),
-        ExerciseSlot(exerciseId: 'legs_calf_raise', order: 6, prescribedSets: 3, prescribedReps: '15-20', prescribedRest: '60s'),
+        ExerciseSlot(
+          exerciseId: 'legs_body_weighted_squat',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'legs_leg_extension',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'legs_adduction_machine',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'legs_body_weighted_hip_thrust',
+          order: 4,
+          prescribedSets: 2,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'legs_seated_leg_press_calve_raises',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'legs_child_pose',
+          order: 6,
+          prescribedSets: 2,
+          prescribedReps: '15-45s',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'legs_banded_pallof_twist',
+          order: 7,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
       ],
     ),
     WorkoutDefinition(
@@ -169,60 +386,222 @@ class WorkoutCatalog {
       name: 'Push',
       type: WorkoutType.push,
       exercises: [
-        ExerciseSlot(exerciseId: 'push_chest_press_machine', order: 1, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'push_incline_chest_press_machine', order: 2, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'push_shoulder_press_machine', order: 3, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'push_lateral_raise', order: 4, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '60s'),
-        ExerciseSlot(exerciseId: 'push_chest_fly', order: 5, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '60s'),
-        ExerciseSlot(exerciseId: 'push_tricep_pushdown', order: 6, prescribedSets: 3, prescribedReps: '10-12', prescribedRest: '60s'),
+        ExerciseSlot(
+          exerciseId: 'push_chest_press_machine',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'push_incline_chest_press_machine',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'push_shoulder_press_machine',
+          order: 3,
+          prescribedSets: 2,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'push_cable_lateral_raises',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'push_sa_triceps_over_head_extension',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'push_triceps_push_down',
+          order: 6,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
       ],
     ),
-    // Placeholder for Upper/Lower if needed to follow schedule
     WorkoutDefinition(
       id: 'upper',
-      name: 'Upper Body',
+      name: 'Upper',
       type: WorkoutType.upper,
       exercises: [
-         ExerciseSlot(exerciseId: 'push_chest_press_machine', order: 1, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-         ExerciseSlot(exerciseId: 'pull_t_bar_row', order: 2, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-         ExerciseSlot(exerciseId: 'push_shoulder_press_machine', order: 3, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
-         ExerciseSlot(exerciseId: 'pull_lat_pulldown', order: 4, prescribedSets: 3, prescribedReps: '8-12', prescribedRest: '90s'),
+        ExerciseSlot(
+          exerciseId: 'upper_chest_fly_machine',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_cable_pull_over',
+          order: 2,
+          prescribedSets: 4,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_cable_lateral_raises',
+          order: 3,
+          prescribedSets: 2,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_no_cheat_db_bicep_curl',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_sa_triceps_over_head_extension',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_reverse_curl',
+          order: 6,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_db_shrugs',
+          order: 7,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
       ],
     ),
     WorkoutDefinition(
       id: 'lower',
-      name: 'Lower Body',
+      name: 'Lower',
       type: WorkoutType.lower,
       exercises: [
-        ExerciseSlot(exerciseId: 'legs_leg_press', order: 1, prescribedSets: 3, prescribedReps: '10-12', prescribedRest: '120s'),
-        ExerciseSlot(exerciseId: 'legs_rdl', order: 2, prescribedSets: 3, prescribedReps: '8-10', prescribedRest: '120s'),
-        ExerciseSlot(exerciseId: 'legs_leg_extension', order: 3, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '90s'),
-        ExerciseSlot(exerciseId: 'legs_seated_leg_curl', order: 4, prescribedSets: 3, prescribedReps: '12-15', prescribedRest: '90s'),
+        ExerciseSlot(
+          exerciseId: 'lower_body_weighted_rdl',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'lower_seated_leg_curl',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'lower_adduction_machine',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'lower_seated_leg_press_calve_raises',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'lower_dead_bug',
+          order: 5,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'lower_standing_ql_db_extension',
+          order: 6,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
+      ],
+    ),
+    WorkoutDefinition(
+      id: 'daily_routine',
+      name: 'Daily Routine',
+      type: WorkoutType.rest, // Type doesn't matter much for Daily Routine
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'routine_slr',
+          order: 1,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'routine_clam_shell',
+          order: 2,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'routine_neurodynamic_sciatic_nerve',
+          order: 3,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'routine_trunk_rotation',
+          order: 4,
+          prescribedSets: 2,
+          prescribedReps: '5-15',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'routine_double_knee_to_chest',
+          order: 5,
+          prescribedSets: 5,
+          prescribedReps: '10s',
+          prescribedRest: '30s',
+        ),
       ],
     ),
   ];
 
   static WorkoutDefinition? getWorkoutForDate(DateTime date) {
-    // Sun=Pull (7), Mon=Legs (1), Tue=Rest (2), Wed=Upper (3), Thu=Lower (4), Fri=Rest (5), Sat=Push (6)
-    // DateTime.weekday: Mon=1, ..., Sun=7
     switch (date.weekday) {
       case DateTime.sunday:
-        return workouts.firstWhere((w) => w.type == WorkoutType.pull);
+        return workouts.firstWhere((w) => w.id == 'pull');
       case DateTime.monday:
-        return workouts.firstWhere((w) => w.type == WorkoutType.legs);
+        return workouts.firstWhere((w) => w.id == 'legs');
       case DateTime.tuesday:
         return null; // Rest
       case DateTime.wednesday:
-        return workouts.firstWhere((w) => w.type == WorkoutType.upper);
+        return workouts.firstWhere((w) => w.id == 'upper');
       case DateTime.thursday:
-        return workouts.firstWhere((w) => w.type == WorkoutType.lower);
+        return workouts.firstWhere((w) => w.id == 'lower');
       case DateTime.friday:
         return null; // Rest
       case DateTime.saturday:
-        return workouts.firstWhere((w) => w.type == WorkoutType.push);
+        return workouts.firstWhere((w) => w.id == 'push');
       default:
         return null;
     }
+  }
+
+  static WorkoutDefinition getDailyRoutine() {
+    return workouts.firstWhere((w) => w.id == 'daily_routine');
   }
 
   static ExerciseDefinition getExerciseById(String id) {

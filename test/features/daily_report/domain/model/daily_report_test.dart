@@ -36,7 +36,7 @@ void main() {
 
     test('isEmpty should return true only when all fields are empty', () {
       expect(DailyReport.empty().isEmpty, true);
-      
+
       final reportWithData = DailyReport.empty().copyWith(breakfast: 'Eggs');
       expect(reportWithData.isEmpty, false);
     });

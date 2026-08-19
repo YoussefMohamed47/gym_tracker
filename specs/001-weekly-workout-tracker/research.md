@@ -28,13 +28,21 @@
 - `image_picker`: Most reliable way to handle camera capture and gallery selection in Flutter. Handles permissions and platform differences internally.
 
 ### 3. Weight Conversion & Precision
-**Decision**: Store all weights as high-precision `double` in **KG**.
+**Decision**: Store all weights as high-precision `double` in **KG** at the **SET** level.
 
 **Rationale**: 
 - **Normalized Truth**: Storing in a single canonical unit (KG) prevents cumulative rounding errors when toggling display units.
+- **Set Independence**: V2 requires independent weight tracking per set.
 - **Conversion Factor**: `1 kg = 2.20462262185 lb`.
 - **UI Rounding**: Round to 1 or 2 decimal places in the UI for display, but keep the full double precision in memory and storage.
-- **Gym Logic**: While users might enter "100" lb, the system stores `100 / 2.20462...`. When switching back to LB, it returns exactly `100.0`.
+
+### 5. Legacy Data Evolution
+**Decision**: Implement a flexible JSON parser that handles both `weightKg` (V1) and `sets` (V2) in `ExerciseLog`.
+
+**Rationale**: 
+- **Backwards Compatibility**: Existing users must not lose data.
+- **Reference Only**: V1 data is treated as an exercise-level summary/reference when prefilling a V2 session.
+- **Persistence**: V2 saves will always use the new `sets` array structure.
 
 ### 4. Photo Persistence Strategy
 **Decision**: Copy selected images to `getApplicationDocumentsDirectory()` with a structured filename.

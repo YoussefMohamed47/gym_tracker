@@ -16,7 +16,7 @@ class WorkoutWeekHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final monthFormat = DateFormat('MMMM yyyy');
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -24,9 +24,9 @@ class WorkoutWeekHeader extends StatelessWidget {
         children: [
           Text(
             monthFormat.format(selectedDate),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           Row(
             children: [

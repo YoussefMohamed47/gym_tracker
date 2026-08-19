@@ -1,129 +1,115 @@
-# Tasks: Weekly Workout Tracker
+# Tasks: Weekly Workout Tracker (EVOLUTION V2)
 
 **Input**: Design documents from `/specs/001-weekly-workout-tracker/`
 
-**Prerequisites**: plan.md, spec.md, research.md, data-model.md
+**Prerequisites**: plan.md (V2), spec.md (V2), data-model.md (V2), research.md (V2)
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing. Foundational tasks (models, persistence, utils) are grouped in Phase 2.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing. Foundational migration and data model tasks are prioritized to unblock all UI work.
+
+---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project directory structure under lib/features/workout/
-- [ ] T002 Update pubspec.yaml with url_launcher and image_picker dependencies
-- [ ] T003 [P] Add #1A46A0 brand color constant in lib/core/utils/colors.dart (if not present)
+- [ ] T001 Update `pubspec.yaml` with latest stable `url_launcher` and `image_picker` dependencies
+- [ ] T002 Ensure project directory structure matches feature-first architecture in `lib/features/workout/`
+- [ ] T003 [P] Add #1A46A0 brand color constant in `lib/core/utils/colors.dart` (if not present)
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+## Phase 2: Foundational (V2 Data Model & Migration - BLOCKING)
 
-**Purpose**: Core infrastructure including models, utilities, and persistence that MUST be complete before UI work begins.
+**Purpose**: Core infrastructure that MUST be complete before ANY V2 user story can be implemented.
 
-- [ ] T004 Implement WeightUnit enum and WeightConverter utility (1 kg = 2.20462262185 lb) in lib/core/utils/weight_converter.dart
-- [ ] T005 Create WorkoutType and WorkoutDefinition entities in lib/features/workout/domain/entities/
-- [ ] T006 Define static workout catalog using Authoritative Weekly Schedule from spec.md in lib/features/workout/data/datasources/workout_catalog.dart
-- [ ] T007 [P] Create ExerciseLog and WorkoutSession entities (using String dateKey) in lib/features/workout/domain/entities/
-- [ ] T008 [P] Create ExerciseLogModel and WorkoutSessionModel (JSON serialization) in lib/features/workout/data/models/
-- [ ] T009 Implement WorkoutLocalDataSource with SharedPreferences in lib/features/workout/data/datasources/workout_local_datasource.dart
-- [ ] T010 Implement WorkoutRepository and RepositoryImpl in lib/features/workout/domain/repositories/ and lib/features/workout/data/repositories/
-- [ ] T011 Create UseCase for GetWorkoutForDate (enforcing yyyy-MM-dd dateKey normalization) in lib/features/workout/domain/usecases/get_workout_for_date.dart
-- [ ] T012 Create UseCase for SaveWorkoutSession (handling photo cleanup) in lib/features/workout/domain/usecases/save_workout_session.dart
-- [ ] T013 Create UseCase for GetPreviousExerciseLog (Workout-Specific logic) in lib/features/workout/domain/usecases/get_previous_exercise_log.dart
-- [ ] T014 Register Workout dependencies in lib/core/di/injection_container.dart
+- [ ] T004 Implement `ExerciseSetLog` entity in `lib/features/workout/domain/entities/exercise_set_log.dart`
+- [ ] T005 [P] Implement `ExerciseSetLogModel` (JSON) in `lib/features/workout/data/models/exercise_set_log_model.dart`
+- [ ] T006 [P] Update `ExerciseLog` entity to support `List<ExerciseSetLog> sets` in `lib/features/workout/domain/entities/exercise_log.dart`
+- [ ] T007 [P] Implement polymorphic JSON deserialization in `ExerciseLogModel.fromJson` to handle V1 (`weightKg`) and V2 (`sets`) in `lib/features/workout/data/models/exercise_log_model.dart`
+- [ ] T008 [P] Implement unit tests for V1/V2 JSON compatibility in `test/features/workout/data/models/exercise_log_model_test.dart`
+- [ ] T009 Update `WorkoutSession` model to support the new `ExerciseLog` structure in `lib/features/workout/data/models/workout_session_model.dart`
+- [ ] T010 [P] Implement high-precision KG weight storage at the set level in `lib/features/workout/data/models/exercise_set_log_model.dart`
+- [ ] T011 Update `WorkoutLocalDataSource` to support versioned schema reads in `lib/features/workout/data/datasources/workout_local_datasource.dart`
 
-**Checkpoint**: Foundation ready - user story implementation can now begin.
+**Checkpoint**: Foundation ready - legacy data can be read, and new set-level data can be persisted.
 
 ---
 
-## Phase 3: User Story 1 - Main Workout Flow (Priority: P1) 🎯 MVP
+## Phase 3: User Story 3 - Daily Routine Correctness (Priority: P1) 🎯
 
-**Goal**: Display prescribed exercises, allow weight entry, and save session to history.
+**Goal**: Fix the "Unknown Exercise" bug and ensure routine is strictly data-driven from the catalog.
 
-**Independent Test**: Select Saturday (Push), enter weights for all exercises, save, restart app, and verify data persists.
+**Independent Test**: Daily Routine contains exactly 5 canonical exercises with functional video links and no placeholders.
+
+- [ ] T012 [P] Identify and remove hardcoded placeholder routine ID strings in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T013 [P] Correct `WorkoutCatalog.getDailyRoutine()` to return EXACTLY the 5 exercises: SLR, Clam shell, neurodynamic sciatic nerve, Trunk rotation, Double knee to chest in `lib/features/workout/data/datasources/workout_catalog.dart`
+- [ ] T014 [P] Verify `WorkoutCatalog` regression tests match the canonical Sama Fit PDF specs in `test/features/workout/data/datasources/workout_catalog_test.dart`
+- [ ] T015 Update `WorkoutCubit` to resolve the routine solely via `WorkoutCatalog.getDailyRoutine()`
+
+---
+
+## Phase 4: User Story 1 - Per-Set Workout Flow (Priority: P1) 🎯 MVP
+
+**Goal**: Record independent weights and performance for EACH prescribed set.
+
+**Independent Test**: 3-set exercise allows entering 3 weights, marking each as done, and saving to history.
 
 ### Tests for User Story 1 (REQUIRED) ⚠️
 
-- [ ] T015 [P] [US1] Unit test for WeightConverter round-trip precision in test/core/utils/weight_converter_test.dart
-- [ ] T016 [P] [US1] Unit test for Sunday-Saturday week calculation and yyyy-MM-dd dateKey normalization in test/features/workout/utils/date_utils_test.dart
-- [ ] T017 [US1] Unit test for WorkoutRepository prefill and duplicate dateKey prevention in test/features/workout/domain/repositories/workout_repository_test.dart
+- [ ] T016 [US1] Unit test for per-set weight mapping (Set N prefills from Previous Set N) in `test/features/workout/domain/repositories/workout_repository_test.dart`
+- [ ] T017 [US1] Unit test for partial completion logic (Exercise is performed if >=1 set is done) in `test/features/workout/presentation/cubit/workout_cubit_test.dart`
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Implement WorkoutState with selectedDate, dateKey, and exerciseLogs in lib/features/workout/presentation/cubit/workout_state.dart
-- [ ] T019 [US1] Implement WorkoutCubit with "Review Workout" save confirmation logic in lib/features/workout/presentation/cubit/workout_cubit.dart
-- [ ] T020 [US1] Create WorkoutWeekHeader and WeekDaySelector widgets in lib/features/workout/presentation/widgets/
-- [ ] T021 [US1] Create ExerciseLogCard with weight input and confirmed status indicator in lib/features/workout/presentation/widgets/exercise_log_card.dart
-- [ ] T022 [US1] Implement WorkoutScreen with day selector and "Photo unavailable" state handling in lib/features/workout/presentation/view/workout_screen.dart
-- [ ] T023 [US1] Add "Daily Routine" section to WorkoutScreen in lib/features/workout/presentation/widgets/daily_routine_section.dart
-- [ ] T024 [US1] Implement "Edit History" mode loading sessions by dateKey in lib/features/workout/presentation/cubit/workout_cubit.dart
+- [ ] T018 [US1] Update `WorkoutState` to store per-set draft data in `lib/features/workout/presentation/cubit/workout_state.dart`
+- [ ] T019 [P] [US1] Implement `ExerciseSetRow` widget with numeric input, "Last" label, and performance toggle in `lib/features/workout/presentation/widgets/exercise_set_row.dart`
+- [ ] T020 [P] [US1] Redesign `ExerciseCard` to include set rows and prescribed meta in `lib/features/workout/presentation/widgets/exercise_card.dart`
+- [ ] T021 [US1] Revise `WorkoutCubit` to handle per-set weight/performed state updates in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T022 [US1] Implement numeric keyboard focus management (Next moves to next set input) in `lib/features/workout/presentation/widgets/exercise_set_row.dart`
+- [ ] T023 [US1] Implement alternative set draft isolation (switching back and forth preserves independent set arrays) in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T024 [US1] Redesign `WorkoutScreen` with sticky header, 7-day week selector, and sticky save bar in `lib/features/workout/presentation/view/workout_screen.dart`
 
-**Checkpoint**: MVP workout logging is functional and persistent.
-
----
-
-## Phase 4: User Story 2 - Weight Unit Support & Conversion (Priority: P1)
-
-**Goal**: Toggle between KG and LB globally while preserving high-precision stored data.
-
-**Independent Test**: Record 100 kg, switch to LB (verify ~220.5 lb), switch back to KG (verify exactly 100 kg).
-
-- [ ] T025 [P] [US2] Implement WeightUnitSelector widget in lib/features/workout/presentation/widgets/weight_unit_selector.dart
-- [ ] T026 [US2] Integrate unit toggle in WorkoutCubit without mutating stored weights in lib/features/workout/presentation/cubit/workout_cubit.dart
-- [ ] T027 [US2] Update ExerciseLogCard to handle high-precision display conversion in lib/features/workout/presentation/widgets/exercise_log_card.dart
+**Checkpoint**: Core V2 per-set logging is functional.
 
 ---
 
-## Phase 5: User Story 3 - Exercise Alternatives (Priority: P2)
+## Phase 5: User Story 2 - Exercise History & Reference (Priority: P2)
 
-**Goal**: Select curated alternatives for exercises with isolated draft states.
+**Goal**: View previous session dates and per-set history directly within the workout context.
 
-**Independent Test**: Replace Chest Press with DB Bench, toggle back and forth, verify draft weights are preserved separately.
+**Independent Test**: Tapping History opens a bottom sheet showing multiple dated sessions with set breakdowns.
 
-- [ ] T028 [US3] Define ExerciseAlternative model and curated replacement matrix in lib/features/workout/data/datasources/replacement_matrix.dart
-- [ ] T029 [US3] Create AlternativeExerciseBottomSheet for selection in lib/features/workout/presentation/widgets/alternative_exercise_bottom_sheet.dart
-- [ ] T030 [US3] Update WorkoutCubit to preserve in-session drafts for original and alternatives separately in lib/features/workout/presentation/cubit/workout_cubit.dart
-- [ ] T031 [US3] Update ExerciseLogCard to display "Planned -> Performed" identity for selected alternatives in lib/features/workout/presentation/widgets/exercise_log_card.dart
-
----
-
-## Phase 6: User Story 4 - Media & Photos (Priority: P3)
-
-**Goal**: External video launching and per-session photo reference logging with failure resilience.
-
-**Independent Test**: Replacement of photo safely deletes old file only after new one is persisted. Missing file does not crash UI.
-
-- [ ] T032 [P] [US4] Implement VideoLauncher utility using url_launcher in lib/features/workout/presentation/utils/video_launcher.dart
-- [ ] T033 [US4] Implement PhotoService with atomic replacement and "Disk Full" handling in lib/features/workout/presentation/services/photo_service.dart
-- [ ] T034 [US4] Add video/photo actions to ExerciseLogCard with missing-file graceful handling in lib/features/workout/presentation/widgets/exercise_log_card.dart
-- [ ] T035 [US4] Implement physical file deletion and missing-file resilience in SaveWorkoutSession in lib/features/workout/domain/usecases/save_workout_session.dart
+- [ ] T025 [P] [US2] Implement `GetExerciseHistory` use case to retrieve multiple dated performances in `lib/features/workout/domain/usecases/get_exercise_history.dart`
+- [ ] T026 [US2] Create `ExerciseHistoryBottomSheet` showing per-set history list in `lib/features/workout/presentation/widgets/exercise_history_sheet.dart`
+- [ ] T027 [US2] Update `ExerciseCard` to display "Previous Workout Date" label in `lib/features/workout/presentation/widgets/exercise_card.dart`
+- [ ] T028 [US2] Integrate `ExerciseHistoryBottomSheet` into `ExerciseCard` actions
 
 ---
 
-## Phase 7: User Story 5 - Sharing & History (Priority: P3)
+## Phase 6: User Story 4 - Legacy Data Integrity (Priority: P2)
 
-**Goal**: Branded image generation for single workouts and detailed weekly summaries.
+**Goal**: Seamlessly handle V1 single-weight history records.
 
-**Independent Test**: Share Week contains full exercise lists for all saved days without including private photos.
+**Independent Test**: Historical V1 session displays "Legacy single-weight record" and can initialize today's sets.
 
-- [ ] T036 [P] [US5] Create WorkoutShareCard template in lib/features/workout/presentation/widgets/share/workout_share_card.dart
-- [ ] T037 [P] [US5] Create detailed WeeklyWorkoutShareCard template in lib/features/workout/presentation/widgets/share/weekly_workout_share_card.dart
-- [ ] T038 [US5] Implement WorkoutShareService using existing WidgetImageCapture in lib/features/workout/presentation/services/workout_share_service.dart
-- [ ] T039 [US5] Add Share action to WorkoutScreen header in lib/features/workout/presentation/view/workout_screen.dart
+- [ ] T029 [US4] Implement "Legacy Working Weight" UI reference for V1 previous sessions in `lib/features/workout/presentation/widgets/exercise_card.dart`
+- [ ] T030 [US4] Implement "Use legacy weight for all sets" draft initialization action in `lib/features/workout/presentation/cubit/workout_cubit.dart`
+- [ ] T031 [US4] Verify sharing handles legacy V1 logs by showing single weight instead of set list in `lib/features/workout/presentation/widgets/share/workout_share_card.dart`
 
 ---
 
-## Phase 8: Polish & Top-Level Integration
+## Phase 7: Polish & Cross-Cutting Concerns
 
-**Purpose**: Integration with main app navigation and final quality checks.
+**Purpose**: Final quality checks and cross-feature integration.
 
-- [ ] T040 Integrate Workout route in lib/core/router/app_router.dart
-- [ ] T041 Implement Material 3 NavigationBar on MainScreen to switch between Report and Workout in lib/features/main/presentation/view/main_screen.dart
-- [ ] T042 [P] Verify existing Daily Report flow and History restore functionality still work.
-- [ ] T043 [P] Verify compliance with Project Constitution principles.
-- [ ] T044 Run dart format .
-- [ ] T045 Run flutter analyze
-- [ ] T046 Run flutter test (all suites)
+- [ ] T032 Update `WorkoutShareCard` to display per-set values (e.g., "50 | 50 | 47.5") for V2 sessions
+- [ ] T033 [P] Verify text scaling and Material 3 brand identity consistency across all redesigned UI
+- [ ] T034 [P] Verify existing photo/report navigation remains functional
+- [ ] T035 [P] Verify compliance with Project Constitution principles
+- [ ] T036 Run `dart format .`
+- [ ] T037 Run `flutter analyze`
+- [ ] T038 Run all tests (`flutter test`)
+- [ ] T039 Execute manual UX verification via `quickstart.md`
 
 ---
 
@@ -132,11 +118,43 @@
 ### Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies.
-- **Foundational (Phase 2)**: Depends on Setup (T001-T003). BLOCKS all UI work.
-- **User Stories (Phase 3-7)**: All depend on Foundational (Phase 2) completion.
-- **Integration (Phase 8)**: Depends on at least US1 (MVP) being complete.
+- **Foundational (Phase 2)**: Depends on Setup. BLOCKS all UI work.
+- **Daily Routine (Phase 3)**: Can run in parallel with Foundational.
+- **User Stories (Phase 4-6)**: Depends on Foundational completion.
+- **Polish (Phase 7)**: Depends on all user stories.
 
 ### User Story Dependencies
 
-- **US1 (MVP)**: Mandatory first story.
-- **US2, US3, US4, US5**: Can proceed in parallel after US1 foundation is laid.
+- **US1 (MVP)**: Must be first UI story.
+- **US2, US4**: Depend on US1 foundation (ExerciseCard redesign).
+
+---
+
+## Parallel Execution Opportunities
+
+- All Phase 1 tasks.
+- Foundational tasks (T005-T008, T010).
+- Daily Routine identification (T012-T014) can start during Foundation.
+- Redesigning widgets (T019, T020) can start once domain entities (T004, T006) are stable.
+- Polish phase verification tasks.
+
+---
+
+## Implementation Strategy
+
+### Revision First (Foundation + US3)
+
+1. Complete Phase 2: Foundational (Migration safety is priority).
+2. Complete Phase 3: Daily Routine fix (Low risk, high impact bug fix).
+
+### Incremental Evolution (US1)
+
+1. Redesign `ExerciseCard` and `WorkoutScreen` structure.
+2. Implement per-set logic in `WorkoutCubit`.
+3. **STOP and VALIDATE**: Verify 3-set exercises log correctly and V1 history doesn't crash.
+
+### Contextual Polish (US2 + US4)
+
+1. Add History Bottom Sheet.
+2. Add Legacy reference actions.
+3. Update Sharing.

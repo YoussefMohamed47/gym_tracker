@@ -43,15 +43,17 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Report saved to history!')),
             );
-            SharePlus.instance.share(ShareParams(
-              files: [XFile(state.imagePath)],
-              text: 'My Daily Report',
-            ));
+            SharePlus.instance.share(
+              ShareParams(
+                files: [XFile(state.imagePath)],
+                text: 'My Daily Report',
+              ),
+            );
             context.read<DailyReportCubit>().resetForm();
           } else if (state is DailyReportError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
           }
         },
         builder: (context, state) {
@@ -83,29 +85,36 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                     ),
                     const SizedBox(height: 32),
                     ElevatedButton.icon(
-                      onPressed: (state is DailyReportGeneratingImage || state.report.isEmpty)
+                      onPressed:
+                          (state is DailyReportGeneratingImage ||
+                              state.report.isEmpty)
                           ? null
                           : () async {
-                        // ⚠️ CRITICAL: was screenshotController.captureFromWidget(...)
-                        // Now renders off-screen with unbounded height — no overflow
-                        // regardless of how much content the report has.
-                        final Uint8List imageBytes = await WidgetImageCapture.capture(
-                          context: context,
-                          child: ReportImageTemplate(report: state.report),
-                          width: 400,
-                          pixelRatio: 2.0,
-                        );
-                        if (context.mounted) {
-                          context
-                              .read<DailyReportCubit>()
-                              .generateAndCacheImage(imageBytes);
-                        }
-                      },
+                              // ⚠️ CRITICAL: was screenshotController.captureFromWidget(...)
+                              // Now renders off-screen with unbounded height — no overflow
+                              // regardless of how much content the report has.
+                              final Uint8List imageBytes =
+                                  await WidgetImageCapture.capture(
+                                    context: context,
+                                    child: ReportImageTemplate(
+                                      report: state.report,
+                                    ),
+                                    width: 400,
+                                    pixelRatio: 2.0,
+                                  );
+                              if (context.mounted) {
+                                context
+                                    .read<DailyReportCubit>()
+                                    .generateAndCacheImage(imageBytes);
+                              }
+                            },
                       icon: const Icon(Icons.image),
                       label: const Text('Generate & Share Image'),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: state.report.isEmpty ? Colors.grey : const Color(0xFF1A46A0),
+                        backgroundColor: state.report.isEmpty
+                            ? Colors.grey
+                            : const Color(0xFF1A46A0),
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: Colors.grey.shade300,
                         disabledForegroundColor: Colors.grey,
@@ -125,7 +134,11 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                         SizedBox(height: 16),
                         Text(
                           'Generating your report...',
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),

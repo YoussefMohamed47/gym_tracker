@@ -16,7 +16,7 @@ class WorkoutDateUtils {
 
   /// Returns the Sunday-Saturday week range for a given date.
   static List<DateTime> getWeekDays(DateTime date) {
-    // Sunday is 7 in DateTime.weekday (or 0 depending on interpretation, 
+    // Sunday is 7 in DateTime.weekday (or 0 depending on interpretation,
     // but Dart's DateTime.weekday uses 1=Mon, 7=Sun).
     // We want Sunday to be the first day.
     int currentWeekday = date.weekday;
@@ -24,7 +24,7 @@ class WorkoutDateUtils {
     // If it's Monday (1), we subtract 1.
     // If it's Saturday (6), we subtract 6.
     int daysToSubtract = currentWeekday % 7;
-    
+
     DateTime sunday = date.subtract(Duration(days: daysToSubtract));
     // Reset to midnight
     sunday = DateTime(sunday.year, sunday.month, sunday.day);

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../domain/model/daily_report.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../domain/model/daily_report.dart';
 
 class ReportImageTemplate extends StatelessWidget {
   final DailyReport report;
@@ -87,6 +84,7 @@ class ReportImageTemplate extends StatelessWidget {
       ],
     );
   }
+
   // ⚠️ CRITICAL: fixed width:160 was forcing 1 box per row on normal phone
   // widths, which is what pushed the total height past the screen and
   // caused the overflow. Now derived from available width via LayoutBuilder.
@@ -97,7 +95,9 @@ class ReportImageTemplate extends StatelessWidget {
         // Aim for 2 columns; fall back to 1 if the space is too narrow
         // (e.g. below ~260 logical px) to keep text readable.
         final twoColWidth = (constraints.maxWidth - spacing) / 2;
-        final boxWidth = twoColWidth >= 130 ? twoColWidth : constraints.maxWidth;
+        final boxWidth = twoColWidth >= 130
+            ? twoColWidth
+            : constraints.maxWidth;
 
         return Wrap(
           spacing: spacing,
@@ -175,7 +175,12 @@ class ReportImageTemplate extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildSpecialItem(Icons.fitness_center, 'التمرين', report.training),
-          const Divider(color: Colors.white30, height: 1, indent: 10, endIndent: 10),
+          const Divider(
+            color: Colors.white30,
+            height: 1,
+            indent: 10,
+            endIndent: 10,
+          ),
           _buildSpecialItem(Icons.directions_run, 'الكارديو', report.cardio),
         ],
       ),
@@ -195,7 +200,11 @@ class ReportImageTemplate extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 label,
-                style: GoogleFonts.notoKufiArabic(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
+                style: GoogleFonts.notoKufiArabic(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
               ),
             ],
           ),
@@ -210,7 +219,11 @@ class ReportImageTemplate extends StatelessWidget {
             child: Text(
               content.isEmpty ? 'resting' : content,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11, color: Colors.black87, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -242,7 +255,10 @@ class ReportImageTemplate extends StatelessWidget {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
                     decoration: const BoxDecoration(
                       color: Color(0xFF1A46A0),
                       borderRadius: BorderRadius.only(
@@ -263,7 +279,9 @@ class ReportImageTemplate extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Text(
-                      (report.notes == null || report.notes!.isEmpty) ? ' ' : report.notes!,
+                      (report.notes == null || report.notes!.isEmpty)
+                          ? ' '
+                          : report.notes!,
                       textAlign: TextAlign.right,
                       style: GoogleFonts.notoKufiArabic(
                         fontSize: 13,

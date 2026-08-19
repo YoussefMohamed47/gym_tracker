@@ -23,36 +23,38 @@ void main() {
       expect(cubit.state, HistoryInitial());
     });
 
-    test('should emit [HistoryLoading, HistoryLoaded] when loadHistory is successful', () async {
-      // arrange
-      when(() => mockRepository.getReportHistory())
-          .thenAnswer((_) async => ApiSuccess(tReports));
-      
-      // act & assert
-      final expectedStates = [
-        HistoryLoading(),
-        HistoryLoaded(tReports),
-      ];
-      
-      expectLater(cubit.stream, emitsInOrder(expectedStates));
-      
-      await cubit.loadHistory();
-    });
+    test(
+      'should emit [HistoryLoading, HistoryLoaded] when loadHistory is successful',
+      () async {
+        // arrange
+        when(
+          () => mockRepository.getReportHistory(),
+        ).thenAnswer((_) async => ApiSuccess(tReports));
 
-    test('should emit [HistoryLoading, HistoryError] when loadHistory fails', () async {
-      // arrange
-      when(() => mockRepository.getReportHistory())
-          .thenAnswer((_) async => const ApiFailure(CacheFailure('Error')));
-      
-      // act & assert
-      final expectedStates = [
-        HistoryLoading(),
-        const HistoryError('Error'),
-      ];
-      
-      expectLater(cubit.stream, emitsInOrder(expectedStates));
-      
-      await cubit.loadHistory();
-    });
+        // act & assert
+        final expectedStates = [HistoryLoading(), HistoryLoaded(tReports)];
+
+        expectLater(cubit.stream, emitsInOrder(expectedStates));
+
+        await cubit.loadHistory();
+      },
+    );
+
+    test(
+      'should emit [HistoryLoading, HistoryError] when loadHistory fails',
+      () async {
+        // arrange
+        when(
+          () => mockRepository.getReportHistory(),
+        ).thenAnswer((_) async => const ApiFailure(CacheFailure('Error')));
+
+        // act & assert
+        final expectedStates = [HistoryLoading(), const HistoryError('Error')];
+
+        expectLater(cubit.stream, emitsInOrder(expectedStates));
+
+        await cubit.loadHistory();
+      },
+    );
   });
 }

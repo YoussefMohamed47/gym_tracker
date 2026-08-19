@@ -50,20 +50,20 @@ class DailyReport extends Equatable {
       (notes?.isEmpty ?? true);
 
   factory DailyReport.empty() => DailyReport(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        breakfast: '',
-        lunch: '',
-        snack: '',
-        beforeTraining: '',
-        afterTraining: '',
-        dinner: '',
-        water: '',
-        training: '',
-        cardio: '',
-        supplements: '',
-        sleepTime: '',
-        notes: '',
-      );
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    breakfast: '',
+    lunch: '',
+    snack: '',
+    beforeTraining: '',
+    afterTraining: '',
+    dinner: '',
+    water: '',
+    training: '',
+    cardio: '',
+    supplements: '',
+    sleepTime: '',
+    notes: '',
+  );
 
   DailyReport copyWith({
     String? id,
@@ -136,27 +136,29 @@ class DailyReport extends Equatable {
       supplements: json['supplements'] as String,
       sleepTime: json['sleepTime'] as String,
       notes: json['notes'] as String?,
-      dateTime: json['dateTime'] != null ? DateTime.parse(json['dateTime'] as String) : null,
+      dateTime: json['dateTime'] != null
+          ? DateTime.parse(json['dateTime'] as String)
+          : null,
       imagePath: json['imagePath'] as String?,
     );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        breakfast,
-        lunch,
-        snack,
-        beforeTraining,
-        afterTraining,
-        dinner,
-        water,
-        training,
-        cardio,
-        supplements,
-        sleepTime,
-        notes,
-        dateTime,
-        imagePath,
-      ];
+    id,
+    breakfast,
+    lunch,
+    snack,
+    beforeTraining,
+    afterTraining,
+    dinner,
+    water,
+    training,
+    cardio,
+    supplements,
+    sleepTime,
+    notes,
+    dateTime,
+    imagePath,
+  ];
 }

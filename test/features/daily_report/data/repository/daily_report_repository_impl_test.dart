@@ -8,6 +8,7 @@ import 'package:gym_tracker_report/features/daily_report/domain/model/daily_repo
 import 'package:mocktail/mocktail.dart';
 
 class MockImageService extends Mock implements ImageService {}
+
 class MockLocalDataSource extends Mock implements LocalDataSource {}
 
 void main() {
@@ -33,19 +34,26 @@ void main() {
     final tBytes = Uint8List(10);
     const tPath = 'path/to/image.png';
 
-    test('should return ApiSuccess with path when image service saves successfully', () async {
-      // arrange
-      when(() => mockImageService.saveImageToCache(any())).thenAnswer((_) async => tPath);
-      // act
-      final result = await repository.cacheReportImage(tBytes);
-      // assert
-      expect(result, const ApiSuccess(tPath));
-      verify(() => mockImageService.saveImageToCache(tBytes));
-    });
+    test(
+      'should return ApiSuccess with path when image service saves successfully',
+      () async {
+        // arrange
+        when(
+          () => mockImageService.saveImageToCache(any()),
+        ).thenAnswer((_) async => tPath);
+        // act
+        final result = await repository.cacheReportImage(tBytes);
+        // assert
+        expect(result, const ApiSuccess(tPath));
+        verify(() => mockImageService.saveImageToCache(tBytes));
+      },
+    );
 
     test('should return ApiFailure when image service throws', () async {
       // arrange
-      when(() => mockImageService.saveImageToCache(any())).thenThrow(Exception());
+      when(
+        () => mockImageService.saveImageToCache(any()),
+      ).thenThrow(Exception());
       // act
       final result = await repository.cacheReportImage(tBytes);
       // assert
@@ -56,15 +64,20 @@ void main() {
   group('saveReport', () {
     final tReport = DailyReport.empty();
 
-    test('should return ApiSuccess when local data source saves successfully', () async {
-      // arrange
-      when(() => mockLocalDataSource.saveReport(any())).thenAnswer((_) async => {});
-      // act
-      final result = await repository.saveReport(tReport);
-      // assert
-      expect(result, ApiSuccess(tReport));
-      verify(() => mockLocalDataSource.saveReport(tReport));
-    });
+    test(
+      'should return ApiSuccess when local data source saves successfully',
+      () async {
+        // arrange
+        when(
+          () => mockLocalDataSource.saveReport(any()),
+        ).thenAnswer((_) async => {});
+        // act
+        final result = await repository.saveReport(tReport);
+        // assert
+        expect(result, ApiSuccess(tReport));
+        verify(() => mockLocalDataSource.saveReport(tReport));
+      },
+    );
 
     test('should return ApiFailure when local data source throws', () async {
       // arrange
@@ -79,15 +92,20 @@ void main() {
   group('getReportHistory', () {
     final tHistory = [DailyReport.empty()];
 
-    test('should return ApiSuccess with history when local data source loads successfully', () async {
-      // arrange
-      when(() => mockLocalDataSource.getReportHistory()).thenAnswer((_) async => tHistory);
-      // act
-      final result = await repository.getReportHistory();
-      // assert
-      expect(result, ApiSuccess(tHistory));
-      verify(() => mockLocalDataSource.getReportHistory());
-    });
+    test(
+      'should return ApiSuccess with history when local data source loads successfully',
+      () async {
+        // arrange
+        when(
+          () => mockLocalDataSource.getReportHistory(),
+        ).thenAnswer((_) async => tHistory);
+        // act
+        final result = await repository.getReportHistory();
+        // assert
+        expect(result, ApiSuccess(tHistory));
+        verify(() => mockLocalDataSource.getReportHistory());
+      },
+    );
 
     test('should return ApiFailure when local data source throws', () async {
       // arrange

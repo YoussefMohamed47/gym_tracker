@@ -25,7 +25,8 @@ class WeekDaySelector extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: weekDays.map((date) {
-          final isSelected = date.year == selectedDate.year &&
+          final isSelected =
+              date.year == selectedDate.year &&
               date.month == selectedDate.month &&
               date.day == selectedDate.day;
 
@@ -38,7 +39,9 @@ class WeekDaySelector extends StatelessWidget {
                 color: isSelected ? AppColors.primaryBlue : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? AppColors.primaryBlue : Colors.grey.shade300,
+                  color: isSelected
+                      ? AppColors.primaryBlue
+                      : Colors.grey.shade300,
                   width: 1,
                 ),
               ),

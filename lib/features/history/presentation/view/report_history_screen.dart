@@ -23,10 +23,7 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Report History'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Report History'), centerTitle: true),
       body: BlocBuilder<HistoryCubit, HistoryState>(
         builder: (context, state) {
           if (state is HistoryLoading) {
@@ -54,7 +51,9 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                               arguments: {
                                 'imagePath': report.imagePath!,
                                 'title': report.dateTime != null
-                                    ? DateFormat('MMM d, yyyy').format(report.dateTime!)
+                                    ? DateFormat(
+                                        'MMM d, yyyy',
+                                      ).format(report.dateTime!)
                                     : 'Report Image',
                               },
                             );
@@ -70,8 +69,9 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                       ListTile(
                         title: Text(
                           report.dateTime != null
-                              ? DateFormat('EEEE, MMM d, yyyy - hh:mm a')
-                                  .format(report.dateTime!)
+                              ? DateFormat(
+                                  'EEEE, MMM d, yyyy - hh:mm a',
+                                ).format(report.dateTime!)
                               : 'Unknown Date',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
@@ -79,16 +79,23 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.restore, color: Colors.blue),
+                              icon: const Icon(
+                                Icons.restore,
+                                color: Colors.blue,
+                              ),
                               onPressed: () {
-                                context.read<DailyReportCubit>().restoreReport(report);
+                                context.read<DailyReportCubit>().restoreReport(
+                                  report,
+                                );
                                 Navigator.pop(context);
                               },
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
-                                context.read<HistoryCubit>().deleteReport(report.id);
+                                context.read<HistoryCubit>().deleteReport(
+                                  report.id,
+                                );
                               },
                             ),
                           ],

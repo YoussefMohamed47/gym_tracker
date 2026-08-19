@@ -12,7 +12,17 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
 
   @override
   Future<WorkoutSession?> getSessionForDate(String dateKey) async {
-    return await localDataSource.getSessionForDate(dateKey);
+    final session = await localDataSource.getSessionForDate(dateKey);
+    if (session == null) return null;
+
+    // Map legacy IDs to canonical IDs on load to ensure UI consistency
+    final Map<String, ExerciseLog> normalizedLogs = {};
+    for (var entry in session.exerciseLogs.entries) {
+      final normalizedLog = _normalizeLog(entry.value);
+      normalizedLogs[normalizedLog.plannedExerciseId] = normalizedLog;
+    }
+
+    return session.copyWith(exerciseLogs: normalizedLogs);
   }
 
   @override
@@ -27,7 +37,15 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
 
   @override
   Future<List<WorkoutSession>> getHistory() async {
-    return await localDataSource.getHistory();
+    final history = await localDataSource.getHistory();
+    return history.map((session) {
+      final Map<String, ExerciseLog> normalizedLogs = {};
+      for (var entry in session.exerciseLogs.entries) {
+        final normalizedLog = _normalizeLog(entry.value);
+        normalizedLogs[normalizedLog.plannedExerciseId] = normalizedLog;
+      }
+      return session.copyWith(exerciseLogs: normalizedLogs);
+    }).toList();
   }
 
   @override
@@ -41,25 +59,52 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
-  Future<ExerciseLog?> getPreviousExerciseLog(String workoutType, String exerciseId) async {
-    final history = await localDataSource.getHistory();
-    
+  Future<ExerciseLog?> getPreviousExerciseLog(
+    String workoutType,
+    String exerciseId,
+  ) async {
+    final history = await getHistory();
+    final canonicalId = _normalizeId(exerciseId);
+
     // Filter by workout type and search for the exercise in logs
     for (final session in history) {
       if (session.workoutType.name == workoutType) {
-        // Find if this exercise was performed in this session
-        // Note: It could be the performedExerciseId if it was an alternative,
-        // but the prefill logic usually looks for the most recent log for that specific exercise ID.
-        // The spec says: "Prefills are pulled only from the previous performance within the same workout type."
-        
-        // We look for any log where performedExerciseId matches our exerciseId
         for (final log in session.exerciseLogs.values) {
-          if (log.performedExerciseId == exerciseId && log.isPerformed) {
+          final isEffectivelyPerformed =
+              log.isPerformed || log.sets.any((s) => s.isPerformed);
+          if (_normalizeId(log.performedExerciseId) == canonicalId &&
+              isEffectivelyPerformed) {
             return log;
           }
         }
       }
     }
     return null;
+  }
+
+  /// Normalizes an ExerciseLog by mapping its IDs to canonical versions.
+  ExerciseLog _normalizeLog(ExerciseLog log) {
+    return log.copyWith(
+      plannedExerciseId: _normalizeId(log.plannedExerciseId),
+      performedExerciseId: _normalizeId(log.performedExerciseId),
+    );
+  }
+
+  /// Map of legacy IDs to canonical IDs.
+  static const Map<String, String> _legacyIdMap = {
+    'push_lateral_raise': 'push_cable_lateral_raises',
+    'push_tricep_pushdown': 'push_triceps_push_down',
+    'legs_leg_press': 'legs_seated_leg_press_calve_raises',
+    'legs_rdl': 'legs_body_weighted_rdl',
+    'legs_calf_raise': 'legs_seated_leg_press_calve_raises',
+    'pull_lat_pulldown': 'pull_sa_lat_pull_down',
+    'pull_face_pull':
+        'pull_cable_rear_delt_fly', // Note: Catalog had Face Pull, source has Rear Delt Fly
+    'pull_sa_iso_lateral_lat_row':
+        'pull_sa_iso_lateral_lat_row', // Identity remains
+  };
+
+  String _normalizeId(String id) {
+    return _legacyIdMap[id] ?? id;
   }
 }

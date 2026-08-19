@@ -11,6 +11,11 @@ class WorkoutState extends Equatable {
   final String dateKey;
   final WorkoutType workoutType;
   final Map<String, ExerciseLog> exerciseLogs;
+
+  /// Stores in-session drafts for alternatives.
+  /// Key: plannedExerciseId -> Map(performedExerciseId -> ExerciseLog)
+  final Map<String, Map<String, ExerciseLog>> alternativeDrafts;
+
   final WeightUnit displayUnit;
   final bool isEditMode;
   final String? errorMessage;
@@ -21,6 +26,7 @@ class WorkoutState extends Equatable {
     required this.dateKey,
     required this.workoutType,
     required this.exerciseLogs,
+    this.alternativeDrafts = const {},
     required this.displayUnit,
     this.isEditMode = false,
     this.errorMessage,
@@ -34,6 +40,7 @@ class WorkoutState extends Equatable {
       dateKey: '', // Will be set by cubit
       workoutType: WorkoutType.rest,
       exerciseLogs: const {},
+      alternativeDrafts: const {},
       displayUnit: WeightUnit.kg,
     );
   }
@@ -44,6 +51,7 @@ class WorkoutState extends Equatable {
     String? dateKey,
     WorkoutType? workoutType,
     Map<String, ExerciseLog>? exerciseLogs,
+    Map<String, Map<String, ExerciseLog>>? alternativeDrafts,
     WeightUnit? displayUnit,
     bool? isEditMode,
     String? errorMessage,
@@ -54,6 +62,7 @@ class WorkoutState extends Equatable {
       dateKey: dateKey ?? this.dateKey,
       workoutType: workoutType ?? this.workoutType,
       exerciseLogs: exerciseLogs ?? this.exerciseLogs,
+      alternativeDrafts: alternativeDrafts ?? this.alternativeDrafts,
       displayUnit: displayUnit ?? this.displayUnit,
       isEditMode: isEditMode ?? this.isEditMode,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -62,13 +71,14 @@ class WorkoutState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        selectedDate,
-        dateKey,
-        workoutType,
-        exerciseLogs,
-        displayUnit,
-        isEditMode,
-        errorMessage,
-      ];
+    status,
+    selectedDate,
+    dateKey,
+    workoutType,
+    exerciseLogs,
+    alternativeDrafts,
+    displayUnit,
+    isEditMode,
+    errorMessage,
+  ];
 }

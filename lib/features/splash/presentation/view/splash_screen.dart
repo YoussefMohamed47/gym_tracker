@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 3));
     if (mounted) {
-      Navigator.pushReplacementNamed(context, AppRouter.dailyReport);
+      Navigator.pushReplacementNamed(context, AppRouter.main);
     }
   }
 
@@ -32,24 +32,20 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.flash_on,
-              color: Colors.white,
-              size: 100,
-            )
+            const Icon(Icons.flash_on, color: Colors.white, size: 100)
                 .animate()
                 .scale(duration: 600.ms, curve: Curves.easeOutBack)
                 .shimmer(delay: 800.ms, duration: 1500.ms),
             const SizedBox(height: 24),
             Text(
-              'SAMA FIT',
-              style: GoogleFonts.montserrat(
-                color: Colors.white,
-                fontSize: 42,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
-              ),
-            )
+                  'SAMA FIT',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontSize: 42,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 400.ms, duration: 800.ms)
                 .slideY(begin: 0.3, end: 0),
@@ -63,9 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontWeight: FontWeight.w500,
                 letterSpacing: 1.5,
               ),
-            )
-                .animate()
-                .fadeIn(delay: 800.ms, duration: 800.ms),
+            ).animate().fadeIn(delay: 800.ms, duration: 800.ms),
           ],
         ),
       ),

@@ -11,15 +11,23 @@ class WorkoutSessionModel extends WorkoutSession {
     required super.displayUnit,
   });
 
-  factory WorkoutSessionModel.fromJson(String dateKey, Map<String, dynamic> json) {
+  factory WorkoutSessionModel.fromJson(
+    String dateKey,
+    Map<String, dynamic> json,
+  ) {
     final logsJson = json['exerciseLogs'] as Map<String, dynamic>;
     final logs = logsJson.map(
-      (key, value) => MapEntry(key, ExerciseLogModel.fromJson(value as Map<String, dynamic>)),
+      (key, value) => MapEntry(
+        key,
+        ExerciseLogModel.fromJson(value as Map<String, dynamic>),
+      ),
     );
 
     return WorkoutSessionModel(
       dateKey: dateKey,
-      workoutType: WorkoutType.values.firstWhere((e) => e.name == json['workoutType']),
+      workoutType: WorkoutType.values.firstWhere(
+        (e) => e.name == json['workoutType'],
+      ),
       exerciseLogs: logs,
       displayUnit: WeightUnit.values.firstWhere(
         (e) => e.name == (json['displayUnit'] as String? ?? 'kg'),
@@ -33,7 +41,8 @@ class WorkoutSessionModel extends WorkoutSession {
       'workoutType': workoutType.name,
       'displayUnit': displayUnit.name,
       'exerciseLogs': exerciseLogs.map(
-        (key, value) => MapEntry(key, ExerciseLogModel.fromEntity(value).toJson()),
+        (key, value) =>
+            MapEntry(key, ExerciseLogModel.fromEntity(value).toJson()),
       ),
     };
   }

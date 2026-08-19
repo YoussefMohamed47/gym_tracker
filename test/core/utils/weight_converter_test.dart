@@ -19,15 +19,21 @@ void main() {
     });
 
     test('convert method handles different units', () {
-      expect(WeightConverter.convert(100, WeightUnit.kg, WeightUnit.lb), closeTo(220.462, 0.001));
-      expect(WeightConverter.convert(220.462262185, WeightUnit.lb, WeightUnit.kg), closeTo(100, 0.0001));
+      expect(
+        WeightConverter.convert(100, WeightUnit.kg, WeightUnit.lb),
+        closeTo(220.462, 0.001),
+      );
+      expect(
+        WeightConverter.convert(220.462262185, WeightUnit.lb, WeightUnit.kg),
+        closeTo(100, 0.0001),
+      );
     });
 
     test('round-trip precision is preserved (KG -> LB -> KG)', () {
       const double initialKg = 87.5;
       final double lbValue = WeightConverter.kgToLb(initialKg);
       final double resultKg = WeightConverter.lbToKg(lbValue);
-      
+
       // Precision should be virtually identical
       expect(resultKg, equals(initialKg));
     });

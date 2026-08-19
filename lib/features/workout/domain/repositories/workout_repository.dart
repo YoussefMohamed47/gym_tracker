@@ -7,10 +7,13 @@ abstract class WorkoutRepository {
   Future<void> saveSession(WorkoutSession session);
   Future<void> deleteSession(String dateKey);
   Future<List<WorkoutSession>> getHistory();
-  
+
   Future<WeightUnit> getPreferredUnit();
   Future<void> setPreferredUnit(WeightUnit unit);
 
   /// Gets the most recent performance of an exercise within a specific workout type.
-  Future<ExerciseLog?> getPreviousExerciseLog(String workoutType, String exerciseId);
+  Future<ExerciseLog?> getPreviousExerciseLog(
+    String workoutType,
+    String exerciseId,
+  );
 }

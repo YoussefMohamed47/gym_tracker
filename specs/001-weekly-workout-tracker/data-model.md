@@ -44,14 +44,15 @@ A user's performed workout for a specific day.
 Record of a single exercise performance.
 - `plannedExerciseId`: String
 - `performedExerciseId`: String
-- `weightKg`: double? (Canonical high-precision KG)
-- `isPerformed`: bool
+- `sets`: List<ExerciseSetLog> (V2)
+- `weightKg`: double? (Legacy V1 - kept for reading old data)
+- `isPerformed`: bool (Legacy V1 - kept for reading old data)
 - `imagePath`: String? (Path to persistent storage)
 - `timestamp`: DateTime
 
-### WeightUnit (Enum)
-- `kg`
-- `lb`
+### ExerciseSetLog (New in V2)
+- `weightKg`: double?
+- `isPerformed`: bool
 
 ## Identity & Uniqueness
 
@@ -63,17 +64,38 @@ Record of a single exercise performance.
 
 Stored in `SharedPreferences` under key `WORKOUT_HISTORY_V1`.
 
+### V2 Format (New)
 ```json
 {
-  "2026-08-18": {
-    "workoutType": "push",
+  "2026-08-19": {
+    "workoutType": "pull",
     "displayUnit": "kg",
     "exerciseLogs": {
-      "push_chest_press_machine": {
-        "performedExerciseId": "push_chest_press_machine",
-        "weightKg": 45.0,
-        "isPerformed": true,
+      "pull_t_bar_row": {
+        "performedExerciseId": "pull_t_bar_row",
+        "sets": [
+          { "weightKg": 50.0, "isPerformed": true },
+          { "weightKg": 52.5, "isPerformed": true },
+          { "weightKg": 50.0, "isPerformed": true }
+        ],
         "imagePath": "/path/to/image.jpg"
+      }
+    }
+  }
+}
+```
+
+### V1 Format (Legacy Support)
+```json
+{
+  "2026-08-12": {
+    "workoutType": "pull",
+    "displayUnit": "kg",
+    "exerciseLogs": {
+      "pull_t_bar_row": {
+        "performedExerciseId": "pull_t_bar_row",
+        "weightKg": 45.0,
+        "isPerformed": true
       }
     }
   }

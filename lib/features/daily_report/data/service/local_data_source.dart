@@ -17,7 +17,7 @@ class LocalDataSource {
     } else {
       history.insert(0, report); // Newest first
     }
-    
+
     final jsonList = history.map((r) => r.toJson()).toList();
     await _prefs.setString(_historyKey, json.encode(jsonList));
   }
@@ -25,9 +25,11 @@ class LocalDataSource {
   Future<List<DailyReport>> getReportHistory() async {
     final jsonString = _prefs.getString(_historyKey);
     if (jsonString == null) return [];
-    
+
     final List<dynamic> jsonList = json.decode(jsonString);
-    return jsonList.map((j) => DailyReport.fromJson(j as Map<String, dynamic>)).toList();
+    return jsonList
+        .map((j) => DailyReport.fromJson(j as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> deleteReport(String id) async {

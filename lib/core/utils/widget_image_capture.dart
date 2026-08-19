@@ -41,7 +41,8 @@ class WidgetImageCapture {
       await Future.delayed(const Duration(milliseconds: 100));
 
       final boundary =
-      repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+          repaintKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
       final image = await boundary.toImage(pixelRatio: pixelRatio);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData!.buffer.asUint8List();

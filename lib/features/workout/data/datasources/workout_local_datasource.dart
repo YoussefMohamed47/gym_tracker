@@ -8,7 +8,7 @@ abstract class WorkoutLocalDataSource {
   Future<void> saveSession(WorkoutSessionModel session);
   Future<void> deleteSession(String dateKey);
   Future<List<WorkoutSessionModel>> getHistory();
-  
+
   Future<WeightUnit> getPreferredUnit();
   Future<void> setPreferredUnit(WeightUnit unit);
 }
@@ -30,13 +30,18 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final sessionJson = history[dateKey];
     if (sessionJson == null) return null;
 
-    return WorkoutSessionModel.fromJson(dateKey, sessionJson as Map<String, dynamic>);
+    return WorkoutSessionModel.fromJson(
+      dateKey,
+      sessionJson as Map<String, dynamic>,
+    );
   }
 
   @override
   Future<void> saveSession(WorkoutSessionModel session) async {
     final historyJson = sharedPreferences.getString(historyKey);
-    final Map<String, dynamic> history = historyJson != null ? json.decode(historyJson) : {};
+    final Map<String, dynamic> history = historyJson != null
+        ? json.decode(historyJson)
+        : {};
 
     history[session.dateKey] = session.toJson();
     await sharedPreferences.setString(historyKey, json.encode(history));
@@ -61,7 +66,10 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
 
     final Map<String, dynamic> history = json.decode(historyJson);
     final sessions = history.entries.map((entry) {
-      return WorkoutSessionModel.fromJson(entry.key, entry.value as Map<String, dynamic>);
+      return WorkoutSessionModel.fromJson(
+        entry.key,
+        entry.value as Map<String, dynamic>,
+      );
     }).toList();
 
     // Sort by dateKey descending (newest first)

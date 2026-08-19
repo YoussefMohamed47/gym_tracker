@@ -5,11 +5,7 @@ class FullScreenImage extends StatelessWidget {
   final String imagePath;
   final String? title;
 
-  const FullScreenImage({
-    super.key,
-    required this.imagePath,
-    this.title,
-  });
+  const FullScreenImage({super.key, required this.imagePath, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +27,7 @@ class FullScreenImage extends StatelessWidget {
           boundaryMargin: const EdgeInsets.all(20),
           minScale: 0.5,
           maxScale: 4,
-          child: Image.file(
-            File(imagePath),
-            fit: BoxFit.contain,
-          ),
+          child: Image.file(File(imagePath), fit: BoxFit.contain),
         ),
       ),
     );
