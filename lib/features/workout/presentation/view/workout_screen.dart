@@ -119,16 +119,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     await WorkoutShareService.shareWorkout(context, session);
   }
 
-  Future<void> _handleSave(WorkoutState state) async {
-    final session = WorkoutSession(
-      dateKey: state.dateKey,
-      workoutType: state.workoutType,
-      exerciseLogs: state.exerciseLogs,
-      displayUnit: state.displayUnit,
-    );
-    await WorkoutShareService.saveToGallery(context, session);
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<WorkoutCubit, WorkoutState>(
@@ -204,11 +194,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               ),
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.download_outlined),
-                    onPressed: () => _handleSave(state),
-                    tooltip: 'Save to Gallery',
-                  ),
                   IconButton(
                     icon: const Icon(Icons.share_outlined),
                     onPressed: () => _handleShare(state),
@@ -372,13 +357,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 slot.exerciseId,
                 setIndex,
                 weight,
-                state.displayUnit,
+                log.displayUnit,
               );
             },
             onToggleSetPerformed: (setIndex) {
               context.read<WorkoutCubit>().toggleSetPerformed(
                 slot.exerciseId,
                 setIndex,
+              );
+            },
+            onUnitChanged: (unit) {
+              context.read<WorkoutCubit>().updateExerciseUnit(
+                slot.exerciseId,
+                unit,
               );
             },
             onSelectAlternative: () {

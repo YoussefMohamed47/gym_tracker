@@ -120,7 +120,25 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       weightKg: prevLog?.weightKg, // For legacy reference
       isPerformed: false,
       timestamp: DateTime.now(),
+      displayUnit: prevLog?.displayUnit ?? state.displayUnit,
     );
+  }
+
+  void updateExerciseUnit(String plannedId, WeightUnit unit) {
+    final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
+    final log = logs[plannedId];
+
+    if (log != null) {
+      final updatedLog = log.copyWith(displayUnit: unit);
+      logs[plannedId] = updatedLog;
+
+      final altDrafts = _updateAltDraft(plannedId, updatedLog);
+
+      emit(state.copyWith(
+        exerciseLogs: logs,
+        alternativeDrafts: altDrafts,
+      ));
+    }
   }
 
   void updateSetWeight(
@@ -325,7 +343,22 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
   void setPreferredUnit(WeightUnit unit) async {
     await repository.setPreferredUnit(unit);
-    emit(state.copyWith(displayUnit: unit));
+
+    final logs = state.exerciseLogs.map((k, v) => MapEntry(k, v.copyWith(displayUnit: unit)));
+    
+    // Also update all drafts to keep them consistent with the new preference
+    final altDrafts = state.alternativeDrafts.map(
+      (k, v) => MapEntry(
+        k,
+        v.map((pk, pv) => MapEntry(pk, pv.copyWith(displayUnit: unit))),
+      ),
+    );
+
+    emit(state.copyWith(
+      displayUnit: unit,
+      exerciseLogs: logs,
+      alternativeDrafts: altDrafts,
+    ));
   }
 
   void navigateWeek(int weeks) {

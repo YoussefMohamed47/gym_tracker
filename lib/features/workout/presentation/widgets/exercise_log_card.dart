@@ -14,6 +14,7 @@ class ExerciseLogCard extends StatefulWidget {
   final String? previousDate;
   final Function(int setIndex, double? weight) onWeightChanged;
   final Function(int setIndex) onToggleSetPerformed;
+  final Function(WeightUnit unit) onUnitChanged;
   final VoidCallback onSelectAlternative;
   final VoidCallback onAddPhoto;
   final VoidCallback onShowHistory;
@@ -27,6 +28,7 @@ class ExerciseLogCard extends StatefulWidget {
     this.previousDate,
     required this.onWeightChanged,
     required this.onToggleSetPerformed,
+    required this.onUnitChanged,
     required this.onSelectAlternative,
     required this.onAddPhoto,
     required this.onShowHistory,
@@ -115,6 +117,10 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       ),
                     ],
                   ),
+                ),
+                _UnitSwitcher(
+                  unit: widget.log.displayUnit,
+                  onChanged: widget.onUnitChanged,
                 ),
                 if (performedExercise.videoUrl != null)
                   IconButton(
@@ -260,7 +266,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                 setLog: widget.log.sets[index],
                 previousSetLog:
                     null, // We'll pass this correctly if we update ExerciseLog to store it
-                displayUnit: widget.displayUnit,
+                displayUnit: widget.log.displayUnit,
                 onWeightChanged: (w) => widget.onWeightChanged(index, w),
                 onTogglePerformed: () => widget.onToggleSetPerformed(index),
                 focusNode: _focusNodes[index],
@@ -304,6 +310,48 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _UnitSwitcher extends StatelessWidget {
+  final WeightUnit unit;
+  final Function(WeightUnit) onChanged;
+
+  const _UnitSwitcher({required this.unit, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: WeightUnit.values.map((u) {
+          final isSelected = u == unit;
+          return GestureDetector(
+            onTap: () => onChanged(u),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primaryBlue : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                u.name.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.grey.shade600,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

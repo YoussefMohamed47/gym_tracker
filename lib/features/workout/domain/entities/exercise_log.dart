@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/weight_converter.dart';
 import 'exercise_set_log.dart';
 
 class ExerciseLog extends Equatable {
@@ -16,6 +17,7 @@ class ExerciseLog extends Equatable {
 
   final String? imagePath;
   final DateTime timestamp;
+  final WeightUnit displayUnit;
 
   const ExerciseLog({
     required this.plannedExerciseId,
@@ -25,6 +27,7 @@ class ExerciseLog extends Equatable {
     this.isPerformed = false,
     this.imagePath,
     required this.timestamp,
+    this.displayUnit = WeightUnit.kg,
   });
 
   ExerciseLog copyWith({
@@ -35,6 +38,7 @@ class ExerciseLog extends Equatable {
     bool? isPerformed,
     String? imagePath,
     DateTime? timestamp,
+    WeightUnit? displayUnit,
   }) {
     return ExerciseLog(
       plannedExerciseId: plannedExerciseId ?? this.plannedExerciseId,
@@ -44,6 +48,7 @@ class ExerciseLog extends Equatable {
       isPerformed: isPerformed ?? this.isPerformed,
       imagePath: imagePath ?? this.imagePath,
       timestamp: timestamp ?? this.timestamp,
+      displayUnit: displayUnit ?? this.displayUnit,
     );
   }
 
@@ -56,5 +61,6 @@ class ExerciseLog extends Equatable {
     isPerformed,
     imagePath,
     timestamp,
+    displayUnit,
   ];
 }

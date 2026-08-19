@@ -111,7 +111,7 @@ class WorkoutShareCard extends StatelessWidget {
                       ? WeightConverter.convert(
                           e.weightKg!,
                           WeightUnit.kg,
-                          session.displayUnit,
+                          log.displayUnit,
                         )
                       : null;
                   return weight != null ? WeightConverter.format(weight) : '-';
@@ -121,12 +121,12 @@ class WorkoutShareCard extends StatelessWidget {
               final weight = WeightConverter.convert(
                 log.weightKg!,
                 WeightUnit.kg,
-                session.displayUnit,
+                log.displayUnit,
               );
               performanceText = WeightConverter.format(weight);
             }
 
-            final unitStr = session.displayUnit == WeightUnit.kg ? 'kg' : 'lb';
+            final unitStr = log.displayUnit == WeightUnit.kg ? 'kg' : 'lb';
             if (performanceText.isNotEmpty &&
                 !isBodyweight &&
                 !performanceText.contains('sets')) {

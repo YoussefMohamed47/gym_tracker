@@ -1,3 +1,4 @@
+import '../../../../core/utils/weight_converter.dart';
 import '../../domain/entities/exercise_log.dart';
 import 'exercise_set_log_model.dart';
 
@@ -10,9 +11,15 @@ class ExerciseLogModel extends ExerciseLog {
     super.isPerformed,
     super.imagePath,
     required super.timestamp,
+    super.displayUnit,
   });
 
   factory ExerciseLogModel.fromJson(Map<String, dynamic> json) {
+    final displayUnit = WeightUnit.values.firstWhere(
+      (e) => e.name == (json['displayUnit'] as String? ?? 'kg'),
+      orElse: () => WeightUnit.kg,
+    );
+
     // Check if it's V2 (has 'sets' key)
     if (json.containsKey('sets') && json['sets'] != null) {
       final setsJson = json['sets'] as List<dynamic>;
@@ -24,6 +31,7 @@ class ExerciseLogModel extends ExerciseLog {
             .toList(),
         imagePath: json['imagePath'] as String?,
         timestamp: DateTime.parse(json['timestamp'] as String),
+        displayUnit: displayUnit,
       );
     }
 
@@ -36,6 +44,7 @@ class ExerciseLogModel extends ExerciseLog {
       isPerformed: json['isPerformed'] as bool? ?? false,
       imagePath: json['imagePath'] as String?,
       timestamp: DateTime.parse(json['timestamp'] as String),
+      displayUnit: displayUnit,
     );
   }
 
@@ -50,6 +59,7 @@ class ExerciseLogModel extends ExerciseLog {
       'isPerformed': isPerformed,
       'imagePath': imagePath,
       'timestamp': timestamp.toIso8601String(),
+      'displayUnit': displayUnit.name,
     };
   }
 
@@ -62,6 +72,7 @@ class ExerciseLogModel extends ExerciseLog {
       isPerformed: entity.isPerformed,
       imagePath: entity.imagePath,
       timestamp: entity.timestamp,
+      displayUnit: entity.displayUnit,
     );
   }
 }
