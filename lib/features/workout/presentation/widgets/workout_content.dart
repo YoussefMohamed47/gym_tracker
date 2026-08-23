@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/workout_type.dart';
 import '../cubit/workout_cubit.dart';
@@ -33,24 +34,49 @@ class WorkoutContent extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 24),
       children: [
         if (state.workoutType == WorkoutType.rest) ...[
-          const SizedBox(height: 32),
-          Icon(
-            Icons.coffee,
-            size: 64,
-            color: Colors.grey.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              'Rest Day',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(color: Colors.grey),
+          Container(
+            margin: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.05),
+                  AppColors.secondary.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.spa_rounded,
+                  size: 80,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Rest & Recovery',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Muscle grows during rest. Focus on hydration, mobility, and high-quality protein today.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.onSurfaceVariant,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          const Center(child: Text('Active recovery and proper nutrition!')),
-          const SizedBox(height: 24),
         ],
         const DailyRoutineSection(),
         if (state.workoutType != WorkoutType.rest && workoutDef != null) ...[

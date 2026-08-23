@@ -34,15 +34,15 @@ class WeekDaySelector extends StatelessWidget {
             onTap: () => onDateSelected(date),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 45,
+              width: 48,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
+                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.primaryBlue
-                      : Colors.grey.shade300,
-                  width: 1,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                  width: 1.5,
                 ),
               ),
               child: Column(
@@ -51,18 +51,22 @@ class WeekDaySelector extends StatelessWidget {
                   Text(
                     dayNameFormat.format(date)[0], // S, M, T...
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.grey,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary 
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     dayNumberFormat.format(date),
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary 
+                          : Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ],

@@ -5,8 +5,6 @@ import '../../domain/entities/workout_definition.dart';
 import '../cubit/workout_cubit.dart';
 import '../cubit/workout_state.dart';
 import '../../data/datasources/workout_catalog.dart';
-import '../../../../core/utils/app_colors.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../utils/video_launcher.dart';
 
 class DailyRoutineSection extends StatelessWidget {
@@ -50,10 +48,10 @@ class _DailyRoutineCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       elevation: 0,
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -72,17 +70,17 @@ class _DailyRoutineCard extends StatelessWidget {
                       ),
                       Text(
                         '${slot.prescribedSets} sets • ${slot.prescribedReps} • Rest ${slot.prescribedRest}',
-                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
                 ),
                 if (exercise.videoUrl != null)
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.play_circle_outline,
                       size: 20,
-                      color: AppColors.primaryBlue,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     onPressed: () => VideoLauncher.launch(
                       context,
@@ -126,13 +124,13 @@ class _DailyRoutineCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isPerformed
-                              ? AppColors.primaryBlue
-                              : Colors.grey[50],
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isPerformed
-                                ? AppColors.primaryBlue
-                                : Colors.grey[300]!,
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Row(
@@ -143,8 +141,8 @@ class _DailyRoutineCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isPerformed
-                                    ? Colors.white
-                                    : Colors.black87,
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onSurface,
                                 fontWeight: isPerformed
                                     ? FontWeight.bold
                                     : FontWeight.normal,
@@ -152,10 +150,10 @@ class _DailyRoutineCard extends StatelessWidget {
                             ),
                             if (isPerformed) ...[
                               const SizedBox(width: 4),
-                              const Icon(
+                              Icon(
                                 Icons.check,
                                 size: 12,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ],
                           ],
@@ -225,11 +223,13 @@ class _RepBasedRoutineSetState extends State<_RepBasedRoutineSet> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: widget.isPerformed
-            ? AppColors.primaryBlue.withValues(alpha: 0.05)
-            : Colors.grey[50],
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+            : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: widget.isPerformed ? AppColors.primaryBlue : Colors.grey[300]!,
+          color: widget.isPerformed 
+              ? Theme.of(context).colorScheme.primary 
+              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         ),
       ),
       child: Column(
@@ -241,10 +241,10 @@ class _RepBasedRoutineSetState extends State<_RepBasedRoutineSet> {
                 'S${widget.index + 1}',
                 style: TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   color: widget.isPerformed
-                      ? AppColors.primaryBlue
-                      : Colors.grey[600],
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               GestureDetector(
@@ -254,12 +254,12 @@ class _RepBasedRoutineSetState extends State<_RepBasedRoutineSet> {
                 ),
                 child: Icon(
                   widget.isPerformed
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
+                      ? Icons.check_circle_rounded
+                      : Icons.radio_button_unchecked_rounded,
                   size: 14,
                   color: widget.isPerformed
-                      ? AppColors.primaryBlue
-                      : Colors.grey,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -276,7 +276,11 @@ class _RepBasedRoutineSetState extends State<_RepBasedRoutineSet> {
               border: InputBorder.none,
               hintText: '0',
             ),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 14, 
+              fontWeight: FontWeight.w900,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onChanged: (value) {
               final reps = int.tryParse(value);
               if (reps != null && reps > 0) {

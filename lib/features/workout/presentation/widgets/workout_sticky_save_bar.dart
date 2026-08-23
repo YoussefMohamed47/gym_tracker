@@ -3,6 +3,7 @@ import '../../domain/entities/workout_type.dart';
 import '../cubit/workout_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/workout_cubit.dart';
+import '../../../../core/utils/app_colors.dart';
 
 class WorkoutStickySaveBar extends StatelessWidget {
   final WorkoutState state;
@@ -25,16 +26,17 @@ class WorkoutStickySaveBar extends StatelessWidget {
     final totalCount = state.exerciseLogs.length;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+            blurRadius: 20,
+            offset: const Offset(0, -10),
           ),
         ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Row(
         children: [
@@ -44,34 +46,36 @@ class WorkoutStickySaveBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$performedCount of $totalCount exercises done',
+                  '$performedCount of $totalCount done'.toUpperCase(),
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 1.0,
+                    color: AppColors.onSurfaceVariant,
                   ),
                 ),
+                const SizedBox(height: 8),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: totalCount > 0 ? performedCount / totalCount : 0,
-                    minHeight: 4,
-                    backgroundColor: Colors.grey[200],
+                    minHeight: 8,
+                    backgroundColor: AppColors.background,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 24),
           ElevatedButton(
             onPressed: state.status == WorkoutStatus.saving
                 ? null
                 : () => context.read<WorkoutCubit>().saveWorkout(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
             child: state.status == WorkoutStatus.saving
@@ -83,7 +87,7 @@ class WorkoutStickySaveBar extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Finish'),
+                : const Text('FINISH'),
           ),
         ],
       ),

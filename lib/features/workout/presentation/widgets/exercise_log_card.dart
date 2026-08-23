@@ -5,7 +5,6 @@ import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/exercise_log.dart';
 import '../../domain/entities/exercise_set_log.dart';
 import '../../domain/entities/workout_definition.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../utils/video_launcher.dart';
 import 'exercise_set_row.dart';
 
@@ -102,55 +101,80 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
     final isAlternative =
         widget.log.plannedExerciseId != widget.log.performedExerciseId;
 
+    final isFullyPerformed = widget.log.sets.isNotEmpty &&
+        widget.log.sets.every((s) => s.isPerformed);
+
+    final hasAnyPerformed = widget.log.sets.any((s) => s.isPerformed);
+
     // Check if it's a duration-based exercise
     final isDurationBased = widget.slot.prescribedReps.contains('s');
 
-    return Card(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+      decoration: BoxDecoration(
+        color: isFullyPerformed
+            ? AppColors.success.withValues(alpha: 0.05)
+            : Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isFullyPerformed
+              ? AppColors.success.withValues(alpha: 0.5)
+              : hasAnyPerformed
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Exercise Header
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (isAlternative)
-                        Text(
-                          'Planned: ${originalExercise.name}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
-                              ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          margin: const EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.warning.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Planned: ${originalExercise.name}'.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.warning,
+                            ),
+                          ),
                         ),
                       Text(
                         performedExercise.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
+                              color:
+                                  isFullyPerformed ? AppColors.success : null,
+                            ),
                       ),
                     ],
                   ),
                 ),
-                _UnitSwitcher(
-                  unit: widget.log.displayUnit,
-                  onChanged: widget.onUnitChanged,
-                ),
                 if (performedExercise.videoUrl != null)
                   IconButton(
-                    icon: const Icon(
-                      Icons.play_circle_outline,
-                      color: AppColors.primaryBlue,
+                    icon: Icon(
+                      Icons.play_circle_filled_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 28,
                     ),
                     onPressed: () => VideoLauncher.launch(
                       context,
@@ -160,24 +184,52 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               ],
             ),
 
+            const SizedBox(height: 4),
             // Prescription Info
-            Text(
-              '${widget.slot.prescribedSets} sets • ${widget.slot.prescribedReps} • Rest ${widget.slot.prescribedRest}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+            Row(
+              children: [
+                Icon(Icons.repeat_rounded,
+                    size: 14,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withValues(alpha: 0.6)),
+                const SizedBox(width: 4),
+                Text(
+                  '${widget.slot.prescribedSets} sets • ${widget.slot.prescribedReps} • Rest ${widget.slot.prescribedRest}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const Spacer(),
+                _UnitSwitcher(
+                  unit: widget.log.displayUnit,
+                  onChanged: widget.onUnitChanged,
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
 
             // Previous Info
             if (widget.previousDate != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Text(
-                  'Previous • ${widget.previousDate}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blueGrey,
+                  'PREVIOUS • ${widget.previousDate}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
@@ -185,34 +237,37 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
             // Legacy Action
             if (widget.log.weightKg != null && widget.log.sets.isEmpty)
               Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
+                padding: const EdgeInsets.only(bottom: 12.0),
                 child: InkWell(
                   onTap: widget.onUseLegacyWeight,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: 12,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.amber.shade50,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.amber.shade200),
+                      color: Colors.amber.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: Colors.amber.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.history,
-                          size: 14,
-                          color: Colors.amber.shade900,
+                        const Icon(
+                          Icons.history_rounded,
+                          size: 16,
+                          color: Colors.orange,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Legacy ref: ${WeightConverter.format(WeightConverter.convert(widget.log.weightKg!, WeightUnit.kg, widget.displayUnit))} ${widget.displayUnit.name}. Use for all sets?',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.amber.shade900,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Legacy ref: ${WeightConverter.format(WeightConverter.convert(widget.log.weightKg!, WeightUnit.kg, widget.displayUnit))} ${widget.displayUnit.name}. Use for all sets?',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -223,7 +278,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
 
             // Set Table Header
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: [
                   const SizedBox(
@@ -233,8 +288,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: Colors.grey,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -245,8 +301,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: Colors.grey,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -257,8 +314,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: Colors.grey,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -269,8 +327,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: Colors.grey,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -281,8 +340,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: Colors.grey,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -295,8 +355,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               return ExerciseSetRow(
                 index: index,
                 setLog: widget.log.sets[index],
-                previousSetLog:
-                    (widget.previousSets != null &&
+                previousSetLog: (widget.previousSets != null &&
                         widget.previousSets!.length > index)
                     ? widget.previousSets![index]
                     : null,
@@ -322,28 +381,31 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               );
             }),
 
-            const Divider(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, thickness: 1),
+            ),
 
             // Action Buttons
             Row(
               children: [
                 _CompactActionButton(
-                  icon: Icons.history,
+                  icon: Icons.history_rounded,
                   label: 'History',
                   onPressed: widget.onShowHistory,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 _CompactActionButton(
                   icon: widget.log.imagePath != null
-                      ? Icons.image
-                      : Icons.add_a_photo_outlined,
+                      ? Icons.image_rounded
+                      : Icons.add_a_photo_rounded,
                   label: 'Photo',
                   onPressed: widget.onAddPhoto,
                   active: widget.log.imagePath != null,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 _CompactActionButton(
-                  icon: Icons.swap_horiz,
+                  icon: Icons.swap_horiz_rounded,
                   label: 'Alt',
                   onPressed: widget.onSelectAlternative,
                 ),
@@ -365,10 +427,10 @@ class _UnitSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 4),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -376,18 +438,19 @@ class _UnitSwitcher extends StatelessWidget {
           final isSelected = u == unit;
           return GestureDetector(
             onTap: () => onChanged(u),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryBlue : Colors.transparent,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 u.name.toUpperCase(),
                 style: TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : Colors.grey.shade600,
+                  fontWeight: FontWeight.w900,
+                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -413,35 +476,40 @@ class _CompactActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: active ? AppColors.primaryBlue : Colors.grey.shade300,
+    return Expanded(
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+            ),
+            borderRadius: BorderRadius.circular(12),
+            color: active ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.05) : Theme.of(context).cardTheme.color,
           ),
-          borderRadius: BorderRadius.circular(8),
-          color: active ? AppColors.primaryBlue.withValues(alpha: 0.05) : null,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: active ? AppColors.primaryBlue : Colors.grey.shade700,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: active ? AppColors.primaryBlue : Colors.grey.shade700,
-                fontWeight: active ? FontWeight.bold : FontWeight.normal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

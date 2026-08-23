@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/router/app_router.dart';
@@ -6,6 +7,9 @@ import 'core/storage/migration/legacy_persistence_migrator.dart';
 import 'core/storage/hive/widgets/storage_error_screen.dart';
 
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+
+import 'core/utils/app_theme.dart';
+import 'features/settings/presentation/cubit/theme_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,16 +49,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gym Tracker Report',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1A46A0)),
-        useMaterial3: true,
-        textTheme: GoogleFonts.notoKufiArabicTextTheme(),
+    return BlocProvider(
+      create: (context) => di.sl<ThemeCubit>(),
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp(
+            title: 'Gym Tracker Report',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: themeMode,
+            onGenerateRoute: AppRouter.onGenerateRoute,
+            initialRoute: AppRouter.splash,
+          );
+        },
       ),
-      onGenerateRoute: AppRouter.onGenerateRoute,
-      initialRoute: AppRouter.splash,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/widget_image_capture.dart'; // ⚠️ CRITICAL: new import
 import '../cubit/daily_report_cubit.dart';
@@ -90,9 +91,6 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                               state.report.isEmpty)
                           ? null
                           : () async {
-                              // ⚠️ CRITICAL: was screenshotController.captureFromWidget(...)
-                              // Now renders off-screen with unbounded height — no overflow
-                              // regardless of how much content the report has.
                               final Uint8List imageBytes =
                                   await WidgetImageCapture.capture(
                                     context: context,
@@ -108,16 +106,13 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                                     .generateAndCacheImage(imageBytes);
                               }
                             },
-                      icon: const Icon(Icons.image),
-                      label: const Text('Generate & Share Image'),
+                      icon: const Icon(Icons.auto_awesome_rounded),
+                      label: const Text('GENERATE & SHARE REPORT'),
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: state.report.isEmpty
-                            ? Colors.grey
-                            : const Color(0xFF1A46A0),
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey.shade300,
-                        disabledForegroundColor: Colors.grey,
+                        minimumSize: const Size(double.infinity, 60),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
                     ),
                   ],
@@ -125,19 +120,22 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
               ),
               if (state is DailyReportGeneratingImage)
                 Container(
-                  color: Colors.black45,
-                  child: const Center(
+                  color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.6),
+                  child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SpinKitFadingCircle(color: Colors.white, size: 50.0),
-                        SizedBox(height: 16),
+                        SpinKitFadingCircle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          size: 50.0,
+                        ),
+                        const SizedBox(height: 24),
                         Text(
                           'Generating your report...',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.outfit(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],

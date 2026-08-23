@@ -17,7 +17,9 @@ class DailyReportForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSection('Meals & Nutrition', Icons.restaurant_menu, [
+        _buildSection(
+            context,
+            'Meals & Nutrition', Icons.restaurant_menu, [
           _buildTextField(
             'Breakfast',
             report.breakfast,
@@ -49,7 +51,7 @@ class DailyReportForm extends StatelessWidget {
           ),
         ], 0),
         const SizedBox(height: 24),
-        _buildSection('Training', Icons.fitness_center, [
+        _buildSection(context,'Training', Icons.fitness_center, [
           _buildTextField(
             'Before Training',
             report.beforeTraining,
@@ -75,7 +77,7 @@ class DailyReportForm extends StatelessWidget {
           ),
         ], 1),
         const SizedBox(height: 24),
-        _buildSection('Others', Icons.more_horiz, [
+        _buildSection(context,'Others', Icons.more_horiz, [
           _buildTextField(
             'Supplements / Vitamins',
             report.supplements,
@@ -99,6 +101,7 @@ class DailyReportForm extends StatelessWidget {
   }
 
   Widget _buildSection(
+      BuildContext context,
     String title,
     IconData icon,
     List<Widget> children,
@@ -106,37 +109,35 @@ class DailyReportForm extends StatelessWidget {
   ) {
     return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+              width: 1.5,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Icon(icon, color: const Color(0xFF1A46A0)),
+                    Icon(icon, color: Theme.of(context).colorScheme.primary, size: 22),
                     const SizedBox(width: 12),
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A46A0),
+                        fontWeight: FontWeight.w900,
+                        color: Theme.of(context).colorScheme.primary,
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(children: children),
@@ -155,34 +156,41 @@ class DailyReportForm extends StatelessWidget {
     Function(String) onChanged, {
     int maxLines = 1,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        initialValue: value,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: TextFormField(
+          initialValue: value,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+            ),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF1A46A0), width: 2),
-          ),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+          maxLines: maxLines,
+          onChanged: onChanged,
         ),
-        maxLines: maxLines,
-        onChanged: onChanged,
       ),
     );
   }

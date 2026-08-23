@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/usecases/get_exercise_history.dart';
@@ -20,9 +21,9 @@ class ExerciseHistorySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -39,21 +40,26 @@ class ExerciseHistorySheet extends StatelessWidget {
                     children: [
                       Text(
                         exerciseName,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.outfit(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
-                        'History',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        'Performance History',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
+                IconButton.filledTonal(
+                  icon: const Icon(Icons.close_rounded, size: 20),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -61,17 +67,39 @@ class ExerciseHistorySheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (history.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(32.0),
-              child: Center(child: Text('No history found for this exercise.')),
+            Padding(
+              padding: const EdgeInsets.all(48.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.history_rounded,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No history found for this exercise.',
+                      style: GoogleFonts.inter(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             )
           else
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 itemCount: history.length,
-                separatorBuilder: (_, _) => const Divider(height: 24),
+                separatorBuilder: (_, _) => Divider(
+                  height: 32, 
+                  thickness: 1, 
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)
+                ),
                 itemBuilder: (context, index) {
                   final entry = history[index];
                   final isLegacy =
@@ -85,39 +113,57 @@ class ExerciseHistorySheet extends StatelessWidget {
                         children: [
                           Text(
                             entry.dateKey,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                          Text(
-                            entry.workoutTypeName.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
-                              letterSpacing: 1,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              entry.workoutTypeName.toUpperCase(),
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: Theme.of(context).colorScheme.primary,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       if (isLegacy)
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.history,
-                              size: 14,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Legacy working weight: ${WeightConverter.format(WeightConverter.convert(entry.log.weightKg!, WeightUnit.kg, displayUnit))} ${displayUnit.name}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.blueGrey,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.history_edu_rounded,
+                                size: 16,
+                                color: Colors.orange,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                'Legacy: ${WeightConverter.format(WeightConverter.convert(entry.log.weightKg!, WeightUnit.kg, displayUnit))} ${displayUnit.name}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.orange.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       else
                         Wrap(
@@ -149,31 +195,34 @@ class ExerciseHistorySheet extends StatelessWidget {
                             } else if (reps != null) {
                               label = '$reps reps';
                             } else {
-                              label = 'Performed';
+                              label = 'Done';
                             }
 
                             return Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
+                                horizontal: 12,
+                                vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey[200]!),
+                                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)
+                                ),
                               ),
                               child: Text(
                                 'S${setIndex + 1}: $label',
-                                style: const TextStyle(
+                                style: GoogleFonts.inter(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w800,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             );
                           }).toList(),
                         ),
                       if (entry.log.imagePath != null) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         GestureDetector(
                           onTap: () {
                             Navigator.pushNamed(
@@ -186,14 +235,21 @@ class ExerciseHistorySheet extends StatelessWidget {
                             );
                           },
                           child: Container(
-                            height: 60,
-                            width: 60,
+                            height: 80,
+                            width: 80,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey[300]!),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Theme.of(context).colorScheme.outline),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(11),
                               child: Image.file(
                                 File(entry.log.imagePath!),
                                 fit: BoxFit.cover,
@@ -207,7 +263,7 @@ class ExerciseHistorySheet extends StatelessWidget {
                 },
               ),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
         ],
       ),
     );

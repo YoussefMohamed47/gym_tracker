@@ -16,6 +16,7 @@ class HiveLocalStorage {
     await Hive.openBox<WorkoutSessionHiveModel>(HiveBoxes.workoutSessions);
     await Hive.openBox<AppSettingsHiveModel>(HiveBoxes.settings);
     await Hive.openBox<MigrationMetaHiveModel>(HiveBoxes.migrationMeta);
+    await Hive.openBox(HiveBoxes.preferences);
   }
 
   Box<T> getBox<T>(String boxName) {

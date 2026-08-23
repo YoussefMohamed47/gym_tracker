@@ -3,11 +3,13 @@ class HiveBoxes {
   static const String workoutSessions = 'gym_tracker_workout_sessions';
   static const String settings = 'gym_tracker_settings';
   static const String migrationMeta = 'gym_tracker_migration_meta';
+  static const String preferences = 'gym_tracker_preferences';
 
   static List<String> get all => [
     dailyReports,
     workoutSessions,
     settings,
     migrationMeta,
+    preferences,
   ];
 }

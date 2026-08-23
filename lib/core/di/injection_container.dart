@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/settings/presentation/cubit/theme_cubit.dart';
 import '../storage/hive/hive_local_storage.dart';
 import '../storage/hive/hive_boxes.dart';
 import '../storage/migration/legacy_persistence_migrator.dart';
@@ -48,6 +49,7 @@ Future<void> init() async {
   // Features - Daily Report & History
 
   // Cubits
+  sl.registerLazySingleton(() => ThemeCubit(sl<HiveLocalStorage>().getBox(HiveBoxes.preferences)));
   sl.registerLazySingleton(() => DailyReportCubit(sl()));
   sl.registerFactory(() => HistoryCubit(sl()));
   sl.registerFactory(() => WorkoutCubit(repository: sl()));

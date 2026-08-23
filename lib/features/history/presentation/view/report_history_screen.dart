@@ -33,12 +33,21 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
               return const Center(child: Text('No reports saved yet.'));
             }
             return ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               itemCount: state.reports.length,
               itemBuilder: (context, index) {
                 final report = state.reports[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardTheme.color,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                      width: 1.5,
+                    ),
+                  ),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
                     children: [
@@ -59,7 +68,7 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                             );
                           },
                           child: AspectRatio(
-                            aspectRatio: 1000 / 700,
+                            aspectRatio: 16 / 10,
                             child: Image.file(
                               File(report.imagePath!),
                               fit: BoxFit.cover,
@@ -67,22 +76,30 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                           ),
                         ),
                       ListTile(
+                        contentPadding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
                         title: Text(
                           report.dateTime != null
                               ? DateFormat(
-                                  'EEEE, MMM d, yyyy - hh:mm a',
+                                  'EEEE, MMM d',
                                 ).format(report.dateTime!)
                               : 'Unknown Date',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                        subtitle: Text(
+                          report.dateTime != null
+                              ? DateFormat('hh:mm a').format(report.dateTime!)
+                              : '',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(
-                                Icons.restore,
-                                color: Colors.blue,
-                              ),
+                              icon: const Icon(Icons.settings_backup_restore_rounded),
+                              color: Theme.of(context).colorScheme.primary,
                               onPressed: () {
                                 context.read<DailyReportCubit>().restoreReport(
                                   report,
@@ -91,7 +108,8 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                               },
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
+                              icon: const Icon(Icons.delete_outline_rounded),
+                              color: Theme.of(context).colorScheme.error,
                               onPressed: () {
                                 context.read<HistoryCubit>().deleteReport(
                                   report.id,

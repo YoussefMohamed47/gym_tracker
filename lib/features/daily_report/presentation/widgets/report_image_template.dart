@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../domain/model/daily_report.dart';
 
 class ReportImageTemplate extends StatelessWidget {
@@ -41,18 +42,20 @@ class ReportImageTemplate extends StatelessWidget {
             children: [
               Text(
                 'SAMA FIT',
-                style: GoogleFonts.montserrat(
+                style: GoogleFonts.outfit(
                   fontWeight: FontWeight.w900,
-                  fontSize: 26,
-                  color: const Color(0xFF1A46A0),
+                  fontSize: 28,
+                  color: AppColors.primary,
+                  letterSpacing: -1,
                 ),
               ),
               Text(
-                'FITNESS, NUTRITION & LIFESTYLE',
-                style: GoogleFonts.montserrat(
-                  fontSize: 9,
-                  letterSpacing: 1.2,
-                  color: Colors.grey[600],
+                'ADVANCE LIKE LIGHTNING',
+                style: GoogleFonts.outfit(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  color: Colors.grey[400],
                 ),
               ),
             ],
@@ -61,13 +64,11 @@ class ReportImageTemplate extends StatelessWidget {
         const SizedBox(width: 12),
         Flexible(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A46A0),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(16),
             ),
-            // 💡 SUGGESTION: FittedBox lets the badge text shrink instead of
-            // wrapping to a new line, guaranteeing it stays beside the title.
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -85,15 +86,10 @@ class ReportImageTemplate extends StatelessWidget {
     );
   }
 
-  // ⚠️ CRITICAL: fixed width:160 was forcing 1 box per row on normal phone
-  // widths, which is what pushed the total height past the screen and
-  // caused the overflow. Now derived from available width via LayoutBuilder.
   Widget _buildFlexibleGrid() {
     const spacing = 12.0;
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Aim for 2 columns; fall back to 1 if the space is too narrow
-        // (e.g. below ~260 logical px) to keep text readable.
         final twoColWidth = (constraints.maxWidth - spacing) / 2;
         final boxWidth = twoColWidth >= 130
             ? twoColWidth
@@ -119,36 +115,36 @@ class ReportImageTemplate extends StatelessWidget {
 
   Widget _buildAutoBox(String label, String content, double width) {
     return Container(
-      width: width, // 💡 SUGGESTION: now responsive instead of hardcoded
+      width: width,
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF1A46A0), width: 1.2),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 1.5),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1A46A0),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(6),
-                topRight: Radius.circular(6),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.05),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
               ),
             ),
             child: Text(
               label,
               textAlign: TextAlign.center,
               style: GoogleFonts.notoKufiArabic(
-                color: Colors.white,
+                color: AppColors.primary,
                 fontSize: 11,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             child: Text(
               content.isEmpty ? ' ' : content,
               textAlign: TextAlign.center,
@@ -156,6 +152,7 @@ class ReportImageTemplate extends StatelessWidget {
                 fontSize: 13,
                 color: Colors.black87,
                 height: 1.4,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -168,20 +165,27 @@ class ReportImageTemplate extends StatelessWidget {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        color: const Color(0xFF2B7CFF),
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildSpecialItem(Icons.fitness_center, 'التمرين', report.training),
+          _buildSpecialItem(Icons.fitness_center_rounded, 'التمرين', report.training),
           const Divider(
-            color: Colors.white30,
+            color: Colors.white24,
             height: 1,
             indent: 10,
             endIndent: 10,
           ),
-          _buildSpecialItem(Icons.directions_run, 'الكارديو', report.cardio),
+          _buildSpecialItem(Icons.bolt_rounded, 'الكارديو', report.cardio),
         ],
       ),
     );
@@ -189,7 +193,7 @@ class ReportImageTemplate extends StatelessWidget {
 
   Widget _buildSpecialItem(IconData icon, String label, String content) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -202,27 +206,27 @@ class ReportImageTemplate extends StatelessWidget {
                 label,
                 style: GoogleFonts.notoKufiArabic(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   fontSize: 10,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(6),
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               content.isEmpty ? 'resting' : content,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 11,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
+                fontSize: 12,
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -246,8 +250,8 @@ class ReportImageTemplate extends StatelessWidget {
             Container(
               width: notesWidth,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF1A46A0), width: 1.2),
-                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 1.5),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -256,28 +260,28 @@ class ReportImageTemplate extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1A46A0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(6),
-                        topRight: Radius.circular(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
                       ),
                     ),
                     child: Text(
                       'ملاحظات',
                       textAlign: TextAlign.right,
                       style: GoogleFonts.notoKufiArabic(
-                        color: Colors.white,
+                        color: AppColors.primary,
                         fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     child: Text(
                       (report.notes == null || report.notes!.isEmpty)
                           ? ' '
@@ -287,6 +291,7 @@ class ReportImageTemplate extends StatelessWidget {
                         fontSize: 13,
                         color: Colors.black87,
                         height: 1.4,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -303,17 +308,17 @@ class ReportImageTemplate extends StatelessWidget {
 
   Widget _buildFooter() {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.flash_on, color: Color(0xFF1A46A0), size: 32),
+        const Icon(Icons.electric_bolt_rounded, color: AppColors.primary, size: 24),
         const SizedBox(width: 8),
         Text(
-          'ADVANCE LIKE LIGHTNING',
-          style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
+          'GENERATED BY GYM TRACKER',
+          style: GoogleFonts.outfit(
             fontWeight: FontWeight.w900,
-            fontSize: 16,
-            color: const Color(0xFF1A46A0),
+            fontSize: 12,
+            color: AppColors.primary,
+            letterSpacing: 1.5,
           ),
         ),
       ],

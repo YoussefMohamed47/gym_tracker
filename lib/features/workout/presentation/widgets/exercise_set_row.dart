@@ -165,9 +165,10 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
                 child: Text(
                   lastLabel,
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
 
@@ -192,17 +193,29 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
                           ],
                           decoration: InputDecoration(
                             isDense: true,
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 8,
-                              vertical: 8,
+                              vertical: 10,
                             ),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
                             ),
                             hintText: '0',
                             suffixText: widget.displayUnit.name,
+                            suffixStyle: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                          style: const TextStyle(fontSize: 13),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           onChanged: (value) {
                             final weight = double.tryParse(value);
                             widget.onWeightChanged(weight);
@@ -229,18 +242,29 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
                           ],
                           decoration: InputDecoration(
                             isDense: true,
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 8,
-                              vertical: 8,
+                              vertical: 10,
                             ),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
                             ),
                             hintText: '0',
                             suffixText: 'r',
-                            errorText: null, // Error shown below row
+                            suffixStyle: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                          style: const TextStyle(fontSize: 13),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           onChanged: _validateReps,
                         )
                       : const Center(child: Text('—')),
@@ -253,11 +277,11 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
                 child: IconButton(
                   icon: Icon(
                     widget.setLog.isPerformed
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked_rounded,
                     color: widget.setLog.isPerformed
                         ? Theme.of(context).colorScheme.primary
-                        : Colors.grey,
+                        : Theme.of(context).colorScheme.outline,
                   ),
                   onPressed: widget.onTogglePerformed,
                 ),
