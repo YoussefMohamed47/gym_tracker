@@ -18,7 +18,6 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     emit(state.copyWith(status: WorkoutStatus.loading, selectedDate: date));
 
     final dateKey = WorkoutDateUtils.formatDateKey(date);
-    final workoutType = WorkoutDateUtils.getWorkoutTypeForDay(date);
     final preferredUnit = await repository.getPreferredUnit();
 
     try {
@@ -29,6 +28,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           state.copyWith(
             status: WorkoutStatus.success,
             dateKey: dateKey,
+            selectedDate: date,
             workoutType: session.workoutType,
             exerciseLogs: session.exerciseLogs,
             displayUnit: session.displayUnit,
@@ -36,44 +36,47 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           ),
         );
       } else {
-        // No session found, initialize draft from catalog and prefill
-        final workoutDef = WorkoutCatalog.getWorkoutForDate(date);
-        final Map<String, ExerciseLog> logs = {};
-        final Map<String, Map<String, ExerciseLog>> altDrafts = {};
+        // No session found, determine workout type from sequence
+        // Important: Filter history to only include sessions BEFORE the selected date
+        final history = await repository.getHistory();
+        final pastTypes = history
+            .where((s) => s.dateKey.compareTo(dateKey) < 0)
+            .toList()
+          ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
 
-        if (workoutDef != null) {
-          for (final slot in workoutDef.exercises) {
-            final log = await _createInitialLog(
-              workoutType.name,
-              slot.exerciseId,
-              slot.prescribedSets,
-            );
-            logs[slot.exerciseId] = log;
-            altDrafts[slot.exerciseId] = {slot.exerciseId: log};
+        final workoutTypes = pastTypes.map((s) => s.workoutType).toList();
+        
+        WorkoutType suggestedType;
+        if (workoutTypes.isEmpty) {
+          // Fallback to calendar if no history exists yet
+          suggestedType = WorkoutDateUtils.getWorkoutTypeForDay(date);
+        } else {
+          // Calculate the number of days passed since the last session
+          final lastSessionDate = WorkoutDateUtils.parseDateKey(pastTypes.first.dateKey);
+          final daysPassed = date.difference(lastSessionDate).inDays;
+
+          // Advance the sequence by 'daysPassed' steps
+          suggestedType = workoutTypes.first;
+          for (int i = 0; i < daysPassed; i++) {
+            suggestedType = WorkoutCatalog.getNextWorkoutType([suggestedType, ...workoutTypes.skip(1)]);
+            // Update history list for the next iteration step to handle Rest days correctly
+            workoutTypes.insert(0, suggestedType);
           }
         }
 
-        // Always add daily routine items to logs (Data-Driven)
-        final dailyRoutine = WorkoutCatalog.getDailyRoutine();
-        for (final slot in dailyRoutine.exercises) {
-          if (!logs.containsKey(slot.exerciseId)) {
-            final log = await _createInitialLog(
-              'daily_routine',
-              slot.exerciseId,
-              slot.prescribedSets,
-            );
-            logs[slot.exerciseId] = log;
-            altDrafts[slot.exerciseId] = {slot.exerciseId: log};
-          }
-        }
+        final logs = await _initializeLogsForType(suggestedType);
 
         emit(
           state.copyWith(
             status: WorkoutStatus.success,
             dateKey: dateKey,
-            workoutType: workoutType,
+            selectedDate: date,
+            workoutType: suggestedType,
             exerciseLogs: logs,
-            alternativeDrafts: altDrafts,
+            alternativeDrafts: {
+              for (var log in logs.values)
+                log.plannedExerciseId: {log.performedExerciseId: log},
+            },
             displayUnit: preferredUnit,
             isEditMode: false,
           ),
@@ -321,7 +324,10 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
-  Future<void> saveWorkout({bool forceSave = false}) async {
+  Future<void> saveWorkout({
+    bool forceSave = false,
+    bool isCompletion = true,
+  }) async {
     if (state.exerciseLogs.isEmpty && state.workoutType != WorkoutType.rest) {
       return;
     }
@@ -348,7 +354,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       return;
     }
 
-    emit(state.copyWith(status: WorkoutStatus.saving));
+    if (isCompletion) {
+      emit(state.copyWith(status: WorkoutStatus.saving));
+    }
 
     try {
       // Persistence only keeps the currently selected performed exercises
@@ -360,7 +368,12 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       );
 
       await repository.saveSession(session);
-      emit(state.copyWith(status: WorkoutStatus.saved));
+
+      if (isCompletion) {
+        emit(state.copyWith(status: WorkoutStatus.saved));
+      } else {
+        emit(state.copyWith(status: WorkoutStatus.success));
+      }
     } catch (e) {
       emit(
         state.copyWith(
@@ -398,5 +411,79 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   void navigateWeek(int weeks) {
     final nextDate = state.selectedDate.add(Duration(days: 7 * weeks));
     loadDate(nextDate);
+  }
+
+  Future<void> changeWorkoutType(WorkoutType type) async {
+    if (state.status == WorkoutStatus.loading || state.status == WorkoutStatus.saving) return;
+
+    emit(state.copyWith(status: WorkoutStatus.loading));
+
+    try {
+      final logs = await _initializeLogsForType(type);
+
+      emit(
+        state.copyWith(
+          status: WorkoutStatus.success,
+          workoutType: type,
+          exerciseLogs: logs,
+          alternativeDrafts: {
+            for (var log in logs.values) log.plannedExerciseId: {log.performedExerciseId: log},
+          },
+          // We keep the dateKey and isEditMode as is. 
+          // If it was an existing session, changing the type will effectively 
+          // allow the user to overwrite it with new exercises.
+        ),
+      );
+
+      // Persist the selection immediately so it sticks when navigating
+      await saveWorkout(forceSave: true, isCompletion: false);
+    } catch (e) {
+      emit(state.copyWith(status: WorkoutStatus.failure, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> clearWorkout() async {
+    emit(state.copyWith(status: WorkoutStatus.saving));
+    try {
+      await repository.deleteSession(state.dateKey);
+      await loadDate(state.selectedDate); // Re-suggest based on sequence
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: WorkoutStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<Map<String, ExerciseLog>> _initializeLogsForType(WorkoutType type) async {
+    final workoutDef = WorkoutCatalog.getWorkoutByType(type);
+    final Map<String, ExerciseLog> logs = {};
+
+    if (workoutDef != null) {
+      for (final slot in workoutDef.exercises) {
+        final log = await _createInitialLog(
+          type.name,
+          slot.exerciseId,
+          slot.prescribedSets,
+        );
+        logs[slot.exerciseId] = log;
+      }
+    }
+
+    // Always add daily routine items to logs (Data-Driven)
+    final dailyRoutine = WorkoutCatalog.getDailyRoutine();
+    for (final slot in dailyRoutine.exercises) {
+      if (!logs.containsKey(slot.exerciseId)) {
+        final log = await _createInitialLog(
+          'daily_routine',
+          slot.exerciseId,
+          slot.prescribedSets,
+        );
+        logs[slot.exerciseId] = log;
+      }
+    }
+    return logs;
   }
 }

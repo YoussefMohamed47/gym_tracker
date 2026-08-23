@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../domain/usecases/get_exercise_history.dart';
@@ -11,12 +10,11 @@ import '../cubit/workout_state.dart';
 import '../services/photo_service.dart';
 import '../services/workout_share_service.dart';
 import '../widgets/alternative_exercise_bottom_sheet.dart';
-import '../widgets/daily_routine_section.dart';
 import '../widgets/exercise_history_sheet.dart';
-import '../widgets/exercise_log_card.dart';
 import '../widgets/week_day_selector.dart';
-import '../widgets/weight_unit_selector.dart';
-import '../widgets/workout_week_header.dart';
+import '../widgets/workout_header.dart';
+import '../widgets/workout_sticky_save_bar.dart';
+import '../widgets/workout_content.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -121,6 +119,72 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     await WorkoutShareService.shareWorkout(context, session);
   }
 
+  void _showWorkoutTypeSelector() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Change Workout for Today'),
+        children: [
+          ...WorkoutType.values.map((type) {
+            return SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.read<WorkoutCubit>().changeWorkoutType(type);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      type == WorkoutType.rest
+                          ? Icons.coffee
+                          : Icons.fitness_center,
+                      size: 20,
+                      color:
+                          type == context.read<WorkoutCubit>().state.workoutType
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      type.displayName,
+                      style: TextStyle(
+                        fontWeight: type ==
+                                context.read<WorkoutCubit>().state.workoutType
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+          const Divider(),
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<WorkoutCubit>().clearWorkout();
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Clear Day (Reset to Suggestion)',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<WorkoutCubit, WorkoutState>(
@@ -149,264 +213,30 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             body: SafeArea(
               child: Column(
                 children: [
-                  _buildHeader(context, state),
+                  WorkoutHeader(
+                    state: state,
+                    onTypeTapped: _showWorkoutTypeSelector,
+                  ),
                   WeekDaySelector(
                     selectedDate: state.selectedDate,
                     onDateSelected: (date) =>
                         context.read<WorkoutCubit>().loadDate(date),
                   ),
-                  Expanded(child: _buildContent(context, state)),
-                  _buildStickySaveBar(context, state),
+                  Expanded(
+                    child: WorkoutContent(
+                      state: state,
+                      onSelectAlternative: _showAlternativeBottomSheet,
+                      onAddPhoto: _handleAddPhoto,
+                      onShowHistory: _showHistoryBottomSheet,
+                    ),
+                  ),
+                  WorkoutStickySaveBar(state: state),
                 ],
               ),
             ),
           );
         },
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, WorkoutState state) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    state.workoutType.name.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'Weekly Workout',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              // Row(
-              //   children: [
-              //     IconButton(
-              //       icon: const Icon(Icons.download_outlined),
-              //       onPressed: () => WorkoutShareService.saveToGallery(
-              //         context,
-              //         WorkoutSession(
-              //           dateKey: state.dateKey,
-              //           workoutType: state.workoutType,
-              //           exerciseLogs: state.exerciseLogs,
-              //           displayUnit: state.displayUnit,
-              //         ),
-              //       ),
-              //       tooltip: 'Save To Gallery',
-              //     ),
-              //     const WeightUnitSelector(),
-              //   ],
-              // ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          WorkoutWeekHeader(
-            selectedDate: state.selectedDate,
-            onPreviousWeek: () => context.read<WorkoutCubit>().navigateWeek(-1),
-            onNextWeek: () => context.read<WorkoutCubit>().navigateWeek(1),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStickySaveBar(BuildContext context, WorkoutState state) {
-    if (state.workoutType == WorkoutType.rest ||
-        state.status == WorkoutStatus.loading) {
-      return const SizedBox.shrink();
-    }
-
-    final performedCount = state.exerciseLogs.values
-        .where((log) => log.sets.any((s) => s.isPerformed))
-        .length;
-    final totalCount = state.exerciseLogs.length;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$performedCount of $totalCount exercises done',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: totalCount > 0 ? performedCount / totalCount : 0,
-                    minHeight: 4,
-                    backgroundColor: Colors.grey[200],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          ElevatedButton(
-            onPressed: state.status == WorkoutStatus.saving
-                ? null
-                : () => context.read<WorkoutCubit>().saveWorkout(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: state.status == WorkoutStatus.saving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('Finish'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, WorkoutState state) {
-    if (state.status == WorkoutStatus.loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.workoutType == WorkoutType.rest) {
-      return SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 64),
-            Icon(
-              Icons.coffee,
-              size: 64,
-              color: Colors.grey.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Rest Day',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            const Text('Active recovery and proper nutrition!'),
-          ],
-        ),
-      );
-    }
-
-    final workoutDef = WorkoutCatalog.workouts.firstWhere(
-      (w) => w.type == state.workoutType,
-      orElse: () => WorkoutCatalog.workouts.first,
-    );
-
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        const DailyRoutineSection(),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Text(
-            'Exercises',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ),
-        ...workoutDef.exercises.map((slot) {
-          final log = state.exerciseLogs[slot.exerciseId];
-          if (log == null) return const SizedBox.shrink();
-
-          final performedExercise = WorkoutCatalog.getExerciseById(
-            log.performedExerciseId,
-          );
-
-          return ExerciseLogCard(
-            log: log,
-            slot: slot,
-            displayUnit: state.displayUnit,
-            onWeightChanged: (setIndex, weight) {
-              context.read<WorkoutCubit>().updateSetWeight(
-                slot.exerciseId,
-                setIndex,
-                weight,
-                log.displayUnit,
-              );
-            },
-            onRepsChanged: (setIndex, reps) {
-              context.read<WorkoutCubit>().updateSetReps(
-                slot.exerciseId,
-                setIndex,
-                reps,
-              );
-            },
-            onToggleSetPerformed: (setIndex) {
-              context.read<WorkoutCubit>().toggleSetPerformed(
-                slot.exerciseId,
-                setIndex,
-              );
-            },
-            onUnitChanged: (unit) {
-              context.read<WorkoutCubit>().updateExerciseUnit(
-                slot.exerciseId,
-                unit,
-              );
-            },
-            onSelectAlternative: () {
-              _showAlternativeBottomSheet(
-                slot.exerciseId,
-                log.performedExerciseId,
-              );
-            },
-            onAddPhoto: () => _handleAddPhoto(slot.exerciseId),
-            onShowHistory: () => _showHistoryBottomSheet(
-              log.performedExerciseId,
-              performedExercise.name,
-            ),
-            onUseLegacyWeight: () => context
-                .read<WorkoutCubit>()
-                .useLegacyWeightForAllSets(slot.exerciseId),
-          );
-        }),
-      ],
     );
   }
 }

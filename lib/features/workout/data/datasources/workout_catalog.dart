@@ -1,6 +1,7 @@
 import '../../domain/entities/exercise_definition.dart';
 import '../../domain/entities/workout_definition.dart';
 import '../../domain/entities/workout_type.dart';
+import '../../utils/date_utils.dart';
 
 class WorkoutCatalog {
   static const List<ExerciseDefinition> exercises = [
@@ -579,24 +580,46 @@ class WorkoutCatalog {
     ),
   ];
 
+  static const List<WorkoutType> trainingSequence = [
+    WorkoutType.push,
+    WorkoutType.pull,
+    WorkoutType.legs,
+    WorkoutType.rest,
+    WorkoutType.upper,
+    WorkoutType.lower,
+    WorkoutType.rest,
+  ];
+
+  static WorkoutType getNextWorkoutType(List<WorkoutType> history) {
+    if (history.isEmpty) return trainingSequence.first;
+
+    final last = history.first;
+
+    if (last == WorkoutType.rest) {
+      if (history.length > 1) {
+        final prev = history[1];
+        if (prev == WorkoutType.legs) return WorkoutType.upper;
+        if (prev == WorkoutType.lower) return WorkoutType.push;
+      }
+      return WorkoutType.push;
+    }
+
+    final index = trainingSequence.indexOf(last);
+    if (index == -1) return trainingSequence.first;
+    return trainingSequence[(index + 1) % trainingSequence.length];
+  }
+
   static WorkoutDefinition? getWorkoutForDate(DateTime date) {
-    switch (date.weekday) {
-      case DateTime.sunday:
-        return workouts.firstWhere((w) => w.id == 'pull');
-      case DateTime.monday:
-        return workouts.firstWhere((w) => w.id == 'legs');
-      case DateTime.tuesday:
-        return null; // Rest
-      case DateTime.wednesday:
-        return workouts.firstWhere((w) => w.id == 'upper');
-      case DateTime.thursday:
-        return workouts.firstWhere((w) => w.id == 'lower');
-      case DateTime.friday:
-        return null; // Rest
-      case DateTime.saturday:
-        return workouts.firstWhere((w) => w.id == 'push');
-      default:
-        return null;
+    final type = WorkoutDateUtils.getWorkoutTypeForDay(date);
+    if (type == WorkoutType.rest) return null;
+    return getWorkoutByType(type);
+  }
+
+  static WorkoutDefinition? getWorkoutByType(WorkoutType type) {
+    try {
+      return workouts.firstWhere((w) => w.type == type && w.id != 'daily_routine');
+    } catch (_) {
+      return null;
     }
   }
 

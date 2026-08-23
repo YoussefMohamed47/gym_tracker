@@ -1,6 +1,7 @@
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/entities/exercise_log.dart';
 import '../../domain/entities/workout_session.dart';
+import '../../domain/entities/workout_type.dart';
 import '../../domain/repositories/workout_repository.dart';
 import '../datasources/workout_local_datasource.dart';
 
@@ -79,6 +80,23 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
       }
     }
     return null;
+  }
+
+  @override
+  Future<WorkoutType?> getLastCompletedWorkoutType() async {
+    final recent = await getRecentWorkoutTypes(limit: 1);
+    return recent.isNotEmpty ? recent.first : null;
+  }
+
+  @override
+  Future<List<WorkoutType>> getRecentWorkoutTypes({int limit = 5}) async {
+    final history = await getHistory();
+    if (history.isEmpty) return [];
+
+    final sortedHistory = List<WorkoutSession>.from(history)
+      ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+
+    return sortedHistory.take(limit).map((s) => s.workoutType).toList();
   }
 
   /// Normalizes an ExerciseLog by mapping its IDs to canonical versions.

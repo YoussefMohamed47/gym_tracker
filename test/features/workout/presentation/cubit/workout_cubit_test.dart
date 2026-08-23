@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:gym_tracker_report/core/utils/weight_converter.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/exercise_log.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/exercise_set_log.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/workout_session.dart';
@@ -7,6 +8,7 @@ import 'package:gym_tracker_report/features/workout/domain/entities/workout_type
 import 'package:gym_tracker_report/features/workout/domain/repositories/workout_repository.dart';
 import 'package:gym_tracker_report/features/workout/presentation/cubit/workout_cubit.dart';
 import 'package:gym_tracker_report/features/workout/presentation/cubit/workout_state.dart';
+import 'package:gym_tracker_report/features/workout/utils/date_utils.dart';
 
 class MockWorkoutRepository extends Mock implements WorkoutRepository {}
 
@@ -110,10 +112,128 @@ void main() {
       ).thenAnswer((_) async => prevLog);
       when(
         () => mockRepository.getPreferredUnit(),
-      ).thenAnswer((_) async => any()); // Any unit
+      ).thenAnswer((_) async => WeightUnit.kg);
 
       // This is internal to loadDate, but we test the private _createInitialLog through logic if possible
       // or just trust the integration in loadDate.
+    });
+  });
+
+  group('WorkoutCubit - Dynamic Type Selection', () {
+    test('changeWorkoutType should update state, fetch history and persist',
+        () async {
+      when(
+        () => mockRepository.getPreviousExerciseLog(any(), any()),
+      ).thenAnswer((_) async => null);
+      when(() => mockRepository.saveSession(any())).thenAnswer((_) async => {});
+
+      await cubit.changeWorkoutType(WorkoutType.push);
+
+      expect(cubit.state.workoutType, WorkoutType.push);
+      expect(cubit.state.exerciseLogs.isNotEmpty, isTrue);
+      verify(() => mockRepository.saveSession(any())).called(1);
+    });
+
+    test('changeWorkoutType should fetch history for new exercises', () async {
+      final prevLog = ExerciseLog(
+        plannedExerciseId: 'push_chest_press_machine',
+        performedExerciseId: 'push_chest_press_machine',
+        sets: const [
+          ExerciseSetLog(weightKg: 80, actualReps: 10, isPerformed: true),
+        ],
+        timestamp: DateTime.now(),
+      );
+
+      when(
+        () => mockRepository.getPreviousExerciseLog('push', any()),
+      ).thenAnswer((_) async => prevLog);
+      when(
+        () => mockRepository.getPreviousExerciseLog('daily_routine', any()),
+      ).thenAnswer((_) async => null);
+
+      await cubit.changeWorkoutType(WorkoutType.push);
+
+      final chestPressLog = cubit.state.exerciseLogs['push_chest_press_machine'];
+      expect(chestPressLog, isNotNull);
+      expect(chestPressLog!.sets[0].weightKg, 80);
+      expect(chestPressLog.sets[0].actualReps, 10);
+    });
+
+    test('loadDate should suggest next workout in sequence if no session exists',
+        () async {
+      // Setup: Last completed was PUSH on yesterday
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      final today = DateTime.now();
+      
+      when(() => mockRepository.getSessionForDate(any()))
+          .thenAnswer((_) async => null);
+      when(() => mockRepository.getHistory()).thenAnswer((_) async => [
+            WorkoutSession(
+              dateKey: WorkoutDateUtils.formatDateKey(yesterday),
+              workoutType: WorkoutType.push,
+              exerciseLogs: {},
+              displayUnit: WeightUnit.kg,
+            )
+          ]);
+      when(() => mockRepository.getPreferredUnit())
+          .thenAnswer((_) async => WeightUnit.kg);
+      when(() => mockRepository.getPreviousExerciseLog(any(), any()))
+          .thenAnswer((_) async => null);
+
+      await cubit.loadDate(today);
+
+      // PUSH -> PULL in sequence
+      expect(cubit.state.workoutType, WorkoutType.pull);
+    });
+
+    test('loadDate should disambiguate Rest days correctly', () async {
+      final today = DateTime.now();
+      final day1 = today.subtract(const Duration(days: 1));
+      final day2 = today.subtract(const Duration(days: 2));
+
+      // Legs -> Rest -> Upper
+      when(() => mockRepository.getSessionForDate(any()))
+          .thenAnswer((_) async => null);
+      when(() => mockRepository.getHistory()).thenAnswer((_) async => [
+            WorkoutSession(
+              dateKey: WorkoutDateUtils.formatDateKey(day1),
+              workoutType: WorkoutType.rest,
+              exerciseLogs: {},
+              displayUnit: WeightUnit.kg,
+            ),
+            WorkoutSession(
+              dateKey: WorkoutDateUtils.formatDateKey(day2),
+              workoutType: WorkoutType.legs,
+              exerciseLogs: {},
+              displayUnit: WeightUnit.kg,
+            )
+          ]);
+      when(() => mockRepository.getPreferredUnit())
+          .thenAnswer((_) async => WeightUnit.kg);
+      when(() => mockRepository.getPreviousExerciseLog(any(), any()))
+          .thenAnswer((_) async => null);
+
+      await cubit.loadDate(today);
+      expect(cubit.state.workoutType, WorkoutType.upper);
+
+      // Lower -> Rest -> Push
+      when(() => mockRepository.getHistory()).thenAnswer((_) async => [
+            WorkoutSession(
+              dateKey: WorkoutDateUtils.formatDateKey(day1),
+              workoutType: WorkoutType.rest,
+              exerciseLogs: {},
+              displayUnit: WeightUnit.kg,
+            ),
+            WorkoutSession(
+              dateKey: WorkoutDateUtils.formatDateKey(day2),
+              workoutType: WorkoutType.lower,
+              exerciseLogs: {},
+              displayUnit: WeightUnit.kg,
+            )
+          ]);
+
+      await cubit.loadDate(today);
+      expect(cubit.state.workoutType, WorkoutType.push);
     });
   });
 }
