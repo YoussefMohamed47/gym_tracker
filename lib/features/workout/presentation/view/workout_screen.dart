@@ -14,7 +14,7 @@ import '../widgets/exercise_history_sheet.dart';
 import '../widgets/week_day_selector.dart';
 import '../widgets/workout_header.dart';
 import '../widgets/workout_sticky_save_bar.dart';
-import '../widgets/workout_content.dart';
+import '../widgets/workout_content_sliver.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -25,6 +25,7 @@ class WorkoutScreen extends StatefulWidget {
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
   final PhotoService _photoService = PhotoService();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -33,6 +34,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<WorkoutCubit>().loadDate(DateTime.now());
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _showReviewDialog(int count) {
@@ -171,7 +178,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               child: Row(
                 children: [
                   Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Text(
                     'Clear Day (Reset to Suggestion)',
                     style: TextStyle(color: Colors.red),
@@ -208,28 +215,50 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       },
       child: BlocBuilder<WorkoutCubit, WorkoutState>(
         builder: (context, state) {
+          final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+          final double workoutSaveBarHeight = 88;
+
           return Scaffold(
             body: SafeArea(
-              child: Column(
+              child: Stack(
                 children: [
-                  WorkoutHeader(
-                    state: state,
-                    onTypeTapped: _showWorkoutTypeSelector,
+                  CustomScrollView(
+                    controller: _scrollController,
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: WorkoutHeader(
+                          state: state,
+                          onTypeTapped: _showWorkoutTypeSelector,
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: WeekDaySelector(
+                          selectedDate: state.selectedDate,
+                          onDateSelected: (date) =>
+                              context.read<WorkoutCubit>().loadDate(date),
+                        ),
+                      ),
+                      WorkoutContentSliver(
+                        state: state,
+                        onSelectAlternative: _showAlternativeBottomSheet,
+                        onAddPhoto: _handleAddPhoto,
+                        onShowHistory: _showHistoryBottomSheet,
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: keyboardOpen ? 24 : workoutSaveBarHeight + 16,
+                        ),
+                      ),
+                    ],
                   ),
-                  WeekDaySelector(
-                    selectedDate: state.selectedDate,
-                    onDateSelected: (date) =>
-                        context.read<WorkoutCubit>().loadDate(date),
-                  ),
-                  Expanded(
-                    child: WorkoutContent(
-                      state: state,
-                      onSelectAlternative: _showAlternativeBottomSheet,
-                      onAddPhoto: _handleAddPhoto,
-                      onShowHistory: _showHistoryBottomSheet,
+                  if (!keyboardOpen)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: WorkoutStickySaveBar(state: state),
                     ),
-                  ),
-                  WorkoutStickySaveBar(state: state),
                 ],
               ),
             ),

@@ -5,6 +5,7 @@ import '../storage/hive/hive_local_storage.dart';
 import '../storage/hive/hive_boxes.dart';
 import '../storage/migration/legacy_persistence_migrator.dart';
 import '../storage/migration/media_migrator.dart';
+import '../theme/theme_transition_controller.dart';
 import '../../features/daily_report/data/repository/daily_report_repository_impl.dart';
 import '../../features/daily_report/data/service/image_service.dart';
 import '../../features/daily_report/data/datasources/daily_report_local_datasource.dart';
@@ -47,6 +48,9 @@ Future<void> init() async {
   );
 
   // Features - Daily Report & History
+
+  // Theme Transition
+  sl.registerLazySingleton(() => ThemeTransitionController());
 
   // Cubits
   sl.registerLazySingleton(() => ThemeCubit(sl<HiveLocalStorage>().getBox(HiveBoxes.preferences)));

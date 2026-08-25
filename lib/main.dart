@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/router/app_router.dart';
 import 'core/storage/migration/legacy_persistence_migrator.dart';
@@ -9,6 +8,8 @@ import 'core/storage/hive/widgets/storage_error_screen.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import 'core/utils/app_theme.dart';
+import 'core/theme/theme_transition_host.dart';
+import 'core/theme/theme_transition_controller.dart';
 import 'features/settings/presentation/cubit/theme_cubit.dart';
 
 void main() async {
@@ -59,8 +60,15 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeMode,
+            themeAnimationDuration: Duration.zero,
             onGenerateRoute: AppRouter.onGenerateRoute,
             initialRoute: AppRouter.splash,
+            builder: (context, child) {
+              return ThemeTransitionHost(
+                controller: di.sl<ThemeTransitionController>(),
+                child: child!,
+              );
+            },
           );
         },
       ),

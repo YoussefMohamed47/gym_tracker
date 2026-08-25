@@ -4,9 +4,10 @@ import '../cubit/workout_state.dart';
 import 'workout_week_header.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/workout_cubit.dart';
-import '../../../../core/utils/app_colors.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/theme/theme_transition_controller.dart';
 
-class WorkoutHeader extends StatelessWidget {
+class WorkoutHeader extends StatefulWidget {
   final WorkoutState state;
   final VoidCallback onTypeTapped;
 
@@ -17,11 +18,18 @@ class WorkoutHeader extends StatelessWidget {
   });
 
   @override
+  State<WorkoutHeader> createState() => _WorkoutHeaderState();
+}
+
+class _WorkoutHeaderState extends State<WorkoutHeader> {
+  final GlobalKey _themeButtonKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
-    final performedCount = state.exerciseLogs.values
+    final performedCount = widget.state.exerciseLogs.values
         .where((log) => log.sets.any((s) => s.isPerformed))
         .length;
-    final totalCount = state.exerciseLogs.length;
+    final totalCount = widget.state.exerciseLogs.length;
     final progress = totalCount > 0 ? performedCount / totalCount : 0.0;
 
     return Container(
@@ -64,13 +72,13 @@ class WorkoutHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: onTypeTapped,
+                      onTap: widget.onTypeTapped,
                       borderRadius: BorderRadius.circular(8),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            state.workoutType.displayName.toUpperCase(),
+                            widget.state.workoutType.displayName.toUpperCase(),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
@@ -97,7 +105,14 @@ class WorkoutHeader extends StatelessWidget {
                 ),
               ),
               IconButton.filledTonal(
-                onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+                key: _themeButtonKey,
+                onPressed: () {
+                  di.sl<ThemeTransitionController>().animateThemeToggle(
+                        context: context,
+                        buttonKey: _themeButtonKey,
+                        onToggle: () => context.read<ThemeCubit>().toggleTheme(),
+                      );
+                },
                 icon: Icon(
                   Theme.of(context).brightness == Brightness.dark
                       ? Icons.light_mode_rounded
@@ -113,7 +128,7 @@ class WorkoutHeader extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           WorkoutWeekHeader(
-            selectedDate: state.selectedDate,
+            selectedDate: widget.state.selectedDate,
             onPreviousWeek: () => context.read<WorkoutCubit>().navigateWeek(-1),
             onNextWeek: () => context.read<WorkoutCubit>().navigateWeek(1),
           ),
