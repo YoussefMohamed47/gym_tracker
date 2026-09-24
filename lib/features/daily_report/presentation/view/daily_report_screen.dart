@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/router/app_router.dart';
-import '../../../../core/utils/widget_image_capture.dart'; // ⚠️ CRITICAL: new import
+import '../../../../core/theme/theme_transition_controller.dart';
+import '../../../../core/utils/widget_image_capture.dart';
+import '../../../settings/presentation/cubit/theme_cubit.dart';
 import '../cubit/daily_report_cubit.dart';
 import '../cubit/daily_report_state.dart';
 import '../widgets/daily_report_form.dart';
 import '../widgets/report_image_template.dart';
-import 'package:share_plus/share_plus.dart';
 
 class DailyReportScreen extends StatefulWidget {
   const DailyReportScreen({super.key});
@@ -19,8 +22,7 @@ class DailyReportScreen extends StatefulWidget {
 }
 
 class _DailyReportScreenState extends State<DailyReportScreen> {
-  // ⚠️ CRITICAL: ScreenshotController / screenshot package no longer needed
-  // for this flow — removed to avoid the tight-constraints overflow.
+  final GlobalKey _themeButtonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,21 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            key: _themeButtonKey,
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+            ),
+            onPressed: () {
+              di.sl<ThemeTransitionController>().animateThemeToggle(
+                    context: context,
+                    buttonKey: _themeButtonKey,
+                    onToggle: () => context.read<ThemeCubit>().toggleTheme(),
+                  );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
