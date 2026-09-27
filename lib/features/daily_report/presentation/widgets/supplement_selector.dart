@@ -107,14 +107,15 @@ class _SupplementSelectorState extends State<SupplementSelector> {
               ),
             ),
             const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: theme.cardColor,
+            Material(
+              color: theme.cardColor,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
+                side: BorderSide(
                   color: colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
+              clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
                   CheckboxListTile(

@@ -113,27 +113,29 @@ class _DailyRoutineCard extends StatelessWidget {
                       );
                     }
 
-                    return InkWell(
-                      onTap: () => context
-                          .read<WorkoutCubit>()
-                          .toggleSetPerformed(slot.exerciseId, index),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
+                    return Material(
+                      color: isPerformed
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(
                           color: isPerformed
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isPerformed
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-                          ),
+                              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                         ),
-                        child: Row(
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => context
+                            .read<WorkoutCubit>()
+                            .toggleSetPerformed(slot.exerciseId, index),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
@@ -159,8 +161,9 @@ class _DailyRoutineCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                  );
+                }),
                 );
               },
             ),

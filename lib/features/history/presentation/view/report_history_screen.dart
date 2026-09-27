@@ -37,19 +37,19 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
               itemCount: state.reports.length,
               itemBuilder: (context, index) {
                 final report = state.reports[index];
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Material(
                     color: Theme.of(context).cardTheme.color,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-                      width: 1.5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
                     ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
                     children: [
                       if (report.imagePath != null)
                         GestureDetector(
@@ -121,7 +121,7 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                       ),
                     ],
                   ),
-                );
+                ));
               },
             );
           } else if (state is HistoryError) {
