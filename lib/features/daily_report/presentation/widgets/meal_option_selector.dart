@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../data/datasources/nutrition_catalog.dart';
 
 class MealOptionSelector extends StatefulWidget {
@@ -41,6 +42,10 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
   }
 
   void _parseInitialValue() {
+    for (final cat in widget.categories) {
+      _selectedOptions[cat.categoryName] = null;
+    }
+
     if (widget.initialValue.trim().isEmpty) return;
 
     final initialText = widget.initialValue;
@@ -59,6 +64,16 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
     if (!matchedAny) {
       _isFreeTextMode = true;
       _freeTextController.text = initialText;
+    } else {
+      _isFreeTextMode = false;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MealOptionSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      _parseInitialValue();
     }
   }
 
@@ -112,9 +127,7 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,15 +208,33 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
               for (final category in widget.categories) ...[
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6.0),
-                  child: DropdownButtonFormField<String>(
+                  child: DropdownButtonFormField<String?>(
+                    key: ValueKey(
+                      '${category.categoryName}_${_selectedOptions[category.categoryName]}',
+                    ),
                     initialValue: _selectedOptions[category.categoryName],
                     isExpanded: true,
                     menuMaxHeight: 220,
-                    icon: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 20,
-                      color: colorScheme.primary,
-                    ),
+                    icon: _selectedOptions[category.categoryName] != null
+                        ? InkWell(
+                            child: Icon(
+                              Icons.clear_rounded,
+                              size: 18,
+                              color: colorScheme.error.withValues(alpha: 0.8),
+                            ),
+
+                            onTap: () {
+                              setState(() {
+                                _selectedOptions[category.categoryName] = null;
+                                _notifyChange();
+                              });
+                            },
+                          )
+                        : Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 20,
+                            color: colorScheme.primary,
+                          ),
                     style: GoogleFonts.notoKufiArabic(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -236,22 +267,9 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
                           color: colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
-                      suffixIcon: _selectedOptions[category.categoryName] != null
-                          ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 16),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: () {
-                                setState(() {
-                                  _selectedOptions[category.categoryName] = null;
-                                  _notifyChange();
-                                });
-                              },
-                            )
-                          : null,
                     ),
                     items: category.options.map((option) {
-                      return DropdownMenuItem<String>(
+                      return DropdownMenuItem<String?>(
                         value: option,
                         child: Text(
                           option,
@@ -285,7 +303,10 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
                     fontSize: 10,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  prefixIcon: const Icon(Icons.add_circle_outline_rounded, size: 16),
+                  prefixIcon: const Icon(
+                    Icons.add_circle_outline_rounded,
+                    size: 16,
+                  ),
                   filled: true,
                   fillColor: theme.cardColor,
                   isDense: true,
