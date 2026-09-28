@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/utils/app_colors.dart';
 import '../../domain/entities/workout_session.dart';
-import '../../domain/entities/workout_type.dart';
 import '../../domain/usecases/get_exercise_history.dart';
 import '../cubit/workout_cubit.dart';
 import '../cubit/workout_state.dart';
 import '../services/photo_service.dart';
 import '../services/workout_share_service.dart';
 import '../widgets/alternative_exercise_bottom_sheet.dart';
+import '../widgets/bottom_dock.dart';
 import '../widgets/exercise_history_sheet.dart';
 import '../widgets/week_day_selector.dart';
 import '../widgets/workout_content_sliver.dart';
 import '../widgets/workout_header.dart';
-import '../widgets/workout_rest_timer_bar.dart';
-import '../widgets/workout_sticky_save_bar.dart';
+import '../widgets/workout_switcher_sheet.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -31,7 +32,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
-    // Load current date on entry
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<WorkoutCubit>().loadDate(DateTime.now());
     });
@@ -48,9 +48,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Review Workout'),
+        title: Text(
+          'Review Workout',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
         content: Text(
           'You have $count exercise(s) not marked as performed. Do you want to save anyway?',
+          style: GoogleFonts.outfit(),
         ),
         actions: [
           TextButton(
@@ -73,18 +77,20 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     String plannedId,
     String currentPerformedId,
   ) {
+    final workoutCubit = context.read<WorkoutCubit>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => AlternativeExerciseBottomSheet(
-        originalExerciseId: plannedId,
-        currentPerformedId: currentPerformedId,
-        onSelect: (altId) {
-          context.read<WorkoutCubit>().selectAlternative(plannedId, altId);
-        },
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: workoutCubit,
+        child: AlternativeExerciseBottomSheet(
+          originalExerciseId: plannedId,
+          currentPerformedId: currentPerformedId,
+          onSelect: (altId) {
+            workoutCubit.selectAlternative(plannedId, altId);
+          },
+        ),
       ),
     );
   }
@@ -99,9 +105,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => ExerciseHistorySheet(
         exerciseName: name,
         history: history,
@@ -125,72 +129,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       displayUnit: state.displayUnit,
     );
     await WorkoutShareService.shareWorkout(context, session);
-  }
-
-  void _showWorkoutTypeSelector() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: const Text('Change Workout for Today'),
-        children: [
-          ...WorkoutType.values.map((type) {
-            return SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                context.read<WorkoutCubit>().changeWorkoutType(type);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Icon(
-                      type == WorkoutType.rest
-                          ? Icons.coffee
-                          : Icons.fitness_center,
-                      size: 20,
-                      color:
-                          type == context.read<WorkoutCubit>().state.workoutType
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      type.displayName,
-                      style: TextStyle(
-                        fontWeight: type ==
-                                context.read<WorkoutCubit>().state.workoutType
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-          const Divider(),
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<WorkoutCubit>().clearWorkout();
-            },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                  SizedBox(width: 12),
-                  Text(
-                    'Clear Day (Reset to Suggestion)',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -217,7 +155,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       child: BlocBuilder<WorkoutCubit, WorkoutState>(
         builder: (context, state) {
           final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-          final double workoutSaveBarHeight = 110;
 
           return Scaffold(
             body: SafeArea(
@@ -225,14 +162,18 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 children: [
                   CustomScrollView(
                     controller: _scrollController,
-                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     slivers: [
+                      // Header
                       SliverToBoxAdapter(
                         child: WorkoutHeader(
                           state: state,
-                          onTypeTapped: _showWorkoutTypeSelector,
+                          onTypeTapped: () => WorkoutSwitcherSheet.show(context),
                         ),
                       ),
+
+                      // Week Selector Strip
                       SliverToBoxAdapter(
                         child: WeekDaySelector(
                           selectedDate: state.selectedDate,
@@ -240,31 +181,31 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                               context.read<WorkoutCubit>().loadDate(date),
                         ),
                       ),
+
+                      // Exercises Content
                       WorkoutContentSliver(
                         state: state,
                         onSelectAlternative: _showAlternativeBottomSheet,
                         onAddPhoto: _handleAddPhoto,
                         onShowHistory: _showHistoryBottomSheet,
                       ),
+
+                      // Scroll Padding for Bottom Dock & Floating Nav
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: keyboardOpen ? 24 : workoutSaveBarHeight + 32,
+                          height: keyboardOpen ? 24 : 140,
                         ),
                       ),
                     ],
                   ),
+
+                  // Floating Bottom Dock
                   if (!keyboardOpen)
                     Positioned(
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          WorkoutRestTimerBar(state: state),
-                          WorkoutStickySaveBar(state: state),
-                        ],
-                      ),
+                      child: BottomDock(state: state),
                     ),
                 ],
               ),

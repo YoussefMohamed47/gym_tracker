@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/workout_type.dart';
-import '../cubit/workout_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/workout_cubit.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../domain/entities/workout_type.dart';
+import '../cubit/workout_cubit.dart';
+import '../cubit/workout_state.dart';
 
 class WorkoutStickySaveBar extends StatelessWidget {
   final WorkoutState state;
@@ -35,17 +35,17 @@ class WorkoutStickySaveBar extends StatelessWidget {
     final percent = totalCount > 0 ? ((performedCount / totalCount) * 100).toInt() : 0;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 20,
-            offset: const Offset(0, -10),
+            offset: const Offset(0, -8),
           ),
         ],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Row(
         children: [
@@ -54,16 +54,30 @@ class WorkoutStickySaveBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '$performedCount of $totalCount Done ($performedSets/$totalSets sets • $percent%)'.toUpperCase(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 11,
-                    letterSpacing: 0.5,
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$performedCount OF $totalCount EXERCISES',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      '$performedSets/$totalSets SETS ($percent%)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
@@ -76,15 +90,16 @@ class WorkoutStickySaveBar extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           ElevatedButton(
             onPressed: state.status == WorkoutStatus.saving
                 ? null
                 : () => context.read<WorkoutCubit>().saveWorkout(),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
               ),
             ),
             child: state.status == WorkoutStatus.saving
@@ -96,7 +111,14 @@ class WorkoutStickySaveBar extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('FINISH', style: TextStyle(fontWeight: FontWeight.bold)),
+                : const Text(
+                    'FINISH WORKOUT',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 11,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
           ),
         ],
       ),

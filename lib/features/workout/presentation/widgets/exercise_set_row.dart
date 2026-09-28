@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/entities/exercise_set_log.dart';
+import 'numeric_keypad_sheet.dart';
 
 class ExerciseSetRow extends StatefulWidget {
   final int index;
@@ -20,6 +24,7 @@ class ExerciseSetRow extends StatefulWidget {
   final FocusNode? repsFocusNode;
   final VoidCallback? onWeightSubmitted;
   final VoidCallback? onRepsSubmitted;
+  final String exerciseName;
 
   const ExerciseSetRow({
     super.key,
@@ -39,16 +44,20 @@ class ExerciseSetRow extends StatefulWidget {
     this.repsFocusNode,
     this.onWeightSubmitted,
     this.onRepsSubmitted,
+    this.exerciseName = '',
   });
 
   @override
   State<ExerciseSetRow> createState() => _ExerciseSetRowState();
 }
 
-class _ExerciseSetRowState extends State<ExerciseSetRow> {
+class _ExerciseSetRowState extends State<ExerciseSetRow>
+    with SingleTickerProviderStateMixin {
   late TextEditingController _weightController;
   late TextEditingController _repsController;
-  String? _repsError;
+  Timer? _autoRepeatTimer;
+  late AnimationController _checkAnimationController;
+  late Animation<double> _checkScaleAnimation;
 
   @override
   void initState() {
@@ -62,12 +71,30 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
         : null;
     _weightController = TextEditingController(
       text: weight != null
-          ? weight.toStringAsFixed(weight % 1 == 0 ? 0 : 1)
+          ? (weight % 1 == 0 ? weight.toInt().toString() : weight.toStringAsFixed(1))
           : '',
     );
     _repsController = TextEditingController(
       text: widget.setLog.actualReps?.toString() ?? '',
     );
+
+    _checkAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _checkScaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.25, end: 1.0), weight: 50),
+    ]).animate(
+      CurvedAnimation(
+        parent: _checkAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    if (widget.setLog.isPerformed) {
+      _checkAnimationController.value = 1.0;
+    }
   }
 
   @override
@@ -84,7 +111,7 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
             )
           : null;
       final newText = weight != null
-          ? weight.toStringAsFixed(weight % 1 == 0 ? 0 : 1)
+          ? (weight % 1 == 0 ? weight.toInt().toString() : weight.toStringAsFixed(1))
           : '';
       if (_weightController.text != newText &&
           !(widget.weightFocusNode?.hasFocus ?? false)) {
@@ -99,35 +126,72 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
         _repsController.text = newText;
       }
     }
+
+    if (!oldWidget.setLog.isPerformed && widget.setLog.isPerformed) {
+      _checkAnimationController.forward(from: 0.0);
+    }
   }
 
   @override
   void dispose() {
+    _autoRepeatTimer?.cancel();
+    _checkAnimationController.dispose();
     _weightController.dispose();
     _repsController.dispose();
     super.dispose();
   }
 
-  void _validateReps(String value) {
-    if (value.isEmpty) {
-      setState(() => _repsError = null);
-      widget.onRepsChanged(null);
-      return;
-    }
+  void _startAutoRepeat(VoidCallback action) {
+    action();
+    _autoRepeatTimer?.cancel();
+    _autoRepeatTimer = Timer.periodic(
+      const Duration(milliseconds: 120),
+      (_) => action(),
+    );
+  }
 
-    final reps = int.tryParse(value);
-    if (reps == null || reps <= 0) {
-      setState(() => _repsError = 'Reps must be greater than 0');
-    } else {
-      setState(() => _repsError = null);
-      widget.onRepsChanged(reps);
+  void _stopAutoRepeat() {
+    _autoRepeatTimer?.cancel();
+  }
+
+  Future<void> _openWeightKeypad() async {
+    final currentWeight = widget.setLog.weightKg != null
+        ? WeightConverter.convert(
+            widget.setLog.weightKg!,
+            WeightUnit.kg,
+            widget.displayUnit,
+          )
+        : null;
+
+    final result = await NumericKeypadSheet.showWeightKeypad(
+      context,
+      title: '${widget.exerciseName} - Set ${widget.index + 1} Weight',
+      initialValue: currentWeight,
+      unit: widget.displayUnit.name.toUpperCase(),
+    );
+
+    if (result != null) {
+      widget.onWeightChanged(result);
+    }
+  }
+
+  Future<void> _openRepsKeypad() async {
+    final result = await NumericKeypadSheet.showRepsKeypad(
+      context,
+      title: '${widget.exerciseName} - Set ${widget.index + 1} Reps',
+      initialValue: widget.setLog.actualReps,
+    );
+
+    if (result != null) {
+      widget.onRepsChanged(result);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final isPerformed = widget.setLog.isPerformed;
 
     final lastWeight = widget.previousSetLog?.weightKg != null
         ? WeightConverter.convert(
@@ -141,271 +205,379 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
     String lastLabel = '—';
     if (lastWeight != null || lastReps != null) {
       final w = lastWeight != null
-          ? lastWeight.toStringAsFixed(lastWeight % 1 == 0 ? 0 : 1)
+          ? (lastWeight % 1 == 0 ? lastWeight.toInt().toString() : lastWeight.toStringAsFixed(1))
           : '';
       final r = lastReps != null ? '×$lastReps' : '';
       lastLabel = '$w$r'.trim();
       if (lastWeight != null) lastLabel += ' ${widget.displayUnit.name}';
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3),
-          child: Row(
-            children: [
-              // Set Number
-              SizedBox(
-                width: 22,
-                child: Text(
-                  '${widget.index + 1}',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
+    final rowContent = AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+      decoration: BoxDecoration(
+        color: isPerformed
+            ? AppColors.completedGreen.withValues(alpha: isDark ? 0.12 : 0.08)
+            : (isDark ? AppColors.darkElevated.withValues(alpha: 0.5) : Colors.grey.shade50),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isPerformed
+              ? AppColors.completedGreen.withValues(alpha: 0.4)
+              : (isDark ? AppColors.borderSubtle : AppColors.outline),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Set Number
+          SizedBox(
+            width: 28,
+            child: Text(
+              '${widget.index + 1}',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                color: isPerformed ? AppColors.completedGreen : theme.colorScheme.onSurface,
               ),
+            ),
+          ),
 
-              // Last Value
-              Expanded(
-                flex: 2,
-                child: Text(
-                  lastLabel,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+          // Last Value Ghosted
+          Expanded(
+            flex: 2,
+            child: Text(
+              lastLabel,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w600,
               ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
 
-              // Weight Input with Stepper Controls
-              Expanded(
-                flex: 5,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1),
-                  child: widget.isWeightAllowed
-                      ? Container(
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              InkWell(
-                                onTap: () => widget.onStepWeight?.call(-2.5),
-                                borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 3,
-                                    vertical: 6,
-                                  ),
-                                  child: Icon(
-                                    Icons.remove_rounded,
-                                    size: 13,
-                                    color: colorScheme.primary,
-                                  ),
+          // Weight Field with Large Buttons & Keypad Tap
+          Expanded(
+            flex: 5,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: widget.isWeightAllowed
+                  ? Container(
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkCard
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isPerformed
+                              ? AppColors.completedGreen.withValues(alpha: 0.3)
+                              : (isDark ? AppColors.borderSubtle : AppColors.outline),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTapDown: (_) => _startAutoRepeat(() {
+                              HapticFeedback.lightImpact();
+                              widget.onStepWeight?.call(-2.5);
+                            }),
+                            onTapUp: (_) => _stopAutoRepeat(),
+                            onTapCancel: _stopAutoRepeat,
+                            child: Container(
+                              width: 32,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.horizontal(
+                                  left: Radius.circular(11),
                                 ),
                               ),
-                              Expanded(
+                              child: Icon(
+                                Icons.remove_rounded,
+                                size: 16,
+                                color: isPerformed
+                                    ? AppColors.completedGreen
+                                    : AppColors.gradientStart,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: _openWeightKeypad,
+                              child: AbsorbPointer(
                                 child: TextField(
                                   controller: _weightController,
-                                  focusNode: widget.weightFocusNode,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  textInputAction: TextInputAction.next,
                                   textAlign: TextAlign.center,
-                                  onSubmitted: (_) =>
-                                      widget.onWeightSubmitted?.call(),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d*\.?\d*'),
-                                    ),
-                                  ],
                                   decoration: InputDecoration(
                                     isDense: true,
                                     contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                      horizontal: 0,
+                                      vertical: 8,
                                     ),
                                     border: InputBorder.none,
                                     hintText: '0',
                                     suffixText: widget.displayUnit.name,
-                                    suffixStyle: TextStyle(
-                                      fontSize: 8.5,
+                                    suffixStyle: GoogleFonts.outfit(
+                                      fontSize: 9,
                                       fontWeight: FontWeight.bold,
-                                      color: colorScheme.onSurfaceVariant,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  onChanged: (value) {
-                                    final weight = double.tryParse(value);
-                                    widget.onWeightChanged(weight);
-                                  },
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => widget.onStepWeight?.call(2.5),
-                                borderRadius: const BorderRadius.horizontal(
-                                  right: Radius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 3,
-                                    vertical: 6,
-                                  ),
-                                  child: Icon(
-                                    Icons.add_rounded,
-                                    size: 13,
-                                    color: colorScheme.primary,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                    color: isPerformed
+                                        ? AppColors.completedGreen
+                                        : theme.colorScheme.onSurface,
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        )
-                      : const Center(child: Text('—')),
-                ),
-              ),
+                          GestureDetector(
+                            onTapDown: (_) => _startAutoRepeat(() {
+                              HapticFeedback.lightImpact();
+                              widget.onStepWeight?.call(2.5);
+                            }),
+                            onTapUp: (_) => _stopAutoRepeat(),
+                            onTapCancel: _stopAutoRepeat,
+                            child: Container(
+                              width: 32,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.horizontal(
+                                  right: Radius.circular(11),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.add_rounded,
+                                size: 16,
+                                color: isPerformed
+                                    ? AppColors.completedGreen
+                                    : AppColors.gradientStart,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const Center(child: Text('—')),
+            ),
+          ),
 
-              // Reps Input with Stepper Controls
-              Expanded(
-                flex: 5,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1),
-                  child: widget.isRepsAllowed
-                      ? Container(
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              InkWell(
-                                onTap: () => widget.onStepReps?.call(-1),
-                                borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 3,
-                                    vertical: 6,
-                                  ),
-                                  child: Icon(
-                                    Icons.remove_rounded,
-                                    size: 13,
-                                    color: colorScheme.primary,
-                                  ),
+          // Reps Field with Large Buttons & Keypad Tap
+          Expanded(
+            flex: 5,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: widget.isRepsAllowed
+                  ? Container(
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkCard : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isPerformed
+                              ? AppColors.completedGreen.withValues(alpha: 0.3)
+                              : (isDark ? AppColors.borderSubtle : AppColors.outline),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTapDown: (_) => _startAutoRepeat(() {
+                              HapticFeedback.lightImpact();
+                              widget.onStepReps?.call(-1);
+                            }),
+                            onTapUp: (_) => _stopAutoRepeat(),
+                            onTapCancel: _stopAutoRepeat,
+                            child: Container(
+                              width: 32,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.horizontal(
+                                  left: Radius.circular(11),
                                 ),
                               ),
-                              Expanded(
+                              child: Icon(
+                                Icons.remove_rounded,
+                                size: 16,
+                                color: isPerformed
+                                    ? AppColors.completedGreen
+                                    : AppColors.gradientStart,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: _openRepsKeypad,
+                              child: AbsorbPointer(
                                 child: TextField(
                                   controller: _repsController,
-                                  focusNode: widget.repsFocusNode,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.next,
                                   textAlign: TextAlign.center,
-                                  onSubmitted: (_) =>
-                                      widget.onRepsSubmitted?.call(),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                  ],
                                   decoration: InputDecoration(
                                     isDense: true,
                                     contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                      horizontal: 0,
+                                      vertical: 8,
                                     ),
                                     border: InputBorder.none,
                                     hintText: '0',
                                     suffixText: 'r',
-                                    suffixStyle: TextStyle(
-                                      fontSize: 8.5,
+                                    suffixStyle: GoogleFonts.outfit(
+                                      fontSize: 9,
                                       fontWeight: FontWeight.bold,
-                                      color: colorScheme.onSurfaceVariant,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  onChanged: _validateReps,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => widget.onStepReps?.call(1),
-                                borderRadius: const BorderRadius.horizontal(
-                                  right: Radius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 3,
-                                    vertical: 6,
-                                  ),
-                                  child: Icon(
-                                    Icons.add_rounded,
-                                    size: 13,
-                                    color: colorScheme.primary,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                    color: isPerformed
+                                        ? AppColors.completedGreen
+                                        : theme.colorScheme.onSurface,
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        )
-                      : const Center(child: Text('—')),
-                ),
-              ),
+                          GestureDetector(
+                            onTapDown: (_) => _startAutoRepeat(() {
+                              HapticFeedback.lightImpact();
+                              widget.onStepReps?.call(1);
+                            }),
+                            onTapUp: (_) => _stopAutoRepeat(),
+                            onTapCancel: _stopAutoRepeat,
+                            child: Container(
+                              width: 32,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.horizontal(
+                                  right: Radius.circular(11),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.add_rounded,
+                                size: 16,
+                                color: isPerformed
+                                    ? AppColors.completedGreen
+                                    : AppColors.gradientStart,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const Center(child: Text('—')),
+            ),
+          ),
 
-              // Done Toggle
-              SizedBox(
-                width: 32,
-                child: Center(
-                  child: IconButton(
-                    icon: Icon(
-                      widget.setLog.isPerformed
-                          ? Icons.check_circle_rounded
-                          : Icons.radio_button_unchecked_rounded,
-                      color: widget.setLog.isPerformed
-                          ? colorScheme.primary
-                          : colorScheme.outline,
-                      size: 20,
+          // Large Done Checkbox with Bounce Animation
+          SizedBox(
+            width: 44,
+            height: 42,
+            child: Center(
+              child: ScaleTransition(
+                scale: _checkScaleAnimation,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    widget.onTogglePerformed();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: isPerformed
+                          ? AppColors.completedGreen
+                          : Colors.transparent,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isPerformed
+                            ? AppColors.completedGreen
+                            : (isDark
+                                ? Colors.white30
+                                : Colors.black26),
+                        width: 2,
+                      ),
+                      boxShadow: isPerformed
+                          ? [
+                              BoxShadow(
+                                color: AppColors.completedGreen.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: widget.onTogglePerformed,
+                    child: isPerformed
+                        ? const Icon(
+                            Icons.check_rounded,
+                            size: 20,
+                            color: Colors.black,
+                          )
+                        : null,
                   ),
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (widget.onDeleteSet != null) {
+      return Dismissible(
+        key: ValueKey('set_${widget.index}_${widget.setLog.hashCode}'),
+        direction: DismissDirection.endToStart,
+        onDismissed: (_) {
+          HapticFeedback.mediumImpact();
+          widget.onDeleteSet?.call();
+        },
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 16),
+          margin: const EdgeInsets.symmetric(vertical: 3),
+          decoration: BoxDecoration(
+            color: AppColors.destructiveRed.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Delete',
+                style: TextStyle(
+                  color: AppColors.destructiveRed,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              SizedBox(width: 4),
+              Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.destructiveRed,
+                size: 20,
               ),
             ],
           ),
         ),
-        if (_repsError != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 22, bottom: 4),
-            child: Text(
-              _repsError!,
-              style: TextStyle(
-                color: colorScheme.error,
-                fontSize: 10,
-              ),
-            ),
-          ),
-      ],
-    );
+        child: rowContent,
+      );
+    }
+
+    return rowContent;
   }
 }
