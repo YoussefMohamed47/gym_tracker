@@ -77,94 +77,100 @@ class _DailyRoutineSectionState extends State<DailyRoutineSection> {
             child: Column(
               children: [
                 // Header Bar with Progress & Expand Toggle
-                InkWell(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: isAllComplete
-                                    ? AppColors.completedGreen.withValues(alpha: 0.15)
-                                    : AppColors.gradientStart.withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(22),
+                    highlightColor: AppColors.gradientStart.withValues(alpha: 0.08),
+                    splashColor: AppColors.gradientStart.withValues(alpha: 0.12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isAllComplete
+                                      ? AppColors.completedGreen.withValues(alpha: 0.15)
+                                      : AppColors.gradientStart.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isAllComplete
+                                      ? Icons.check_circle_rounded
+                                      : Icons.accessibility_new_rounded,
+                                  size: 18,
+                                  color: isAllComplete
+                                      ? AppColors.completedGreen
+                                      : AppColors.gradientStart,
+                                ),
                               ),
-                              child: Icon(
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Warm-up & Rehab',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w900,
+                                        color: isAllComplete
+                                            ? AppColors.completedGreen
+                                            : Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$completedRoutineItems of $totalRoutineItems done',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AnimatedRotation(
+                                turns: _isExpanded ? 0.5 : 0.0,
+                                duration: const Duration(milliseconds: 250),
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 5,
+                              backgroundColor:
+                                  isDark ? Colors.white10 : Colors.black12,
+                              valueColor: AlwaysStoppedAnimation<Color>(
                                 isAllComplete
-                                    ? Icons.check_circle_rounded
-                                    : Icons.accessibility_new_rounded,
-                                size: 18,
-                                color: isAllComplete
                                     ? AppColors.completedGreen
                                     : AppColors.gradientStart,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Warm-up & Rehab',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900,
-                                      color: isAllComplete
-                                          ? AppColors.completedGreen
-                                          : Theme.of(context).colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  Text(
-                                    '$completedRoutineItems of $totalRoutineItems done',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            AnimatedRotation(
-                              turns: _isExpanded ? 0.5 : 0.0,
-                              duration: const Duration(milliseconds: 250),
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 5,
-                            backgroundColor:
-                                isDark ? Colors.white10 : Colors.black12,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              isAllComplete
-                                  ? AppColors.completedGreen
-                                  : AppColors.gradientStart,
-                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

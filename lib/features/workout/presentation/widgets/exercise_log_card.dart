@@ -244,136 +244,136 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
         child: Column(
           children: [
             // Collapsed Summary Header / Expand Controller
-            InkWell(
-              onTap: widget.onExpandToggle,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Chips Row & Collapsed Status Bar
-                    Row(
-                      children: [
-                        if (chips.isNotEmpty)
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: chips.map((chip) {
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 3,
-                                    ),
-                                    margin: const EdgeInsets.only(right: 6),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.gradientStart.withValues(
-                                        alpha: 0.12,
-                                      ),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      chip,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.gradientStart,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        if (isPR)
-                          Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                margin: const EdgeInsets.only(left: 6),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFFFD700),
-                                      Color(0xFFFF8C00),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onExpandToggle,
+                borderRadius: BorderRadius.circular(22),
+                highlightColor: AppColors.gradientStart.withValues(alpha: 0.08),
+                splashColor: AppColors.gradientStart.withValues(alpha: 0.12),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Chips Row & Collapsed Status Bar
+                      Row(
+                        children: [
+                          if (chips.isNotEmpty)
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.emoji_events_rounded,
-                                      size: 11,
-                                      color: Colors.black,
-                                    ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      'PR',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.black,
+                                  children: chips.map((chip) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                              .animate(
-                                onPlay: (controller) => controller.repeat(),
-                              )
-                              .shimmer(
-                                duration: 1500.ms,
-                                color: Colors.white70,
-                              ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Exercise Name & Chevron / Progress Mini Bar
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Hero(
-                            tag: 'ex_name_${widget.log.performedExerciseId}',
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (isAlternative)
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 2),
+                                      margin: const EdgeInsets.only(right: 6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.gradientStart
+                                            .withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
                                       child: Text(
-                                        'Planned: ${originalExercise.name}'
-                                            .toUpperCase(),
+                                        chip,
                                         style: GoogleFonts.outfit(
                                           fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.restAmber,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.gradientStart,
+                                          letterSpacing: 0.5,
                                         ),
                                       ),
-                                    ),
-                                  Text(
-                                    performedExercise.name,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.3,
-                                      color: isFullyPerformed
-                                          ? AppColors.completedGreen
-                                          : theme.colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ],
+                                    );
+                                  }).toList(),
+                                ),
                               ),
                             ),
+                          if (isPR)
+                            Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  margin: const EdgeInsets.only(left: 6),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFFFFD700),
+                                        Color(0xFFFF8C00),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.emoji_events_rounded,
+                                        size: 11,
+                                        color: Colors.black,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        'PR',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .animate(
+                                  onPlay: (controller) => controller.repeat(),
+                                )
+                                .shimmer(
+                                  duration: 1500.ms,
+                                  color: Colors.white70,
+                                ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Exercise Name & Chevron / Progress Mini Bar
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (isAlternative)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 2),
+                                    child: Text(
+                                      'Planned: ${originalExercise.name}'
+                                          .toUpperCase(),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.restAmber,
+                                      ),
+                                    ),
+                                  ),
+                                Text(
+                                  performedExercise.name,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.3,
+                                    color: isFullyPerformed
+                                        ? AppColors.completedGreen
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                         const SizedBox(width: 8),
 
                         // Progress mini pill or done badge
@@ -456,6 +456,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                 ),
               ),
             ),
+          ),
 
             // Expanded Card Body
             AnimatedSize(
