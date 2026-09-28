@@ -25,6 +25,15 @@ class WorkoutStickySaveBar extends StatelessWidget {
         .length;
     final totalCount = state.exerciseLogs.length;
 
+    int totalSets = 0;
+    int performedSets = 0;
+    for (final log in state.exerciseLogs.values) {
+      totalSets += log.sets.length;
+      performedSets += log.sets.where((s) => s.isPerformed).length;
+    }
+
+    final percent = totalCount > 0 ? ((performedCount / totalCount) * 100).toInt() : 0;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
@@ -46,11 +55,11 @@ class WorkoutStickySaveBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$performedCount of $totalCount done'.toUpperCase(),
+                  '$performedCount of $totalCount Done ($performedSets/$totalSets sets • $percent%)'.toUpperCase(),
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    letterSpacing: 1.0,
+                    fontSize: 11,
+                    letterSpacing: 0.5,
                     color: AppColors.onSurfaceVariant,
                   ),
                 ),
@@ -67,13 +76,13 @@ class WorkoutStickySaveBar extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 24),
+          const SizedBox(width: 16),
           ElevatedButton(
             onPressed: state.status == WorkoutStatus.saving
                 ? null
                 : () => context.read<WorkoutCubit>().saveWorkout(),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -87,7 +96,7 @@ class WorkoutStickySaveBar extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('FINISH'),
+                : const Text('FINISH', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

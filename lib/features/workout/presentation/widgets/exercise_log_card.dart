@@ -16,12 +16,17 @@ class ExerciseLogCard extends StatefulWidget {
   final List<ExerciseSetLog>? previousSets;
   final Function(int setIndex, double? weight) onWeightChanged;
   final Function(int setIndex, int? reps) onRepsChanged;
+  final Function(int setIndex, double delta)? onStepWeight;
+  final Function(int setIndex, int delta)? onStepReps;
   final Function(int setIndex) onToggleSetPerformed;
   final Function(WeightUnit unit) onUnitChanged;
   final VoidCallback onSelectAlternative;
   final VoidCallback onAddPhoto;
   final VoidCallback onShowHistory;
   final VoidCallback? onUseLegacyWeight;
+  final VoidCallback? onCopyPreviousSession;
+  final VoidCallback? onAddSet;
+  final Function(int setIndex)? onRemoveSet;
 
   const ExerciseLogCard({
     super.key,
@@ -32,12 +37,17 @@ class ExerciseLogCard extends StatefulWidget {
     this.previousSets,
     required this.onWeightChanged,
     required this.onRepsChanged,
+    this.onStepWeight,
+    this.onStepReps,
     required this.onToggleSetPerformed,
     required this.onUnitChanged,
     required this.onSelectAlternative,
     required this.onAddPhoto,
     required this.onShowHistory,
     this.onUseLegacyWeight,
+    this.onCopyPreviousSession,
+    this.onAddSet,
+    this.onRemoveSet,
   });
 
   @override
@@ -92,6 +102,9 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final originalExercise = WorkoutCatalog.getExerciseById(
       widget.log.plannedExerciseId,
     );
@@ -106,7 +119,6 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
 
     final hasAnyPerformed = widget.log.sets.any((s) => s.isPerformed);
 
-    // Check if it's a duration-based exercise
     final isDurationBased = widget.slot.prescribedReps.contains('s');
 
     return AnimatedContainer(
@@ -115,19 +127,19 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
       decoration: BoxDecoration(
         color: isFullyPerformed
             ? AppColors.success.withValues(alpha: 0.05)
-            : Theme.of(context).cardTheme.color,
+            : theme.cardTheme.color,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isFullyPerformed
               ? AppColors.success.withValues(alpha: 0.5)
               : hasAnyPerformed
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)
-                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                  ? colorScheme.primary.withValues(alpha: 0.4)
+                  : colorScheme.outline.withValues(alpha: 0.5),
           width: 1.5,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -159,7 +171,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                         ),
                       Text(
                         performedExercise.name,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.5,
                               color:
@@ -173,7 +185,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                   IconButton(
                     icon: Icon(
                       Icons.play_circle_filled_rounded,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: colorScheme.primary,
                       size: 28,
                     ),
                     onPressed: () => VideoLauncher.launch(
@@ -188,16 +200,15 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
             // Prescription Info
             Row(
               children: [
-                Icon(Icons.repeat_rounded,
-                    size: 14,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: 0.6)),
+                Icon(
+                  Icons.repeat_rounded,
+                  size: 14,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${widget.slot.prescribedSets} sets • ${widget.slot.prescribedReps} • Rest ${widget.slot.prescribedRest}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -208,29 +219,47 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Previous Info
+            // Previous Info & Copy Button
             if (widget.previousDate != null)
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHighest
-                      .withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
-                  'PREVIOUS • ${widget.previousDate}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    letterSpacing: 0.5,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'PREVIOUS • ${widget.previousDate}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    if (widget.onCopyPreviousSession != null)
+                      TextButton.icon(
+                        onPressed: widget.onCopyPreviousSession,
+                        icon: const Icon(Icons.electric_bolt_rounded, size: 14),
+                        label: const Text(
+                          'Copy Previous Session',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                  ],
                 ),
               ),
 
@@ -253,30 +282,30 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                         vertical: 8,
                       ),
                       child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.history_rounded,
-                          size: 16,
-                          color: Colors.orange,
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            'Legacy ref: ${WeightConverter.format(WeightConverter.convert(widget.log.weightKg!, WeightUnit.kg, widget.displayUnit))} ${widget.displayUnit.name}. Use for all sets?',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.history_rounded,
+                            size: 16,
+                            color: Colors.orange,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Legacy ref: ${WeightConverter.format(WeightConverter.convert(widget.log.weightKg!, WeightUnit.kg, widget.displayUnit))} ${widget.displayUnit.name}. Use for all sets?',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
             // Set Table Header
             Padding(
@@ -284,7 +313,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               child: Row(
                 children: [
                   const SizedBox(
-                    width: 32,
+                    width: 22,
                     child: Text(
                       'SET',
                       textAlign: TextAlign.center,
@@ -297,7 +326,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                     ),
                   ),
                   const Expanded(
-                    flex: 3,
+                    flex: 2,
                     child: Text(
                       'LAST',
                       textAlign: TextAlign.center,
@@ -310,7 +339,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                     ),
                   ),
                   const Expanded(
-                    flex: 3,
+                    flex: 5,
                     child: Text(
                       'WEIGHT',
                       textAlign: TextAlign.center,
@@ -323,7 +352,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                     ),
                   ),
                   const Expanded(
-                    flex: 3,
+                    flex: 5,
                     child: Text(
                       'REPS',
                       textAlign: TextAlign.center,
@@ -336,7 +365,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                     ),
                   ),
                   const SizedBox(
-                    width: 48,
+                    width: 32,
                     child: Text(
                       'DONE',
                       textAlign: TextAlign.center,
@@ -365,7 +394,16 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                 isRepsAllowed: !isDurationBased,
                 onWeightChanged: (w) => widget.onWeightChanged(index, w),
                 onRepsChanged: (r) => widget.onRepsChanged(index, r),
+                onStepWeight: widget.onStepWeight != null
+                    ? (delta) => widget.onStepWeight!(index, delta)
+                    : null,
+                onStepReps: widget.onStepReps != null
+                    ? (delta) => widget.onStepReps!(index, delta)
+                    : null,
                 onTogglePerformed: () => widget.onToggleSetPerformed(index),
+                onDeleteSet: widget.onRemoveSet != null
+                    ? () => widget.onRemoveSet!(index)
+                    : null,
                 weightFocusNode: _weightFocusNodes[index],
                 repsFocusNode: _repsFocusNodes[index],
                 onWeightSubmitted: () {
@@ -383,6 +421,27 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               );
             }),
 
+            // Add Set Button
+            if (widget.onAddSet != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                child: Center(
+                  child: TextButton.icon(
+                    onPressed: widget.onAddSet,
+                    icon: const Icon(Icons.add_rounded, size: 16),
+                    label: const Text(
+                      'Add Set',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ),
+
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1, thickness: 1),
@@ -393,22 +452,22 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
               children: [
                 _CompactActionButton(
                   icon: Icons.history_rounded,
-                  label: 'History',
+                  label: 'Exercise History',
                   onPressed: widget.onShowHistory,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 6),
                 _CompactActionButton(
                   icon: widget.log.imagePath != null
                       ? Icons.image_rounded
                       : Icons.add_a_photo_rounded,
-                  label: 'Photo',
+                  label: 'Attach Photo',
                   onPressed: widget.onAddPhoto,
                   active: widget.log.imagePath != null,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 6),
                 _CompactActionButton(
                   icon: Icons.swap_horiz_rounded,
-                  label: 'Alt',
+                  label: 'Alternative Exercise',
                   onPressed: widget.onSelectAlternative,
                 ),
               ],
@@ -491,23 +550,26 @@ class _CompactActionButton extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   icon,
-                  size: 16,
+                  size: 13,
                   color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

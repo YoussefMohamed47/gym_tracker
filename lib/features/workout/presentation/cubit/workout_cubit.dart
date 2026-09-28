@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/rest_time_parser.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/exercise_log.dart';
 import '../../domain/entities/exercise_set_log.dart';
+import '../../domain/entities/workout_definition.dart';
 import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../domain/repositories/workout_repository.dart';
@@ -210,9 +212,12 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     final log = logs[plannedId];
 
     if (log != null && log.sets.length > setIndex) {
+      final wasPerformed = log.sets[setIndex].isPerformed;
       final updatedSets = List<ExerciseSetLog>.from(log.sets);
+      final newPerformed = !wasPerformed;
+
       updatedSets[setIndex] = updatedSets[setIndex].copyWith(
-        isPerformed: !updatedSets[setIndex].isPerformed,
+        isPerformed: newPerformed,
       );
 
       final updatedLog = log.copyWith(
@@ -225,6 +230,196 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final altDrafts = _updateAltDraft(plannedId, updatedLog);
 
       emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
+
+      if (newPerformed) {
+        final exerciseDef = WorkoutCatalog.getExerciseById(log.performedExerciseId);
+        final workoutDef = WorkoutCatalog.getWorkoutByType(state.workoutType);
+        ExerciseSlot? foundSlot;
+        if (workoutDef != null) {
+          for (final slot in workoutDef.exercises) {
+            if (slot.exerciseId == log.plannedExerciseId) {
+              foundSlot = slot;
+              break;
+            }
+          }
+        }
+        if (foundSlot == null) {
+          for (final slot in WorkoutCatalog.getDailyRoutine().exercises) {
+            if (slot.exerciseId == log.plannedExerciseId) {
+              foundSlot = slot;
+              break;
+            }
+          }
+        }
+
+        final restSecs = RestTimeParser.parseInSeconds(foundSlot?.prescribedRest);
+        startRestTimer(restSecs, exerciseDef.name);
+      }
+    }
+  }
+
+  void startRestTimer(int durationSeconds, String exerciseName) {
+    emit(
+      state.copyWith(
+        isRestTimerActive: true,
+        restTimerSeconds: durationSeconds,
+        restTimerTargetSeconds: durationSeconds,
+        restTimerExerciseName: exerciseName,
+      ),
+    );
+  }
+
+  void tickRestTimer() {
+    if (!state.isRestTimerActive) return;
+    if (state.restTimerSeconds <= 1) {
+      emit(
+        state.copyWith(
+          isRestTimerActive: false,
+          restTimerSeconds: 0,
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          restTimerSeconds: state.restTimerSeconds - 1,
+        ),
+      );
+    }
+  }
+
+  void addRestTimerSeconds(int seconds) {
+    if (!state.isRestTimerActive) return;
+    emit(
+      state.copyWith(
+        restTimerSeconds: state.restTimerSeconds + seconds,
+        restTimerTargetSeconds: state.restTimerTargetSeconds + seconds,
+      ),
+    );
+  }
+
+  void skipRestTimer() {
+    emit(
+      state.copyWith(
+        isRestTimerActive: false,
+        restTimerSeconds: 0,
+      ),
+    );
+  }
+
+  Future<void> copyPreviousSession(String plannedId) async {
+    final log = state.exerciseLogs[plannedId];
+    if (log == null) return;
+
+    final prevLog = await repository.getPreviousExerciseLog(
+      state.workoutType == WorkoutType.rest
+          ? 'daily_routine'
+          : state.workoutType.name,
+      log.performedExerciseId,
+    );
+
+    if (prevLog == null || prevLog.sets.isEmpty) return;
+
+    final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
+    final updatedSets = <ExerciseSetLog>[];
+
+    for (int i = 0; i < log.sets.length; i++) {
+      if (i < prevLog.sets.length) {
+        updatedSets.add(
+          log.sets[i].copyWith(
+            weightKg: prevLog.sets[i].weightKg,
+            actualReps: prevLog.sets[i].actualReps,
+          ),
+        );
+      } else {
+        final lastPrevSet = prevLog.sets.last;
+        updatedSets.add(
+          log.sets[i].copyWith(
+            weightKg: lastPrevSet.weightKg,
+            actualReps: lastPrevSet.actualReps,
+          ),
+        );
+      }
+    }
+
+    final updatedLog = log.copyWith(
+      sets: updatedSets,
+      timestamp: DateTime.now(),
+    );
+
+    logs[plannedId] = updatedLog;
+    final altDrafts = _updateAltDraft(plannedId, updatedLog);
+
+    emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
+  }
+
+  void addSet(String plannedId) {
+    final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
+    final log = logs[plannedId];
+
+    if (log != null) {
+      final updatedSets = List<ExerciseSetLog>.from(log.sets);
+      final lastSet = updatedSets.isNotEmpty ? updatedSets.last : null;
+
+      updatedSets.add(
+        ExerciseSetLog(
+          weightKg: lastSet?.weightKg,
+          actualReps: lastSet?.actualReps,
+          isPerformed: false,
+        ),
+      );
+
+      final updatedLog = log.copyWith(
+        sets: updatedSets,
+        timestamp: DateTime.now(),
+      );
+
+      logs[plannedId] = updatedLog;
+      final altDrafts = _updateAltDraft(plannedId, updatedLog);
+
+      emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
+    }
+  }
+
+  void removeSet(String plannedId, int setIndex) {
+    final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
+    final log = logs[plannedId];
+
+    if (log != null && log.sets.length > 1 && setIndex < log.sets.length) {
+      final updatedSets = List<ExerciseSetLog>.from(log.sets);
+      updatedSets.removeAt(setIndex);
+
+      final updatedLog = log.copyWith(
+        sets: updatedSets,
+        timestamp: DateTime.now(),
+      );
+
+      logs[plannedId] = updatedLog;
+      final altDrafts = _updateAltDraft(plannedId, updatedLog);
+
+      emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
+    }
+  }
+
+  void stepWeight(String plannedId, int setIndex, double deltaAmount) {
+    final log = state.exerciseLogs[plannedId];
+    if (log != null && log.sets.length > setIndex) {
+      final currentKg = log.sets[setIndex].weightKg ?? 0.0;
+      final currentUnitValue = WeightConverter.convert(
+        currentKg,
+        WeightUnit.kg,
+        log.displayUnit,
+      );
+      final newUnitValue = (currentUnitValue + deltaAmount).clamp(0.0, 999.0);
+      updateSetWeight(plannedId, setIndex, newUnitValue, log.displayUnit);
+    }
+  }
+
+  void stepReps(String plannedId, int setIndex, int deltaAmount) {
+    final log = state.exerciseLogs[plannedId];
+    if (log != null && log.sets.length > setIndex) {
+      final currentReps = log.sets[setIndex].actualReps ?? 0;
+      final newReps = (currentReps + deltaAmount).clamp(0, 999);
+      updateSetReps(plannedId, setIndex, newReps);
     }
   }
 

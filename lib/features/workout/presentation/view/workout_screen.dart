@@ -12,9 +12,10 @@ import '../services/workout_share_service.dart';
 import '../widgets/alternative_exercise_bottom_sheet.dart';
 import '../widgets/exercise_history_sheet.dart';
 import '../widgets/week_day_selector.dart';
-import '../widgets/workout_header.dart';
-import '../widgets/workout_sticky_save_bar.dart';
 import '../widgets/workout_content_sliver.dart';
+import '../widgets/workout_header.dart';
+import '../widgets/workout_rest_timer_bar.dart';
+import '../widgets/workout_sticky_save_bar.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -216,7 +217,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       child: BlocBuilder<WorkoutCubit, WorkoutState>(
         builder: (context, state) {
           final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-          final double workoutSaveBarHeight = 88;
+          final double workoutSaveBarHeight = 110;
 
           return Scaffold(
             body: SafeArea(
@@ -247,7 +248,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       ),
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: keyboardOpen ? 24 : workoutSaveBarHeight + 16,
+                          height: keyboardOpen ? 24 : workoutSaveBarHeight + 32,
                         ),
                       ),
                     ],
@@ -257,7 +258,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      child: WorkoutStickySaveBar(state: state),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          WorkoutRestTimerBar(state: state),
+                          WorkoutStickySaveBar(state: state),
+                        ],
+                      ),
                     ),
                 ],
               ),

@@ -20,6 +20,12 @@ class WorkoutState extends Equatable {
   final bool isEditMode;
   final String? errorMessage;
 
+  // Rest Timer State
+  final bool isRestTimerActive;
+  final int restTimerSeconds;
+  final int restTimerTargetSeconds;
+  final String restTimerExerciseName;
+
   const WorkoutState({
     required this.status,
     required this.selectedDate,
@@ -30,6 +36,10 @@ class WorkoutState extends Equatable {
     required this.displayUnit,
     this.isEditMode = false,
     this.errorMessage,
+    this.isRestTimerActive = false,
+    this.restTimerSeconds = 0,
+    this.restTimerTargetSeconds = 0,
+    this.restTimerExerciseName = '',
   });
 
   factory WorkoutState.initial() {
@@ -42,6 +52,10 @@ class WorkoutState extends Equatable {
       exerciseLogs: const {},
       alternativeDrafts: const {},
       displayUnit: WeightUnit.kg,
+      isRestTimerActive: false,
+      restTimerSeconds: 0,
+      restTimerTargetSeconds: 0,
+      restTimerExerciseName: '',
     );
   }
 
@@ -55,6 +69,10 @@ class WorkoutState extends Equatable {
     WeightUnit? displayUnit,
     bool? isEditMode,
     String? errorMessage,
+    bool? isRestTimerActive,
+    int? restTimerSeconds,
+    int? restTimerTargetSeconds,
+    String? restTimerExerciseName,
   }) {
     return WorkoutState(
       status: status ?? this.status,
@@ -66,6 +84,12 @@ class WorkoutState extends Equatable {
       displayUnit: displayUnit ?? this.displayUnit,
       isEditMode: isEditMode ?? this.isEditMode,
       errorMessage: errorMessage ?? this.errorMessage,
+      isRestTimerActive: isRestTimerActive ?? this.isRestTimerActive,
+      restTimerSeconds: restTimerSeconds ?? this.restTimerSeconds,
+      restTimerTargetSeconds:
+          restTimerTargetSeconds ?? this.restTimerTargetSeconds,
+      restTimerExerciseName:
+          restTimerExerciseName ?? this.restTimerExerciseName,
     );
   }
 
@@ -80,5 +104,9 @@ class WorkoutState extends Equatable {
     displayUnit,
     isEditMode,
     errorMessage,
+    isRestTimerActive,
+    restTimerSeconds,
+    restTimerTargetSeconds,
+    restTimerExerciseName,
   ];
 }

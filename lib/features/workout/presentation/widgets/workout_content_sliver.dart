@@ -127,6 +127,20 @@ class WorkoutContentSliver extends StatelessWidget {
                           reps,
                         );
                   },
+                  onStepWeight: (setIndex, delta) {
+                    context.read<WorkoutCubit>().stepWeight(
+                          slot.exerciseId,
+                          setIndex,
+                          delta,
+                        );
+                  },
+                  onStepReps: (setIndex, delta) {
+                    context.read<WorkoutCubit>().stepReps(
+                          slot.exerciseId,
+                          setIndex,
+                          delta,
+                        );
+                  },
                   onToggleSetPerformed: (setIndex) {
                     context.read<WorkoutCubit>().toggleSetPerformed(
                           slot.exerciseId,
@@ -151,6 +165,15 @@ class WorkoutContentSliver extends StatelessWidget {
                   onUseLegacyWeight: () => context
                       .read<WorkoutCubit>()
                       .useLegacyWeightForAllSets(slot.exerciseId),
+                  onCopyPreviousSession: () => context
+                      .read<WorkoutCubit>()
+                      .copyPreviousSession(slot.exerciseId),
+                  onAddSet: () => context
+                      .read<WorkoutCubit>()
+                      .addSet(slot.exerciseId),
+                  onRemoveSet: (setIndex) => context
+                      .read<WorkoutCubit>()
+                      .removeSet(slot.exerciseId, setIndex),
                 );
               },
               childCount: workoutDef.exercises.length,

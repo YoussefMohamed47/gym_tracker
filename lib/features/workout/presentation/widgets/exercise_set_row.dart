@@ -12,7 +12,10 @@ class ExerciseSetRow extends StatefulWidget {
   final bool isRepsAllowed;
   final Function(double? weight) onWeightChanged;
   final Function(int? reps) onRepsChanged;
+  final Function(double delta)? onStepWeight;
+  final Function(int delta)? onStepReps;
   final VoidCallback onTogglePerformed;
+  final VoidCallback? onDeleteSet;
   final FocusNode? weightFocusNode;
   final FocusNode? repsFocusNode;
   final VoidCallback? onWeightSubmitted;
@@ -28,7 +31,10 @@ class ExerciseSetRow extends StatefulWidget {
     this.isRepsAllowed = true,
     required this.onWeightChanged,
     required this.onRepsChanged,
+    this.onStepWeight,
+    this.onStepReps,
     required this.onTogglePerformed,
+    this.onDeleteSet,
     this.weightFocusNode,
     this.repsFocusNode,
     this.onWeightSubmitted,
@@ -112,7 +118,6 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
     final reps = int.tryParse(value);
     if (reps == null || reps <= 0) {
       setState(() => _repsError = 'Reps must be greater than 0');
-      // Do not persist invalid value
     } else {
       setState(() => _repsError = null);
       widget.onRepsChanged(reps);
@@ -121,6 +126,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final lastWeight = widget.previousSetLog?.weightKg != null
         ? WeightConverter.convert(
             widget.previousSetLog!.weightKg!,
@@ -135,7 +143,7 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
       final w = lastWeight != null
           ? lastWeight.toStringAsFixed(lastWeight % 1 == 0 ? 0 : 1)
           : '';
-      final r = lastReps != null ? '× $lastReps' : '';
+      final r = lastReps != null ? '×$lastReps' : '';
       lastLabel = '$w$r'.trim();
       if (lastWeight != null) lastLabel += ' ${widget.displayUnit.name}';
     }
@@ -144,128 +152,220 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(
             children: [
               // Set Number
               SizedBox(
-                width: 32,
+                width: 22,
                 child: Text(
                   '${widget.index + 1}',
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
 
               // Last Value
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: Text(
                   lastLabel,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
 
-              // Weight Input
+              // Weight Input with Stepper Controls
               Expanded(
-                flex: 3,
+                flex: 5,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
                   child: widget.isWeightAllowed
-                      ? TextField(
-                          controller: _weightController,
-                          focusNode: widget.weightFocusNode,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          textInputAction: TextInputAction.next,
-                          onSubmitted: (_) => widget.onWeightSubmitted?.call(),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d*\.?\d*'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            isDense: true,
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 10,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
-                            ),
-                            hintText: '0',
-                            suffixText: widget.displayUnit.name,
-                            suffixStyle: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InkWell(
+                                onTap: () => widget.onStepWeight?.call(-2.5),
+                                borderRadius: const BorderRadius.horizontal(
+                                  left: Radius.circular(8),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 3,
+                                    vertical: 6,
+                                  ),
+                                  child: Icon(
+                                    Icons.remove_rounded,
+                                    size: 13,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _weightController,
+                                  focusNode: widget.weightFocusNode,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  textInputAction: TextInputAction.next,
+                                  textAlign: TextAlign.center,
+                                  onSubmitted: (_) =>
+                                      widget.onWeightSubmitted?.call(),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d*'),
+                                    ),
+                                  ],
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                      horizontal: 0,
+                                    ),
+                                    border: InputBorder.none,
+                                    hintText: '0',
+                                    suffixText: widget.displayUnit.name,
+                                    suffixStyle: TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  onChanged: (value) {
+                                    final weight = double.tryParse(value);
+                                    widget.onWeightChanged(weight);
+                                  },
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => widget.onStepWeight?.call(2.5),
+                                borderRadius: const BorderRadius.horizontal(
+                                  right: Radius.circular(8),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 3,
+                                    vertical: 6,
+                                  ),
+                                  child: Icon(
+                                    Icons.add_rounded,
+                                    size: 13,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                          onChanged: (value) {
-                            final weight = double.tryParse(value);
-                            widget.onWeightChanged(weight);
-                          },
                         )
                       : const Center(child: Text('—')),
                 ),
               ),
 
-              // Reps Input
+              // Reps Input with Stepper Controls
               Expanded(
-                flex: 3,
+                flex: 5,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
                   child: widget.isRepsAllowed
-                      ? TextField(
-                          controller: _repsController,
-                          focusNode: widget.repsFocusNode,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.next,
-                          onSubmitted: (_) => widget.onRepsSubmitted?.call(),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          decoration: InputDecoration(
-                            isDense: true,
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 10,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
-                            ),
-                            hintText: '0',
-                            suffixText: 'r',
-                            suffixStyle: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                          onChanged: _validateReps,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InkWell(
+                                onTap: () => widget.onStepReps?.call(-1),
+                                borderRadius: const BorderRadius.horizontal(
+                                  left: Radius.circular(8),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 3,
+                                    vertical: 6,
+                                  ),
+                                  child: Icon(
+                                    Icons.remove_rounded,
+                                    size: 13,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _repsController,
+                                  focusNode: widget.repsFocusNode,
+                                  keyboardType: TextInputType.number,
+                                  textInputAction: TextInputAction.next,
+                                  textAlign: TextAlign.center,
+                                  onSubmitted: (_) =>
+                                      widget.onRepsSubmitted?.call(),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                      horizontal: 0,
+                                    ),
+                                    border: InputBorder.none,
+                                    hintText: '0',
+                                    suffixText: 'r',
+                                    suffixStyle: TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  onChanged: _validateReps,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => widget.onStepReps?.call(1),
+                                borderRadius: const BorderRadius.horizontal(
+                                  right: Radius.circular(8),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 3,
+                                    vertical: 6,
+                                  ),
+                                  child: Icon(
+                                    Icons.add_rounded,
+                                    size: 13,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       : const Center(child: Text('—')),
                 ),
@@ -273,17 +373,22 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
 
               // Done Toggle
               SizedBox(
-                width: 48,
-                child: IconButton(
-                  icon: Icon(
-                    widget.setLog.isPerformed
-                        ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    color: widget.setLog.isPerformed
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outline,
+                width: 32,
+                child: Center(
+                  child: IconButton(
+                    icon: Icon(
+                      widget.setLog.isPerformed
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: widget.setLog.isPerformed
+                          ? colorScheme.primary
+                          : colorScheme.outline,
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: widget.onTogglePerformed,
                   ),
-                  onPressed: widget.onTogglePerformed,
                 ),
               ),
             ],
@@ -291,11 +396,11 @@ class _ExerciseSetRowState extends State<ExerciseSetRow> {
         ),
         if (_repsError != null)
           Padding(
-            padding: const EdgeInsets.only(left: 32, bottom: 4),
+            padding: const EdgeInsets.only(left: 22, bottom: 4),
             child: Text(
               _repsError!,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
+                color: colorScheme.error,
                 fontSize: 10,
               ),
             ),
