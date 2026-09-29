@@ -93,7 +93,10 @@ class TrainingCard extends StatelessWidget {
     }
 
     final localizedWorkout = ReportFormatter.localizeArabicWorkoutType(trainingName);
-    final localizedCardio = ReportFormatter.localizeArabicDuration(cardioDuration);
+    final rawCardio = cardioDuration.trim();
+    final displayCardio = rawCardio.isNotEmpty
+        ? ReportFormatter.toArabicDigits(rawCardio)
+        : '';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -165,7 +168,7 @@ class TrainingCard extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          if (localizedCardio.isNotEmpty) ...[
+          if (displayCardio.isNotEmpty) ...[
             const SizedBox(height: 6),
             Row(
               children: [
@@ -176,7 +179,7 @@ class TrainingCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'الكارديو: $localizedCardio',
+                  'الكارديو: $displayCardio',
                   style: ReportThemeTokens.arabicBody(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

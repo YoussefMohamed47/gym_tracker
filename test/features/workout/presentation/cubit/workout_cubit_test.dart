@@ -70,7 +70,7 @@ void main() {
       expect(cubit.state.errorMessage, contains('REVIEW_REQUIRED:1'));
     });
 
-    test('updateSetReps should mark set as performed', () async {
+    test('updateSetReps should update reps without auto-toggling isPerformed', () async {
       final logs = {
         'ex1': ExerciseLog(
           plannedExerciseId: 'ex1',
@@ -94,7 +94,7 @@ void main() {
 
       final updatedLog = cubit.state.exerciseLogs['ex1']!;
       expect(updatedLog.sets[0].actualReps, 12);
-      expect(updatedLog.sets[0].isPerformed, isTrue);
+      expect(updatedLog.sets[0].isPerformed, isFalse);
     });
 
     test('prefill should map weight and reps correctly by index', () async {

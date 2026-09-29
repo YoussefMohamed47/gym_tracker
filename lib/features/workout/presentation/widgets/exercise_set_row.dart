@@ -265,108 +265,116 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: widget.isWeightAllowed
-                  ? Container(
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkCard
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isPerformed
-                              ? AppColors.completedGreen.withValues(alpha: 0.3)
-                              : (isDark ? AppColors.borderSubtle : AppColors.outline),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTapDown: (_) => _startAutoRepeat(() {
-                              HapticFeedback.lightImpact();
-                              widget.onStepWeight?.call(-2.5);
-                            }),
-                            onTapUp: (_) => _stopAutoRepeat(),
-                            onTapCancel: _stopAutoRepeat,
-                            child: Container(
-                              width: 32,
-                              height: double.infinity,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(11),
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.remove_rounded,
-                                size: 16,
-                                color: isPerformed
-                                    ? AppColors.completedGreen
-                                    : AppColors.gradientStart,
-                              ),
+                  ? Builder(
+                      builder: (context) {
+                        final hasWeightValue =
+                            widget.setLog.weightKg != null && widget.setLog.weightKg! > 0;
+
+                        return Container(
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? (hasWeightValue
+                                    ? AppColors.darkElevated
+                                    : AppColors.darkCard)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isPerformed
+                                  ? AppColors.completedGreen.withValues(alpha: 0.4)
+                                  : (hasWeightValue
+                                      ? AppColors.gradientStart.withValues(alpha: 0.5)
+                                      : (isDark
+                                          ? AppColors.borderSubtle
+                                          : AppColors.outline)),
+                              width: hasWeightValue || isPerformed ? 1.5 : 1.0,
                             ),
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: _openWeightKeypad,
-                              child: AbsorbPointer(
-                                child: TextField(
-                                  controller: _weightController,
-                                  textAlign: TextAlign.center,
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                    ),
-                                    border: InputBorder.none,
-                                    hintText: '0',
-                                    suffixText: widget.displayUnit.name,
-                                    suffixStyle: GoogleFonts.outfit(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTapDown: (_) => _startAutoRepeat(() {
+                                  HapticFeedback.lightImpact();
+                                  widget.onStepWeight?.call(-2.5);
+                                }),
+                                onTapUp: (_) => _stopAutoRepeat(),
+                                onTapCancel: _stopAutoRepeat,
+                                child: Container(
+                                  width: 28,
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.remove_rounded,
+                                    size: 14,
                                     color: isPerformed
                                         ? AppColors.completedGreen
-                                        : theme.colorScheme.onSurface,
+                                        : AppColors.gradientStart,
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTapDown: (_) => _startAutoRepeat(() {
-                              HapticFeedback.lightImpact();
-                              widget.onStepWeight?.call(2.5);
-                            }),
-                            onTapUp: (_) => _stopAutoRepeat(),
-                            onTapCancel: _stopAutoRepeat,
-                            child: Container(
-                              width: 32,
-                              height: double.infinity,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.horizontal(
-                                  right: Radius.circular(11),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: _openWeightKeypad,
+                                  child: AbsorbPointer(
+                                    child: TextField(
+                                      controller: _weightController,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                        ),
+                                        border: InputBorder.none,
+                                        hintText: '0',
+                                        suffixText: widget.displayUnit.name,
+                                        suffixStyle: GoogleFonts.outfit(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: hasWeightValue
+                                              ? AppColors.gradientStart
+                                              : theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w900,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                        color: isPerformed
+                                            ? AppColors.completedGreen
+                                            : (hasWeightValue
+                                                ? theme.colorScheme.onSurface
+                                                : theme.colorScheme.onSurfaceVariant),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.add_rounded,
-                                size: 16,
-                                color: isPerformed
-                                    ? AppColors.completedGreen
-                                    : AppColors.gradientStart,
+                              GestureDetector(
+                                onTapDown: (_) => _startAutoRepeat(() {
+                                  HapticFeedback.lightImpact();
+                                  widget.onStepWeight?.call(2.5);
+                                }),
+                                onTapUp: (_) => _stopAutoRepeat(),
+                                onTapCancel: _stopAutoRepeat,
+                                child: Container(
+                                  width: 28,
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.add_rounded,
+                                    size: 14,
+                                    color: isPerformed
+                                        ? AppColors.completedGreen
+                                        : AppColors.gradientStart,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : const Center(child: Text('—')),
             ),
@@ -378,106 +386,116 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: widget.isRepsAllowed
-                  ? Container(
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isPerformed
-                              ? AppColors.completedGreen.withValues(alpha: 0.3)
-                              : (isDark ? AppColors.borderSubtle : AppColors.outline),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTapDown: (_) => _startAutoRepeat(() {
-                              HapticFeedback.lightImpact();
-                              widget.onStepReps?.call(-1);
-                            }),
-                            onTapUp: (_) => _stopAutoRepeat(),
-                            onTapCancel: _stopAutoRepeat,
-                            child: Container(
-                              width: 32,
-                              height: double.infinity,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(11),
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.remove_rounded,
-                                size: 16,
-                                color: isPerformed
-                                    ? AppColors.completedGreen
-                                    : AppColors.gradientStart,
-                              ),
+                  ? Builder(
+                      builder: (context) {
+                        final hasRepsValue =
+                            widget.setLog.actualReps != null && widget.setLog.actualReps! > 0;
+
+                        return Container(
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? (hasRepsValue
+                                    ? AppColors.darkElevated
+                                    : AppColors.darkCard)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isPerformed
+                                  ? AppColors.completedGreen.withValues(alpha: 0.4)
+                                  : (hasRepsValue
+                                      ? AppColors.gradientStart.withValues(alpha: 0.5)
+                                      : (isDark
+                                          ? AppColors.borderSubtle
+                                          : AppColors.outline)),
+                              width: hasRepsValue || isPerformed ? 1.5 : 1.0,
                             ),
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: _openRepsKeypad,
-                              child: AbsorbPointer(
-                                child: TextField(
-                                  controller: _repsController,
-                                  textAlign: TextAlign.center,
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                    ),
-                                    border: InputBorder.none,
-                                    hintText: '0',
-                                    suffixText: 'r',
-                                    suffixStyle: GoogleFonts.outfit(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTapDown: (_) => _startAutoRepeat(() {
+                                  HapticFeedback.lightImpact();
+                                  widget.onStepReps?.call(-1);
+                                }),
+                                onTapUp: (_) => _stopAutoRepeat(),
+                                onTapCancel: _stopAutoRepeat,
+                                child: Container(
+                                  width: 28,
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.remove_rounded,
+                                    size: 14,
                                     color: isPerformed
                                         ? AppColors.completedGreen
-                                        : theme.colorScheme.onSurface,
+                                        : AppColors.gradientStart,
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTapDown: (_) => _startAutoRepeat(() {
-                              HapticFeedback.lightImpact();
-                              widget.onStepReps?.call(1);
-                            }),
-                            onTapUp: (_) => _stopAutoRepeat(),
-                            onTapCancel: _stopAutoRepeat,
-                            child: Container(
-                              width: 32,
-                              height: double.infinity,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.horizontal(
-                                  right: Radius.circular(11),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: _openRepsKeypad,
+                                  child: AbsorbPointer(
+                                    child: TextField(
+                                      controller: _repsController,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                        ),
+                                        border: InputBorder.none,
+                                        hintText: '0',
+                                        suffixText: 'r',
+                                        suffixStyle: GoogleFonts.outfit(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: hasRepsValue
+                                              ? AppColors.gradientStart
+                                              : theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w900,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                        color: isPerformed
+                                            ? AppColors.completedGreen
+                                            : (hasRepsValue
+                                                ? theme.colorScheme.onSurface
+                                                : theme.colorScheme.onSurfaceVariant),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.add_rounded,
-                                size: 16,
-                                color: isPerformed
-                                    ? AppColors.completedGreen
-                                    : AppColors.gradientStart,
+                              GestureDetector(
+                                onTapDown: (_) => _startAutoRepeat(() {
+                                  HapticFeedback.lightImpact();
+                                  widget.onStepReps?.call(1);
+                                }),
+                                onTapUp: (_) => _stopAutoRepeat(),
+                                onTapCancel: _stopAutoRepeat,
+                                child: Container(
+                                  width: 28,
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.add_rounded,
+                                    size: 14,
+                                    color: isPerformed
+                                        ? AppColors.completedGreen
+                                        : AppColors.gradientStart,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : const Center(child: Text('—')),
             ),

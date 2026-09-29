@@ -42,7 +42,7 @@ class WeekDaySelector extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final itemWidth = (constraints.maxWidth - 12) / 7;
+          final itemWidth = constraints.maxWidth / 7.0;
 
           return Stack(
             children: [
@@ -72,7 +72,6 @@ class WeekDaySelector extends StatelessWidget {
 
               // 7 Day Tap Buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: weekDays.map((date) {
                   final isSelected =
                       date.year == selectedDate.year &&
@@ -99,58 +98,59 @@ class WeekDaySelector extends StatelessWidget {
                     }
                   }
 
-                  return SizedBox(
-                    width: itemWidth,
-                    height: 64,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          onDateSelected(date);
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              dayNameFormat.format(date)[0], // M, T, W...
-                              style: GoogleFonts.outfit(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                  return Expanded(
+                    child: SizedBox(
+                      height: 64,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            onDateSelected(date);
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                dayNameFormat.format(date)[0], // M, T, W...
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              dayNumberFormat.format(date),
-                              style: GoogleFonts.outfit(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                                color: isSelected
-                                    ? Colors.white
-                                    : Theme.of(context).colorScheme.onSurface,
+                              const SizedBox(height: 2),
+                              Text(
+                                dayNumberFormat.format(date),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
+                              const SizedBox(height: 4),
 
-                            // Status Dot
-                            Container(
-                              width: 4,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isSelected ? Colors.white : dotColor,
+                              // Status Dot
+                              Container(
+                                width: 4,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isSelected ? Colors.white : dotColor,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

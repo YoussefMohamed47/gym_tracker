@@ -166,7 +166,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final updatedSets = List<ExerciseSetLog>.from(log.sets);
       updatedSets[setIndex] = updatedSets[setIndex].copyWith(
         weightKg: weightKg,
-        isPerformed: weight != null, // Auto-mark as performed
+        isPerformed: updatedSets[setIndex].isPerformed, // Preserves manual toggle state
       );
 
       final updatedLog = log.copyWith(
@@ -191,7 +191,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final updatedSets = List<ExerciseSetLog>.from(log.sets);
       updatedSets[setIndex] = updatedSets[setIndex].copyWith(
         actualReps: reps,
-        isPerformed: reps != null, // Auto-mark as performed
+        isPerformed: updatedSets[setIndex].isPerformed, // Preserves manual toggle state
       );
 
       final updatedLog = log.copyWith(

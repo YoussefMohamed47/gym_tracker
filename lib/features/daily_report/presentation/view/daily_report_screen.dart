@@ -138,6 +138,18 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                                           state.report.isEmpty)
                                       ? null
                                       : () async {
+                                          if (state.report.water.trim().isEmpty) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Water Intake is required! يرجى إدخال كمية المياه',
+                                                ),
+                                                backgroundColor: Colors.redAccent,
+                                              ),
+                                            );
+                                            return;
+                                          }
+
                                           final imageBytes =
                                               await WidgetImageCapture.capture(
                                             context: context,

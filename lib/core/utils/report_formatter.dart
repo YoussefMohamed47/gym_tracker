@@ -32,43 +32,20 @@ class ReportFormatter {
     return DateFormat('EEE, MMM d, yyyy').format(date).toUpperCase();
   }
 
-  /// Localizes duration strings for Arabic (e.g. "45 min" -> "٤٥ دقيقة", "7 hours" -> "٧ ساعات")
+  /// Localizes duration strings for Arabic reports (or preserves exact user text)
   static String localizeArabicDuration(String rawDuration) {
     if (rawDuration.trim().isEmpty) return '';
-
-    String text = rawDuration.trim();
-    
-    // Check for hours
-    final hoursMatch = RegExp(r'(\d+)\s*(hrs?|hours?|ساعات?|ساعة)').firstMatch(text);
-    if (hoursMatch != null) {
-      final hrs = hoursMatch.group(1)!;
-      return '${toArabicDigits(hrs)} ساعات';
-    }
-
-    // Check for mins
-    final minsMatch = RegExp(r'(\d+)\s*(mins?|minutes?|دقائق?|دقيقة)').firstMatch(text);
-    if (minsMatch != null) {
-      final mins = minsMatch.group(1)!;
-      return '${toArabicDigits(mins)} دقيقة';
-    }
-
-    // Single number
-    final numberMatch = RegExp(r'^(\d+)$').firstMatch(text);
-    if (numberMatch != null) {
-      return '${toArabicDigits(numberMatch.group(1)!)} دقيقة';
-    }
-
-    return toArabicDigits(text);
+    return toArabicDigits(rawDuration.trim());
   }
 
-  /// Localizes workout type names for Arabic
+  /// Localizes workout type names cleanly without mixing Arabic and English
   static String localizeArabicWorkoutType(String typeName) {
     final lower = typeName.toLowerCase().trim();
-    if (lower.contains('push')) return 'تمرين دفع (Push)';
-    if (lower.contains('pull')) return 'تمرين سحب (Pull)';
-    if (lower.contains('leg')) return 'تمرين أرجل (Legs)';
-    if (lower.contains('upper')) return 'جزء علوي (Upper)';
-    if (lower.contains('lower')) return 'جزء سفلي (Lower)';
+    if (lower.contains('push')) return 'تمرين دفع';
+    if (lower.contains('pull')) return 'تمرين سحب';
+    if (lower.contains('leg')) return 'تمرين أرجل';
+    if (lower.contains('upper')) return 'تمرين جزء علوي';
+    if (lower.contains('lower')) return 'تمرين جزء سفلي';
     if (lower.contains('rest') || lower == 'راحة') return 'يوم راحة';
     return toArabicDigits(typeName);
   }

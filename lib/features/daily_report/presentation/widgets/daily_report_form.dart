@@ -50,9 +50,10 @@ class DailyReportForm extends StatelessWidget {
               onChanged: (val) => onChanged(report.copyWith(snack: val)),
             ),
             _buildTextField(
-              'Water Intake (كمية المياه)',
+              'Water Intake (كمية المياه) *',
               report.water,
               (val) => onChanged(report.copyWith(water: val)),
+              isRequired: true,
             ),
           ],
           0,
@@ -175,7 +176,10 @@ class DailyReportForm extends StatelessWidget {
     String value,
     Function(String) onChanged, {
     int maxLines = 1,
+    bool isRequired = false,
   }) {
+    final isMissingRequired = isRequired && value.trim().isEmpty;
+
     return Builder(
       builder: (context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -185,26 +189,36 @@ class DailyReportForm extends StatelessWidget {
           decoration: InputDecoration(
             labelText: label,
             labelStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: isMissingRequired
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
             filled: true,
-            fillColor: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.3),
+            fillColor: isMissingRequired
+                ? Theme.of(context).colorScheme.error.withValues(alpha: 0.08)
+                : Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.3),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: isMissingRequired
+                  ? BorderSide(color: Theme.of(context).colorScheme.error)
+                  : BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: isMissingRequired
+                  ? BorderSide(color: Theme.of(context).colorScheme.error)
+                  : BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
+                color: isMissingRequired
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
                 width: 2,
               ),
             ),
