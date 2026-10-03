@@ -244,51 +244,60 @@ class WorkoutCompleteReportCard extends StatelessWidget {
   Widget _buildWarmupSection(WorkoutDefinition dailyRoutine) {
     final List<Widget> warmupRows = [];
 
-    for (final slot in dailyRoutine.exercises) {
-      final log = session.exerciseLogs[slot.exerciseId];
-      if (log == null) continue;
+    final warmupRoutines = [
+      dailyRoutine,
+      if (session.workoutType.isUpperBody)
+        WorkoutCatalog.getUpperBodyWarmup(),
+    ];
 
-      final isPerformed = log.isPerformed || log.sets.any((s) => s.isPerformed);
-      if (!isPerformed) continue;
+    for (final routine in warmupRoutines) {
+      for (final slot in routine.exercises) {
+        final log = session.exerciseLogs[slot.exerciseId];
+        if (log == null) continue;
 
-      final exercise = WorkoutCatalog.getExerciseById(slot.exerciseId);
+        final isPerformed =
+            log.isPerformed || log.sets.any((s) => s.isPerformed);
+        if (!isPerformed) continue;
 
-      warmupRows.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: ReportThemeTokens.completedGreen,
-                  shape: BoxShape.circle,
+        final exercise = WorkoutCatalog.getExerciseById(slot.exerciseId);
+
+        warmupRows.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: ReportThemeTokens.completedGreen,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, size: 10, color: Colors.black),
                 ),
-                child: const Icon(Icons.check, size: 10, color: Colors.black),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  exercise.name,
-                  style: ReportThemeTokens.outfitSubtext(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: ReportThemeTokens.textPrimary,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    exercise.name,
+                    style: ReportThemeTokens.outfitSubtext(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: ReportThemeTokens.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                '${slot.prescribedSets} sets ✓',
-                style: ReportThemeTokens.outfitSubtext(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: ReportThemeTokens.completedGreen,
+                Text(
+                  '${slot.prescribedSets} sets ✓',
+                  style: ReportThemeTokens.outfitSubtext(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: ReportThemeTokens.completedGreen,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     if (warmupRows.isEmpty) return const SizedBox.shrink();

@@ -135,5 +135,41 @@ void main() {
         'https://youtube.com/shorts/WjLJ7zIppXQ?si=2F4GVDQYVmElNolD',
       );
     });
+
+    test('Upper Body Warm-up Routine Canonical Content & Isolation', () {
+      final warmup = WorkoutCatalog.getUpperBodyWarmup();
+      expect(warmup.exercises.length, 4);
+
+      expect(warmup.exercises[0].exerciseId, 'warmup_banded_shoulder_circles');
+      expect(warmup.exercises[0].prescribedSets, 1);
+      expect(warmup.exercises[0].prescribedReps, '10–12');
+
+      expect(warmup.exercises[1].exerciseId, 'warmup_banded_external_rotation');
+      expect(warmup.exercises[1].prescribedSets, 2);
+      expect(warmup.exercises[1].prescribedReps, '12–15 / arm');
+
+      expect(warmup.exercises[2].exerciseId, 'warmup_banded_scapula_push_up');
+      expect(warmup.exercises[2].prescribedSets, 1);
+      expect(warmup.exercises[2].prescribedReps, '10–12');
+
+      expect(warmup.exercises[3].exerciseId, 'warmup_banded_single_arm_row');
+      expect(warmup.exercises[3].prescribedSets, 2);
+      expect(warmup.exercises[3].prescribedReps, '12 / arm');
+
+      // Verify excluded exercises are NOT included in warmup
+      for (final slot in warmup.exercises) {
+        final name = WorkoutCatalog.getExerciseById(slot.exerciseId).name.toLowerCase();
+        expect(name.contains('shoulder dislocates'), isFalse);
+        expect(name.contains('upright row'), isFalse);
+        expect(name.contains('strict press'), isFalse);
+      }
+
+      // Verify video URLs exist for all warmup exercises
+      for (final slot in warmup.exercises) {
+        final def = WorkoutCatalog.getExerciseById(slot.exerciseId);
+        expect(def.videoUrl, isNotNull);
+        expect(def.videoUrl, contains('youtube.com/shorts/'));
+      }
+    });
   });
 }

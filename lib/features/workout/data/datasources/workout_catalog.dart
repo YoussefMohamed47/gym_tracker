@@ -223,6 +223,32 @@ class WorkoutCatalog {
       isWeightAllowed: false,
     ),
 
+    // --- UPPER BODY WARM-UP ---
+    ExerciseDefinition(
+      id: 'warmup_banded_shoulder_circles',
+      name: 'Banded Shoulder Circles',
+      videoUrl: 'https://youtube.com/shorts/4CgzlcxpX6c',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'warmup_banded_external_rotation',
+      name: 'Banded External Rotation',
+      videoUrl: 'https://youtube.com/shorts/itrfhrP03sg',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'warmup_banded_scapula_push_up',
+      name: 'Banded Scapula Push Up',
+      videoUrl: 'https://youtube.com/shorts/e0xZY2exolw',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'warmup_banded_single_arm_row',
+      name: 'Single Arm Banded Row',
+      videoUrl: 'https://www.youtube.com/watch?v=I5cBCIhT9fI',
+      isWeightAllowed: false,
+    ),
+
     // --- ALTERNATIVES ---
     ExerciseDefinition(id: 'alt_db_bench_press', name: 'DB Bench Press'),
     ExerciseDefinition(
@@ -578,6 +604,41 @@ class WorkoutCatalog {
         ),
       ],
     ),
+    WorkoutDefinition(
+      id: 'upper_body_warmup',
+      name: 'Upper Body Warm-up',
+      type: WorkoutType.upper,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'warmup_banded_shoulder_circles',
+          order: 1,
+          prescribedSets: 1,
+          prescribedReps: '10–12',
+          prescribedRest: '30s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_banded_external_rotation',
+          order: 2,
+          prescribedSets: 2,
+          prescribedReps: '12–15 / arm',
+          prescribedRest: '30s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_banded_scapula_push_up',
+          order: 3,
+          prescribedSets: 1,
+          prescribedReps: '10–12',
+          prescribedRest: '30s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_banded_single_arm_row',
+          order: 4,
+          prescribedSets: 2,
+          prescribedReps: '12 / arm',
+          prescribedRest: '30s',
+        ),
+      ],
+    ),
   ];
 
   static const List<WorkoutType> trainingSequence = [
@@ -617,7 +678,12 @@ class WorkoutCatalog {
 
   static WorkoutDefinition? getWorkoutByType(WorkoutType type) {
     try {
-      return workouts.firstWhere((w) => w.type == type && w.id != 'daily_routine');
+      return workouts.firstWhere(
+        (w) =>
+            w.type == type &&
+            w.id != 'daily_routine' &&
+            w.id != 'upper_body_warmup',
+      );
     } catch (_) {
       return null;
     }
@@ -625,6 +691,10 @@ class WorkoutCatalog {
 
   static WorkoutDefinition getDailyRoutine() {
     return workouts.firstWhere((w) => w.id == 'daily_routine');
+  }
+
+  static WorkoutDefinition getUpperBodyWarmup() {
+    return workouts.firstWhere((w) => w.id == 'upper_body_warmup');
   }
 
   static ExerciseDefinition getExerciseById(String id) {

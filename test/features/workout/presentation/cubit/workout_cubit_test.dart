@@ -145,11 +145,11 @@ void main() {
       );
 
       when(
+        () => mockRepository.getPreviousExerciseLog(any(), any()),
+      ).thenAnswer((_) async => null);
+      when(
         () => mockRepository.getPreviousExerciseLog('push', any()),
       ).thenAnswer((_) async => prevLog);
-      when(
-        () => mockRepository.getPreviousExerciseLog('daily_routine', any()),
-      ).thenAnswer((_) async => null);
 
       await cubit.changeWorkoutType(WorkoutType.push);
 
@@ -234,6 +234,74 @@ void main() {
 
       await cubit.loadDate(today);
       expect(cubit.state.workoutType, WorkoutType.push);
+    });
+  });
+
+  group('WorkoutCubit - Upper Body Warm-up Routine', () {
+    test('Push, Pull, Upper should include warm-up exercises', () async {
+      when(() => mockRepository.getPreviousExerciseLog(any(), any()))
+          .thenAnswer((_) async => null);
+      when(() => mockRepository.saveSession(any())).thenAnswer((_) async => {});
+
+      // Push
+      await cubit.changeWorkoutType(WorkoutType.push);
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
+        isTrue,
+      );
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_external_rotation'),
+        isTrue,
+      );
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_scapula_push_up'),
+        isTrue,
+      );
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_single_arm_row'),
+        isTrue,
+      );
+
+      // Pull
+      await cubit.changeWorkoutType(WorkoutType.pull);
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
+        isTrue,
+      );
+
+      // Upper
+      await cubit.changeWorkoutType(WorkoutType.upper);
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
+        isTrue,
+      );
+    });
+
+    test('Legs, Lower, Rest should NOT include warm-up exercises', () async {
+      when(() => mockRepository.getPreviousExerciseLog(any(), any()))
+          .thenAnswer((_) async => null);
+      when(() => mockRepository.saveSession(any())).thenAnswer((_) async => {});
+
+      // Legs
+      await cubit.changeWorkoutType(WorkoutType.legs);
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
+        isFalse,
+      );
+
+      // Lower
+      await cubit.changeWorkoutType(WorkoutType.lower);
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
+        isFalse,
+      );
+
+      // Rest
+      await cubit.changeWorkoutType(WorkoutType.rest);
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
+        isFalse,
+      );
     });
   });
 }

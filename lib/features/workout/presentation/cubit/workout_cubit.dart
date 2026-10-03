@@ -26,13 +26,34 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final session = await repository.getSessionForDate(dateKey);
 
       if (session != null) {
+        var logs = session.exerciseLogs;
+        if (session.workoutType.isUpperBody) {
+          final mutableLogs = Map<String, ExerciseLog>.from(logs);
+          final warmup = WorkoutCatalog.getUpperBodyWarmup();
+          bool missingWarmup = false;
+          for (final slot in warmup.exercises) {
+            if (!mutableLogs.containsKey(slot.exerciseId)) {
+              final log = await _createInitialLog(
+                'upper_body_warmup',
+                slot.exerciseId,
+                slot.prescribedSets,
+              );
+              mutableLogs[slot.exerciseId] = log;
+              missingWarmup = true;
+            }
+          }
+          if (missingWarmup) {
+            logs = mutableLogs;
+          }
+        }
+
         emit(
           state.copyWith(
             status: WorkoutStatus.success,
             dateKey: dateKey,
             selectedDate: date,
             workoutType: session.workoutType,
-            exerciseLogs: session.exerciseLogs,
+            exerciseLogs: logs,
             displayUnit: session.displayUnit,
             isEditMode: true,
           ),
@@ -664,6 +685,21 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           slot.prescribedSets,
         );
         logs[slot.exerciseId] = log;
+      }
+    }
+
+    // Add upper body warm-up items if applicable
+    if (type.isUpperBody) {
+      final warmup = WorkoutCatalog.getUpperBodyWarmup();
+      for (final slot in warmup.exercises) {
+        if (!logs.containsKey(slot.exerciseId)) {
+          final log = await _createInitialLog(
+            'upper_body_warmup',
+            slot.exerciseId,
+            slot.prescribedSets,
+          );
+          logs[slot.exerciseId] = log;
+        }
       }
     }
 

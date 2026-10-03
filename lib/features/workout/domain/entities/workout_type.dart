@@ -22,4 +22,9 @@ enum WorkoutType {
         return 'Push';
     }
   }
+
+  bool get isUpperBody =>
+      this == WorkoutType.push ||
+      this == WorkoutType.pull ||
+      this == WorkoutType.upper;
 }

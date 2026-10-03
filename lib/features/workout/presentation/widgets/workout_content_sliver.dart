@@ -8,6 +8,7 @@ import '../../domain/entities/workout_type.dart';
 import '../cubit/workout_cubit.dart';
 import '../cubit/workout_state.dart';
 import 'daily_routine_section.dart';
+import 'warmup_section.dart';
 import 'exercise_log_card.dart';
 import 'workout_switcher_sheet.dart';
 
@@ -169,6 +170,8 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
 
         // Warm-up & Rehab Section
         const SliverToBoxAdapter(child: DailyRoutineSection()),
+        if (widget.state.workoutType.isUpperBody)
+          const SliverToBoxAdapter(child: WarmupSection()),
 
         // Main Exercises Section
         if (widget.state.workoutType != WorkoutType.rest &&
@@ -179,10 +182,11 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
               child: Row(
                 children: [
                   Text(
-                    'Main Exercises',
+                    'WORKOUT',
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
+                      letterSpacing: 1.1,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
