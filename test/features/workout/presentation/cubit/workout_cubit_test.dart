@@ -68,6 +68,40 @@ void main() {
 
       expect(cubit.state.status, WorkoutStatus.failure);
       expect(cubit.state.errorMessage, contains('REVIEW_REQUIRED:1'));
+
+      // Resetting status clears errorMessage and sets status back to success
+      cubit.resetStatus();
+      expect(cubit.state.status, WorkoutStatus.success);
+      expect(cubit.state.errorMessage, isNull);
+    });
+
+    test('saveWorkout forceSave should succeed and set status to saved', () async {
+      final logs = {
+        'ex1': ExerciseLog(
+          plannedExerciseId: 'ex1',
+          performedExerciseId: 'ex1',
+          sets: const [
+            ExerciseSetLog(weightKg: 50, actualReps: 10, isPerformed: true),
+          ],
+          timestamp: DateTime.now(),
+        ),
+      };
+
+      cubit.emit(
+        cubit.state.copyWith(
+          status: WorkoutStatus.success,
+          exerciseLogs: logs,
+          dateKey: '2026-08-19',
+          workoutType: WorkoutType.push,
+        ),
+      );
+
+      when(() => mockRepository.saveSession(any())).thenAnswer((_) async => {});
+
+      await cubit.saveWorkout(forceSave: true);
+
+      expect(cubit.state.status, WorkoutStatus.saved);
+      expect(cubit.state.errorMessage, isNull);
     });
 
     test('updateSetReps should update reps without auto-toggling isPerformed', () async {

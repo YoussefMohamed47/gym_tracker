@@ -69,6 +69,7 @@ class WorkoutState extends Equatable {
     WeightUnit? displayUnit,
     bool? isEditMode,
     String? errorMessage,
+    bool clearErrorMessage = false,
     bool? isRestTimerActive,
     int? restTimerSeconds,
     int? restTimerTargetSeconds,
@@ -83,7 +84,8 @@ class WorkoutState extends Equatable {
       alternativeDrafts: alternativeDrafts ?? this.alternativeDrafts,
       displayUnit: displayUnit ?? this.displayUnit,
       isEditMode: isEditMode ?? this.isEditMode,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
       isRestTimerActive: isRestTimerActive ?? this.isRestTimerActive,
       restTimerSeconds: restTimerSeconds ?? this.restTimerSeconds,
       restTimerTargetSeconds:

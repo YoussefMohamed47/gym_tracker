@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/utils/app_colors.dart';
 import '../../domain/entities/workout_session.dart';
 import '../../domain/usecases/get_exercise_history.dart';
 import '../cubit/workout_cubit.dart';
@@ -128,24 +127,32 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       exerciseLogs: state.exerciseLogs,
       displayUnit: state.displayUnit,
     );
+    if (!mounted) return;
     await WorkoutShareService.shareWorkout(context, session);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<WorkoutCubit, WorkoutState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.errorMessage != current.errorMessage,
       listener: (context, state) {
         if (state.status == WorkoutStatus.failure &&
             state.errorMessage != null) {
           if (state.errorMessage!.startsWith('REVIEW_REQUIRED:')) {
             final count = int.parse(state.errorMessage!.split(':')[1]);
+            context.read<WorkoutCubit>().resetStatus();
             _showReviewDialog(count);
           } else {
+            final errorMsg = state.errorMessage!;
+            context.read<WorkoutCubit>().resetStatus();
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            ).showSnackBar(SnackBar(content: Text(errorMsg)));
           }
         } else if (state.status == WorkoutStatus.saved) {
+          context.read<WorkoutCubit>().resetStatus();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Workout saved and finished!')),
           );

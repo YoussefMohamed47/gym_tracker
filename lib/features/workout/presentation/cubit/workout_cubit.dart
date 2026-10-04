@@ -540,6 +540,24 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
+  void clearError() {
+    emit(
+      state.copyWith(
+        status: WorkoutStatus.success,
+        clearErrorMessage: true,
+      ),
+    );
+  }
+
+  void resetStatus() {
+    emit(
+      state.copyWith(
+        status: WorkoutStatus.success,
+        clearErrorMessage: true,
+      ),
+    );
+  }
+
   Future<void> saveWorkout({
     bool forceSave = false,
     bool isCompletion = true,
@@ -571,7 +589,12 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
 
     if (isCompletion) {
-      emit(state.copyWith(status: WorkoutStatus.saving));
+      emit(
+        state.copyWith(
+          status: WorkoutStatus.saving,
+          clearErrorMessage: true,
+        ),
+      );
     }
 
     try {
@@ -586,9 +609,19 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       await repository.saveSession(session);
 
       if (isCompletion) {
-        emit(state.copyWith(status: WorkoutStatus.saved));
+        emit(
+          state.copyWith(
+            status: WorkoutStatus.saved,
+            clearErrorMessage: true,
+          ),
+        );
       } else {
-        emit(state.copyWith(status: WorkoutStatus.success));
+        emit(
+          state.copyWith(
+            status: WorkoutStatus.success,
+            clearErrorMessage: true,
+          ),
+        );
       }
     } catch (e) {
       emit(
