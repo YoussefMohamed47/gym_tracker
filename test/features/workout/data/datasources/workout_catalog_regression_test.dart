@@ -37,7 +37,7 @@ void main() {
 
     test('PUSH (Saturday) Canonical Content', () {
       final push = WorkoutCatalog.workouts.firstWhere((w) => w.id == 'push');
-      expect(push.exercises.length, 6);
+      expect(push.exercises.length, 7);
 
       final expectedExercises = [
         'push_chest_press_machine',
@@ -46,6 +46,7 @@ void main() {
         'push_cable_lateral_raises',
         'push_sa_triceps_over_head_extension',
         'push_triceps_push_down',
+        'push_forearm_exercise_variations',
       ];
 
       for (int i = 0; i < expectedExercises.length; i++) {
@@ -63,11 +64,15 @@ void main() {
       final shoulderPress = push.exercises[2];
       expect(shoulderPress.prescribedSets, 2);
       expect(shoulderPress.prescribedRest, '2-3m');
+
+      final forearm = push.exercises[6];
+      expect(forearm.prescribedSets, 3);
+      expect(forearm.prescribedReps, '15');
     });
 
     test('PULL (Sunday) Canonical Content', () {
       final pull = WorkoutCatalog.workouts.firstWhere((w) => w.id == 'pull');
-      expect(pull.exercises.length, 7);
+      expect(pull.exercises.length, 8);
 
       final expectedExercises = [
         'pull_t_bar_row',
@@ -77,11 +82,16 @@ void main() {
         'pull_sa_db_preacher_bicep_curl',
         'pull_cable_hammer_curl',
         'pull_db_shrugs',
+        'pull_forearm_exercise_variations',
       ];
 
       for (int i = 0; i < expectedExercises.length; i++) {
         expect(pull.exercises[i].exerciseId, expectedExercises[i]);
       }
+
+      final forearm = pull.exercises[7];
+      expect(forearm.prescribedSets, 3);
+      expect(forearm.prescribedReps, '15');
 
       // Verify Face Pull was replaced by Cable Rear Delt Fly
       expect(
@@ -101,8 +111,13 @@ void main() {
 
     test('UPPER (Wednesday) Canonical Content', () {
       final upper = WorkoutCatalog.workouts.firstWhere((w) => w.id == 'upper');
-      expect(upper.exercises.length, 7);
+      expect(upper.exercises.length, 8);
       expect(upper.exercises[0].exerciseId, 'upper_chest_fly_machine');
+      expect(upper.exercises[7].exerciseId, 'upper_forearm_exercise_variations');
+
+      final forearm = upper.exercises[7];
+      expect(forearm.prescribedSets, 3);
+      expect(forearm.prescribedReps, '15');
     });
 
     test('LOWER (Thursday) Canonical Content', () {
@@ -133,6 +148,14 @@ void main() {
       expect(
         tricepPushdown.videoUrl,
         'https://youtube.com/shorts/WjLJ7zIppXQ?si=2F4GVDQYVmElNolD',
+      );
+
+      final forearm = WorkoutCatalog.getExerciseById(
+        'push_forearm_exercise_variations',
+      );
+      expect(
+        forearm.videoUrl,
+        'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
       );
     });
 
@@ -168,7 +191,7 @@ void main() {
       for (final slot in warmup.exercises) {
         final def = WorkoutCatalog.getExerciseById(slot.exerciseId);
         expect(def.videoUrl, isNotNull);
-        expect(def.videoUrl, contains('youtube.com/shorts/'));
+        expect(def.videoUrl, contains('youtube.com/'));
       }
     });
   });

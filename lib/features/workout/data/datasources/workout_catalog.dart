@@ -39,6 +39,11 @@ class WorkoutCatalog {
       name: 'Triceps push down',
       videoUrl: 'https://youtube.com/shorts/WjLJ7zIppXQ?si=2F4GVDQYVmElNolD',
     ),
+    ExerciseDefinition(
+      id: 'push_forearm_exercise_variations',
+      name: 'Forearm exercise variations',
+      videoUrl: 'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
+    ),
 
     // --- PULL (Sunday) ---
     ExerciseDefinition(
@@ -77,6 +82,11 @@ class WorkoutCatalog {
       id: 'pull_db_shrugs',
       name: 'DB shrugs',
       videoUrl: 'https://youtube.com/shorts/rFsSeClGnNA?si=vLn4ffTmYiezyOah',
+    ),
+    ExerciseDefinition(
+      id: 'pull_forearm_exercise_variations',
+      name: 'Forearm exercise variations',
+      videoUrl: 'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
     ),
 
     // --- LEGS (Monday) ---
@@ -154,6 +164,11 @@ class WorkoutCatalog {
       id: 'upper_db_shrugs',
       name: 'DB shrugs',
       videoUrl: 'https://youtube.com/shorts/rFsSeClGnNA?si=vLn4ffTmYiezyOah',
+    ),
+    ExerciseDefinition(
+      id: 'upper_forearm_exercise_variations',
+      name: 'Forearm exercise variations',
+      videoUrl: 'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
     ),
 
     // --- LOWER (Thursday) ---
@@ -350,6 +365,13 @@ class WorkoutCatalog {
           prescribedReps: '8-12',
           prescribedRest: '2-3m',
         ),
+        ExerciseSlot(
+          exerciseId: 'pull_forearm_exercise_variations',
+          order: 8,
+          prescribedSets: 3,
+          prescribedReps: '15',
+          prescribedRest: '2-3m',
+        ),
       ],
     ),
     WorkoutDefinition(
@@ -455,6 +477,13 @@ class WorkoutCatalog {
           prescribedReps: '8-12',
           prescribedRest: '2-3m',
         ),
+        ExerciseSlot(
+          exerciseId: 'push_forearm_exercise_variations',
+          order: 7,
+          prescribedSets: 3,
+          prescribedReps: '15',
+          prescribedRest: '2-3m',
+        ),
       ],
     ),
     WorkoutDefinition(
@@ -509,6 +538,13 @@ class WorkoutCatalog {
           order: 7,
           prescribedSets: 3,
           prescribedReps: '8-12',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'upper_forearm_exercise_variations',
+          order: 8,
+          prescribedSets: 3,
+          prescribedReps: '15',
           prescribedRest: '2-3m',
         ),
       ],
