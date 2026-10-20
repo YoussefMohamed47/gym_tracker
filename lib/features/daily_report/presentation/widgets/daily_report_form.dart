@@ -76,11 +76,11 @@ class DailyReportForm extends StatelessWidget {
               initialValue: report.afterTraining,
               onChanged: (val) => onChanged(report.copyWith(afterTraining: val)),
             ),
-            _buildTextField(
-              'Training Name/Intensity (نوع وحجم التمرين)',
-              report.training,
-              (val) => onChanged(report.copyWith(training: val)),
-              maxLines: 2,
+            MealOptionSelector(
+              label: 'نوع وحجم التمرين (Training Name)',
+              categories: NutritionCatalog.training,
+              initialValue: report.training,
+              onChanged: (val) => onChanged(report.copyWith(training: val)),
             ),
             _buildTextField(
               'Cardio Duration (مدة الكارديو)',

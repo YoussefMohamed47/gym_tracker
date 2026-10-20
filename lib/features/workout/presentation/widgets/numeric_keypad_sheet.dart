@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +18,22 @@ class NumericKeypadSheet extends StatefulWidget {
     this.isDecimal = true,
   });
 
+  /// Formats double cleanly to avoid IEEE 754 precision artifacts (e.g. 32.699999999999996 -> 32.7).
+  static String formatCleanNumber(double val) {
+    final rounded = (val * 100).roundToDouble() / 100;
+    if (rounded % 1 == 0) {
+      return rounded.toInt().toString();
+    }
+    String s = rounded.toStringAsFixed(2);
+    while (s.endsWith('0')) {
+      s = s.substring(0, s.length - 1);
+    }
+    if (s.endsWith('.')) {
+      s = s.substring(0, s.length - 1);
+    }
+    return s;
+  }
+
   static Future<double?> showWeightKeypad(
     BuildContext context, {
     required String title,
@@ -32,11 +46,7 @@ class NumericKeypadSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => NumericKeypadSheet(
         title: title,
-        initialValue: initialValue != null
-            ? (initialValue % 1 == 0
-                  ? initialValue.toInt().toString()
-                  : initialValue.toString())
-            : '',
+        initialValue: initialValue != null ? formatCleanNumber(initialValue) : '',
         unit: unit,
         isDecimal: true,
       ),
@@ -106,168 +116,160 @@ class _NumericKeypadSheetState extends State<NumericKeypadSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.darkCard.withValues(alpha: 0.9)
-                : Colors.white.withValues(alpha: 0.95),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(
-              color: isDark ? AppColors.borderSubtle : AppColors.outline,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(
+          color: isDark ? AppColors.borderSubtle : AppColors.outline,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle Bar
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white24 : Colors.black12,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 16),
+
+          // Title & Display
+          Text(
+            widget.title.toUpperCase(),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              // Handle Bar
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.black12,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Title & Display
               Text(
-                widget.title.toUpperCase(),
+                _value.isEmpty ? '0' : _value,
                 style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 44,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: _value.isEmpty
+                      ? theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.4,
+                        )
+                      : theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    _value.isEmpty ? '0' : _value,
-                    style: GoogleFonts.outfit(
-                      fontSize: 44,
-                      fontWeight: FontWeight.w900,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                      color: _value.isEmpty
-                          ? theme.colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.4,
-                            )
-                          : theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  if (widget.unit.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      widget.unit,
-                      style: GoogleFonts.outfit(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.gradientStart,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Quick Step Pills
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _quickAddPill('+1'),
-                  const SizedBox(width: 8),
-                  _quickAddPill('+2.5'),
-                  const SizedBox(width: 8),
-                  _quickAddPill('+5'),
-                  const SizedBox(width: 8),
-                  _quickAddPill('+10'),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Numeric Keypad Grid
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 3,
-                childAspectRatio: 1.6,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                children: [
-                  ...[
-                    '1',
-                    '2',
-                    '3',
-                    '4',
-                    '5',
-                    '6',
-                    '7',
-                    '8',
-                    '9',
-                  ].map((digit) => _keypadButton(digit, () => _onKeyPress(digit))),
-                  _keypadButton(
-                    widget.isDecimal ? '.' : '',
-                    widget.isDecimal ? () => _onKeyPress('.') : null,
-                  ),
-                  _keypadButton('0', () => _onKeyPress('0')),
-                  _keypadButton(
-                    'BACK',
-                    () => _onKeyPress('BACK'),
-                    icon: Icons.backspace_outlined,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Confirm / Done Button
-              Container(
-                width: double.infinity,
-                height: 52,
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.gradientStart.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      Navigator.pop(context, _value);
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Center(
-                      child: Text(
-                        'DONE',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+              if (widget.unit.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Text(
+                  widget.unit,
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.gradientStart,
                   ),
                 ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Quick Step Pills
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _quickAddPill('+1'),
+              const SizedBox(width: 8),
+              _quickAddPill('+2.5'),
+              const SizedBox(width: 8),
+              _quickAddPill('+5'),
+              const SizedBox(width: 8),
+              _quickAddPill('+10'),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Numeric Keypad Grid
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 3,
+            childAspectRatio: 1.6,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            children: [
+              ...[
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                '8',
+                '9',
+              ].map((digit) => _keypadButton(digit, () => _onKeyPress(digit))),
+              _keypadButton(
+                widget.isDecimal ? '.' : '',
+                widget.isDecimal ? () => _onKeyPress('.') : null,
+              ),
+              _keypadButton('0', () => _onKeyPress('0')),
+              _keypadButton(
+                'BACK',
+                () => _onKeyPress('BACK'),
+                icon: Icons.backspace_outlined,
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 20),
+
+          // Confirm / Done Button
+          Container(
+            width: double.infinity,
+            height: 52,
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.gradientStart.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  Navigator.pop(context, _value);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Center(
+                  child: Text(
+                    'DONE',
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -280,9 +282,7 @@ class _NumericKeypadSheetState extends State<NumericKeypadSheet> {
         final currVal = double.tryParse(_value) ?? 0;
         final newVal = currVal + addVal;
         setState(() {
-          _value = newVal % 1 == 0
-              ? newVal.toInt().toString()
-              : newVal.toString();
+          _value = NumericKeypadSheet.formatCleanNumber(newVal);
         });
       },
       child: Container(

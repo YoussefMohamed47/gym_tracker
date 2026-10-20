@@ -54,7 +54,7 @@ Future<void> init() async {
 
   // Cubits
   sl.registerLazySingleton(() => ThemeCubit(sl<HiveLocalStorage>().getBox(HiveBoxes.preferences)));
-  sl.registerLazySingleton(() => DailyReportCubit(sl()));
+  sl.registerLazySingleton(() => DailyReportCubit(sl(), workoutRepository: sl()));
   sl.registerFactory(() => HistoryCubit(sl()));
   sl.registerFactory(() => WorkoutCubit(repository: sl()));
 

@@ -15,11 +15,9 @@ class TrainingCard extends StatelessWidget {
   bool get isRestDay {
     final lower = trainingName.toLowerCase().trim();
     return lower.isEmpty ||
-        lower == 'resting' ||
-        lower == 'rest' ||
-        lower == 'راحة' ||
-        lower == 'لا يوجد' ||
-        lower == 'يوم راحة';
+        lower.contains('rest') ||
+        lower.contains('راحة') ||
+        lower == 'لا يوجد';
   }
 
   @override
