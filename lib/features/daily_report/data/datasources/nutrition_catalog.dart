@@ -174,4 +174,19 @@ class NutritionCatalog {
       options: ['طبق سلطة / خضار طازج (100جم)', 'زيت زيتون (20جم)'],
     ),
   ];
+
+  static const List<MealCategoryOptions> training = [
+    MealCategoryOptions(
+      categoryName: 'نوع التمرين',
+      options: [
+        'Push',
+        'Pull',
+        'Legs',
+        'Upper Body',
+        'Lower Body',
+        'Rest Day',
+        'Cardio',
+      ],
+    ),
+  ];
 }
