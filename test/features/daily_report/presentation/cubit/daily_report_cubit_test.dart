@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gym_tracker_report/core/utils/weight_converter.dart';
-import 'package:gym_tracker_report/features/daily_report/domain/model/daily_report.dart';
 import 'package:gym_tracker_report/features/daily_report/domain/repository/daily_report_repository.dart';
 import 'package:gym_tracker_report/features/daily_report/presentation/cubit/daily_report_cubit.dart';
-import 'package:gym_tracker_report/features/daily_report/presentation/cubit/daily_report_state.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/workout_session.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/workout_type.dart';
 import 'package:gym_tracker_report/features/workout/domain/repositories/workout_repository.dart';

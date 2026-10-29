@@ -16,6 +16,10 @@ import '../../features/workout/presentation/cubit/workout_cubit.dart';
 import '../../features/workout/data/datasources/workout_local_datasource.dart';
 import '../../features/workout/data/repositories/workout_repository_impl.dart';
 import '../../features/workout/domain/repositories/workout_repository.dart';
+import '../../features/workout/domain/repositories/workout_catalog_repository.dart';
+import '../../features/workout/data/repositories/workout_catalog_repository_impl.dart';
+import '../../features/workout/domain/usecases/get_workout_catalog.dart';
+import '../../features/workout/presentation/cubit/workout_catalog_cubit.dart';
 import '../../features/workout/domain/usecases/get_previous_exercise_log.dart';
 import '../../features/workout/domain/usecases/get_workout_for_date.dart';
 import '../../features/workout/domain/usecases/save_workout_session.dart';
@@ -57,6 +61,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => DailyReportCubit(sl(), workoutRepository: sl()));
   sl.registerFactory(() => HistoryCubit(sl()));
   sl.registerFactory(() => WorkoutCubit(repository: sl()));
+  sl.registerFactory(() => WorkoutCatalogCubit(getWorkoutCatalog: sl()));
 
   // Repositories
   sl.registerLazySingleton<DailyReportRepository>(
@@ -90,10 +95,14 @@ Future<void> init() async {
   sl.registerLazySingleton<WorkoutRepository>(
     () => WorkoutRepositoryImpl(localDataSource: sl()),
   );
+  sl.registerLazySingleton<WorkoutCatalogRepository>(
+    () => WorkoutCatalogRepositoryImpl(),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => GetWorkoutForDate(sl()));
   sl.registerLazySingleton(() => SaveWorkoutSession(sl()));
   sl.registerLazySingleton(() => GetPreviousExerciseLog(sl()));
   sl.registerLazySingleton(() => GetExerciseHistory(sl()));
+  sl.registerLazySingleton(() => GetWorkoutCatalog(sl()));
 }

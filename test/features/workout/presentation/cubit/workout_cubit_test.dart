@@ -204,7 +204,7 @@ void main() {
       when(() => mockRepository.getHistory()).thenAnswer((_) async => [
             WorkoutSession(
               dateKey: WorkoutDateUtils.formatDateKey(yesterday),
-              workoutType: WorkoutType.push,
+              workoutType: WorkoutType.chestAndBack,
               exerciseLogs: {},
               displayUnit: WeightUnit.kg,
             )
@@ -216,8 +216,8 @@ void main() {
 
       await cubit.loadDate(today);
 
-      // PUSH -> PULL in sequence
-      expect(cubit.state.workoutType, WorkoutType.pull);
+      // Chest & Back -> Shoulder & Arms in 8-day rotation
+      expect(cubit.state.workoutType, WorkoutType.shoulderAndArms);
     });
 
     test('loadDate should disambiguate Rest days correctly', () async {
@@ -225,7 +225,7 @@ void main() {
       final day1 = today.subtract(const Duration(days: 1));
       final day2 = today.subtract(const Duration(days: 2));
 
-      // Legs -> Rest -> Upper
+      // Legs -> Rest -> Full Body
       when(() => mockRepository.getSessionForDate(any()))
           .thenAnswer((_) async => null);
       when(() => mockRepository.getHistory()).thenAnswer((_) async => [
@@ -248,9 +248,9 @@ void main() {
           .thenAnswer((_) async => null);
 
       await cubit.loadDate(today);
-      expect(cubit.state.workoutType, WorkoutType.upper);
+      expect(cubit.state.workoutType, WorkoutType.fullBody);
 
-      // Lower -> Rest -> Push
+      // Full Body -> Rest -> Upper and Calves
       when(() => mockRepository.getHistory()).thenAnswer((_) async => [
             WorkoutSession(
               dateKey: WorkoutDateUtils.formatDateKey(day1),
@@ -260,14 +260,14 @@ void main() {
             ),
             WorkoutSession(
               dateKey: WorkoutDateUtils.formatDateKey(day2),
-              workoutType: WorkoutType.lower,
+              workoutType: WorkoutType.fullBody,
               exerciseLogs: {},
               displayUnit: WeightUnit.kg,
             )
           ]);
 
       await cubit.loadDate(today);
-      expect(cubit.state.workoutType, WorkoutType.push);
+      expect(cubit.state.workoutType, WorkoutType.upperAndCalves);
     });
   });
 

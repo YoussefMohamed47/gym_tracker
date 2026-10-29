@@ -26,13 +26,13 @@ class DailyReportCubit extends Cubit<DailyReportState> {
     try {
       final now = DateTime.now();
       final dateKey = WorkoutDateUtils.formatDateKey(now);
-      final session = await _workoutRepository!.getSessionForDate(dateKey);
+      final session = await _workoutRepository.getSessionForDate(dateKey);
 
       String defaultTraining;
       if (session != null) {
         defaultTraining = session.workoutType.displayName;
       } else {
-        final history = await _workoutRepository!.getHistory();
+        final history = await _workoutRepository.getHistory();
         final pastTypes = history
             .where((s) => s.dateKey.compareTo(dateKey) < 0)
             .toList()

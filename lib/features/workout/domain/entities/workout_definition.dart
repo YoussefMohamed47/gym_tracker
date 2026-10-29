@@ -20,6 +20,7 @@ class ExerciseSlot {
   final String prescribedReps;
   final String prescribedRest;
   final int order;
+  final String? tempoNote;
 
   const ExerciseSlot({
     required this.exerciseId,
@@ -27,5 +28,6 @@ class ExerciseSlot {
     required this.prescribedReps,
     required this.prescribedRest,
     required this.order,
+    this.tempoNote,
   });
 }

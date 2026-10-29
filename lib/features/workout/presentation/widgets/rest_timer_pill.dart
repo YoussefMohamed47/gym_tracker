@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/report_theme_tokens.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/rest_time_parser.dart';
 import '../cubit/workout_cubit.dart';
@@ -59,55 +59,50 @@ class _RestTimerPillState extends State<RestTimerPill> {
 
     return AnimatedSlide(
       offset: isActive ? Offset.zero : const Offset(0, 1.5),
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 250),
       curve: Curves.easeOutCubic,
       child: AnimatedOpacity(
         opacity: isActive ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 200),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: AppColors.restAmber.withValues(alpha: 0.15),
+            color: const Color(0xF214171F),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: AppColors.restAmber,
               width: 1.5,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.restAmber.withValues(alpha: 0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
-              ),
-            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Circular Countdown Ring
-              SizedBox(
-                width: 28,
-                height: 28,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(
-                    begin: 1.0,
-                    end: widget.state.restTimerTargetSeconds > 0
-                        ? (widget.state.restTimerSeconds /
-                            widget.state.restTimerTargetSeconds)
-                        : 0.0,
+              // RepaintBoundary isolated circular countdown ring
+              RepaintBoundary(
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(
+                      begin: 1.0,
+                      end: widget.state.restTimerTargetSeconds > 0
+                          ? (widget.state.restTimerSeconds /
+                              widget.state.restTimerTargetSeconds)
+                          : 0.0,
+                    ),
+                    duration: const Duration(milliseconds: 250),
+                    builder: (context, val, _) {
+                      return CircularProgressIndicator(
+                        value: val,
+                        strokeWidth: 3,
+                        backgroundColor: Colors.white12,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.restAmber,
+                        ),
+                      );
+                    },
                   ),
-                  duration: const Duration(milliseconds: 300),
-                  builder: (context, val, _) {
-                    return CircularProgressIndicator(
-                      value: val,
-                      strokeWidth: 3,
-                      backgroundColor: Colors.white24,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.restAmber,
-                      ),
-                    );
-                  },
                 ),
               ),
               const SizedBox(width: 10),
@@ -119,17 +114,16 @@ class _RestTimerPillState extends State<RestTimerPill> {
                 children: [
                   Text(
                     RestTimeParser.formatDisplay(widget.state.restTimerSeconds),
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
+                    style: ReportThemeTokens.outfitNumber(
+                      fontSize: 15,
                       fontWeight: FontWeight.w900,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                       color: AppColors.restAmber,
                     ),
                   ),
                   if (widget.state.restTimerExerciseName.isNotEmpty)
                     Text(
                       widget.state.restTimerExerciseName.toUpperCase(),
-                      style: GoogleFonts.outfit(
+                      style: ReportThemeTokens.outfitSubtext(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                         color: AppColors.restAmber.withValues(alpha: 0.8),
@@ -148,15 +142,14 @@ class _RestTimerPillState extends State<RestTimerPill> {
                   context.read<WorkoutCubit>().addRestTimerSeconds(15);
                 },
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.restAmber.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '+15s',
-                    style: GoogleFonts.outfit(
+                    style: ReportThemeTokens.outfitNumber(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: AppColors.restAmber,

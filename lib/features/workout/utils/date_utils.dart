@@ -14,22 +14,20 @@ class WorkoutDateUtils {
     return _dateKeyFormat.parse(dateKey);
   }
 
-  /// Returns the Sunday-Saturday week range for a given date.
+  /// Returns the Sunday-Saturday week range for a given date safely across DST transitions.
   static List<DateTime> getWeekDays(DateTime date) {
-    // Sunday is 7 in DateTime.weekday (or 0 depending on interpretation,
-    // but Dart's DateTime.weekday uses 1=Mon, 7=Sun).
-    // We want Sunday to be the first day.
-    int currentWeekday = date.weekday;
-    // If it's Sunday (7), we subtract 0 to stay at Sunday.
-    // If it's Monday (1), we subtract 1.
-    // If it's Saturday (6), we subtract 6.
-    int daysToSubtract = currentWeekday % 7;
+    // DateTime.weekday: Monday = 1, ..., Saturday = 6, Sunday = 7.
+    // We want Sunday to be day 0 of the week.
+    final daysSinceSunday = date.weekday % 7;
+    // Normalize date to pure calendar date (year, month, day) first to avoid DST hour shift!
+    final pureDate = DateTime(date.year, date.month, date.day);
+    final sunday = pureDate.subtract(Duration(days: daysSinceSunday));
 
-    DateTime sunday = date.subtract(Duration(days: daysToSubtract));
-    // Reset to midnight
-    sunday = DateTime(sunday.year, sunday.month, sunday.day);
-
-    return List.generate(7, (index) => sunday.add(Duration(days: index)));
+    // Construct each calendar day by incrementing the day field directly
+    return List.generate(
+      7,
+      (index) => DateTime(sunday.year, sunday.month, sunday.day + index),
+    );
   }
 
   /// Returns the WorkoutType for a given weekday (1=Mon, 7=Sun).

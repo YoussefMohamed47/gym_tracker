@@ -308,6 +308,226 @@ class WorkoutCatalog {
     ExerciseDefinition(id: 'legs_leg_press', name: 'Leg Press (Legacy)'),
     ExerciseDefinition(id: 'legs_rdl', name: 'Romanian Deadlift (Legacy)'),
     ExerciseDefinition(id: 'legs_calf_raise', name: 'Calf Raise (Legacy)'),
+
+    // --- 8-DAY ROTATING CATALOG EXERCISES ---
+    // Day 1: Chest & Back
+    ExerciseDefinition(
+      id: 'c_incline_chest_press_smith',
+      name: 'Incline Chest Press Smith Machine',
+      videoUrl: 'https://youtube.com/shorts/VXaBbUYMfIs',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['alt_db_incline_bench_press', 'c_db_chest_press'],
+    ),
+    ExerciseDefinition(
+      id: 'c_db_chest_press',
+      name: 'DB Chest Press',
+      videoUrl: 'https://youtube.com/shorts/mTaiQemkEpU',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['alt_db_bench_press', 'c_incline_chest_press_smith'],
+    ),
+    ExerciseDefinition(
+      id: 'c_high_to_low_cable_chest_fly',
+      name: 'High to Low Cable Chest Fly',
+      videoUrl: 'https://youtube.com/shorts/AB3Fj_O2EL4',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['c_chest_fly_machine', 'push_chest_fly'],
+    ),
+    ExerciseDefinition(
+      id: 'c_t_bar_row_machine',
+      name: 'T-Bar Row Machine',
+      videoUrl: 'https://youtube.com/shorts/ZbOUxXRS42s',
+      alternatives: ['alt_chest_supported_db_row', 'c_dh_v_grip_cable_row'],
+    ),
+    ExerciseDefinition(
+      id: 'c_sa_cable_lat_row',
+      name: 'SA Cable Lat Row',
+      videoUrl: 'https://youtu.be/1jN6qeXdvWA',
+      alternatives: ['alt_sa_db_row', 'c_sa_db_lat_row'],
+    ),
+    ExerciseDefinition(
+      id: 'c_cable_shrugs',
+      name: 'Cable Shrugs',
+      videoUrl: 'https://youtube.com/shorts/Y77EtpS8CL0',
+    ),
+
+    // Day 2: Shoulder & Arms
+    ExerciseDefinition(
+      id: 'c_scapular_plane_db_lateral_raises',
+      name: 'Scapular Plane DB Lateral Raises',
+      videoUrl: 'https://youtube.com/shorts/czKlnVCSJPM',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['push_cable_lateral_raises', 'push_lateral_raise'],
+    ),
+    ExerciseDefinition(
+      id: 'c_incline_db_bicep_curl',
+      name: 'Incline DB Bicep Curl',
+      videoUrl: 'https://youtube.com/shorts/uCUaRFlA9vE',
+      alternatives: ['c_db_bicep_curl', 'pull_cable_hammer_curl'],
+    ),
+    ExerciseDefinition(
+      id: 'c_sa_triceps_push_down',
+      name: 'SA Triceps Push Down',
+      videoUrl: 'https://youtube.com/shorts/w5a5sErWIEw',
+      alternatives: ['push_triceps_push_down', 'push_sa_triceps_over_head_extension'],
+    ),
+    ExerciseDefinition(
+      id: 'c_rear_delt_machine_fly',
+      name: 'Rear Delt Machine Fly',
+      videoUrl: 'https://youtube.com/shorts/7tgx6QHB0-A',
+      alternatives: ['pull_cable_rear_delt_fly'],
+    ),
+    ExerciseDefinition(
+      id: 'c_sa_db_preacher_hammer_curl',
+      name: 'SA DB Preacher Hammer Curl',
+      videoUrl: 'https://youtube.com/shorts/oHbSWPo3swM',
+      alternatives: ['pull_sa_db_preacher_bicep_curl'],
+    ),
+    ExerciseDefinition(
+      id: 'c_cable_wrist_flexion_extension',
+      name: 'Cable Wrist Flexion + Cable Wrist Extension',
+      videoUrl: 'https://youtu.be/WVAaKJvToe0',
+      pairedVideoUrls: ['https://youtube.com/shorts/_JiYn7I9F_k'],
+      alternatives: ['push_forearm_exercise_variations'],
+    ),
+
+    // Day 3: Legs
+    ExerciseDefinition(
+      id: 'c_leg_press_machine',
+      name: 'Leg Press Machine',
+      videoUrl: 'https://youtu.be/q4W4_VJbKW0',
+      alternatives: ['alt_goblet_squat', 'legs_body_weighted_squat'],
+    ),
+    ExerciseDefinition(
+      id: 'c_leg_extension',
+      name: 'Leg Extension',
+      videoUrl: 'https://youtube.com/shorts/2zZ3vkPsExQ',
+      alternatives: ['alt_goblet_squat'],
+    ),
+    ExerciseDefinition(
+      id: 'c_adduction_machine',
+      name: 'Adduction Machine',
+      videoUrl: 'https://youtu.be/mvIxYwz-Vkg',
+      alternatives: ['alt_banded_adduction'],
+    ),
+    ExerciseDefinition(
+      id: 'c_db_hip_thrust',
+      name: 'DB Hip Thrust',
+      videoUrl: 'https://youtube.com/shorts/QqtLsnNthbA',
+    ),
+    ExerciseDefinition(
+      id: 'c_standing_calf_raises_machine',
+      name: 'Standing Calf Raises Machine',
+      videoUrl: 'https://youtube.com/shorts/95itLfMBG40',
+      alternatives: ['legs_calf_raise'],
+    ),
+    ExerciseDefinition(
+      id: 'c_cat_cow',
+      name: 'Cat Cow',
+      videoUrl: 'https://youtube.com/shorts/FyCuSE3mDcc',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'c_bird_dog_hold',
+      name: 'Bird Dog Hold',
+      videoUrl: 'https://youtube.com/shorts/knsOPG88idk',
+      isWeightAllowed: false,
+    ),
+
+    // Day 5: Full Body
+    ExerciseDefinition(
+      id: 'c_chest_fly_machine',
+      name: 'Chest Fly Machine',
+      videoUrl: 'https://youtu.be/eGjt4lk6g34',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['c_high_to_low_cable_chest_fly', 'push_chest_fly'],
+    ),
+    ExerciseDefinition(
+      id: 'c_dh_v_grip_cable_row',
+      name: 'DH V Grip Cable Row',
+      videoUrl: 'https://youtube.com/shorts/qD1WZ5pSuvk',
+      alternatives: ['c_t_bar_row_machine', 'alt_chest_supported_db_row'],
+    ),
+    ExerciseDefinition(
+      id: 'c_rear_delt_machine_fly_fb',
+      name: 'Rear Delt Machine Fly',
+      videoUrl: 'https://youtube.com/shorts/7tgx6QHB0-A',
+      alternatives: ['pull_cable_rear_delt_fly'],
+    ),
+    ExerciseDefinition(
+      id: 'c_db_bicep_curl',
+      name: 'DB Bicep Curl',
+      videoUrl: 'https://youtube.com/shorts/MKWBV29S6c0',
+      alternatives: ['c_incline_db_bicep_curl', 'pull_cable_hammer_curl'],
+    ),
+    ExerciseDefinition(
+      id: 'c_db_rdl',
+      name: 'DB RDL',
+      videoUrl: 'https://youtube.com/shorts/4-Gq43Y0OK4',
+    ),
+    ExerciseDefinition(
+      id: 'c_seated_leg_curl',
+      name: 'Seated Leg Curl',
+      videoUrl: 'https://youtu.be/WGih6WFr3uI',
+      alternatives: ['alt_db_leg_curl'],
+    ),
+    ExerciseDefinition(
+      id: 'c_banded_glute_kick_back',
+      name: 'Banded Glute Kick Back',
+      videoUrl: 'https://youtu.be/rONpWaNIhE8',
+      isWeightAllowed: false,
+    ),
+
+    // Day 7: Upper + Calves
+    ExerciseDefinition(
+      id: 'c_incline_chest_press_machine',
+      name: 'Incline Chest Press Machine',
+      videoUrl: 'https://youtube.com/shorts/VXaBbUYMfIs',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['c_incline_chest_press_smith', 'alt_db_incline_bench_press'],
+    ),
+    ExerciseDefinition(
+      id: 'c_sa_db_lat_row',
+      name: 'SA DB Lat Row',
+      videoUrl: 'https://youtu.be/yHqqGd0tXcw',
+      alternatives: ['c_sa_cable_lat_row', 'alt_sa_db_row'],
+    ),
+    ExerciseDefinition(
+      id: 'c_db_kelso_shrugs',
+      name: 'DB Kelso Shrugs',
+      videoUrl: 'https://youtu.be/zX0c-WIIilk',
+    ),
+    ExerciseDefinition(
+      id: 'c_scapular_plane_db_lateral_raises_uc',
+      name: 'Scapular Plane DB Lateral Raises',
+      videoUrl: 'https://youtube.com/shorts/czKlnVCSJPM',
+      tempoNote: 'Light weight, slow tempo',
+      alternatives: ['push_cable_lateral_raises', 'push_lateral_raise'],
+    ),
+    ExerciseDefinition(
+      id: 'c_sa_cable_preacher_bicep_curl',
+      name: 'SA Cable Preacher Bicep Curl',
+      videoUrl: 'https://youtube.com/shorts/vyP7ggY_baE',
+      alternatives: ['c_sa_db_bench_preacher_curl', 'c_sa_db_preacher_hammer_curl', 'pull_sa_db_preacher_bicep_curl'],
+    ),
+    // Alternative: SA DB Preacher curl on incline bench (one-arm dumbbell)
+    ExerciseDefinition(
+      id: 'c_sa_db_bench_preacher_curl',
+      name: 'SA DB Bench Preacher Curl',
+      videoUrl: 'https://www.instagram.com/reel/De2Dm8_ILOA/',
+      alternatives: ['c_sa_cable_preacher_bicep_curl', 'pull_sa_db_preacher_bicep_curl'],
+    ),
+    ExerciseDefinition(
+      id: 'c_sa_triceps_push_down_uc',
+      name: 'SA Triceps Push Down',
+      videoUrl: 'https://youtube.com/shorts/w5a5sErWIEw',
+      alternatives: ['c_sa_triceps_push_down', 'push_triceps_push_down'],
+    ),
+    ExerciseDefinition(
+      id: 'c_standing_calf_raises_machine_uc',
+      name: 'Standing Calf Raises Machine',
+      videoUrl: 'https://youtube.com/shorts/95itLfMBG40',
+      alternatives: ['c_standing_calf_raises_machine', 'legs_calf_raise'],
+    ),
   ];
 
   static const List<WorkoutDefinition> workouts = [
@@ -675,15 +895,291 @@ class WorkoutCatalog {
         ),
       ],
     ),
+
+    // --- 8-DAY ROTATING CATALOG WORKOUTS ---
+    WorkoutDefinition(
+      id: 'chest_and_back',
+      name: 'Chest & Back',
+      type: WorkoutType.chestAndBack,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'c_incline_chest_press_smith',
+          order: 1,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_db_chest_press',
+          order: 2,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_high_to_low_cable_chest_fly',
+          order: 3,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_t_bar_row_machine',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_sa_cable_lat_row',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_cable_shrugs',
+          order: 6,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+      ],
+    ),
+    WorkoutDefinition(
+      id: 'shoulder_and_arms',
+      name: 'Shoulder & Arms',
+      type: WorkoutType.shoulderAndArms,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'c_scapular_plane_db_lateral_raises',
+          order: 1,
+          prescribedSets: 2,
+          prescribedReps: '15-25',
+          prescribedRest: '1-2m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_incline_db_bicep_curl',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_sa_triceps_push_down',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_rear_delt_machine_fly',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_sa_db_preacher_hammer_curl',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_cable_wrist_flexion_extension',
+          order: 6,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '1-2m',
+        ),
+      ],
+    ),
+    WorkoutDefinition(
+      id: 'legs_8day',
+      name: 'Legs',
+      type: WorkoutType.legs,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'c_leg_press_machine',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_leg_extension',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_adduction_machine',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_db_hip_thrust',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_standing_calf_raises_machine',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_cat_cow',
+          order: 6,
+          prescribedSets: 2,
+          prescribedReps: '10-15',
+          prescribedRest: '1m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_bird_dog_hold',
+          order: 7,
+          prescribedSets: 2,
+          prescribedReps: '10-20s',
+          prescribedRest: '1m',
+        ),
+      ],
+    ),
+    WorkoutDefinition(
+      id: 'full_body',
+      name: 'Full Body',
+      type: WorkoutType.fullBody,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'c_chest_fly_machine',
+          order: 1,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_dh_v_grip_cable_row',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_rear_delt_machine_fly_fb',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_db_bicep_curl',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_db_rdl',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_seated_leg_curl',
+          order: 6,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_banded_glute_kick_back',
+          order: 7,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+      ],
+    ),
+    WorkoutDefinition(
+      id: 'upper_and_calves',
+      name: 'Upper + Calves',
+      type: WorkoutType.upperAndCalves,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'c_incline_chest_press_machine',
+          order: 1,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_sa_db_lat_row',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_db_kelso_shrugs',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_scapular_plane_db_lateral_raises_uc',
+          order: 4,
+          prescribedSets: 2,
+          prescribedReps: '15-25',
+          prescribedRest: '1-2m',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_sa_cable_preacher_bicep_curl',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_sa_triceps_push_down_uc',
+          order: 6,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_standing_calf_raises_machine_uc',
+          order: 7,
+          prescribedSets: 3,
+          prescribedReps: '6-10',
+          prescribedRest: '2-3m',
+        ),
+      ],
+    ),
   ];
 
   static const List<WorkoutType> trainingSequence = [
-    WorkoutType.push,
-    WorkoutType.pull,
+    WorkoutType.chestAndBack,
+    WorkoutType.shoulderAndArms,
     WorkoutType.legs,
     WorkoutType.rest,
-    WorkoutType.upper,
-    WorkoutType.lower,
+    WorkoutType.fullBody,
+    WorkoutType.rest,
+    WorkoutType.upperAndCalves,
     WorkoutType.rest,
   ];
 
@@ -695,10 +1191,13 @@ class WorkoutCatalog {
     if (last == WorkoutType.rest) {
       if (history.length > 1) {
         final prev = history[1];
-        if (prev == WorkoutType.legs) return WorkoutType.upper;
+        if (prev == WorkoutType.legs) return WorkoutType.fullBody;
+        if (prev == WorkoutType.fullBody) return WorkoutType.upperAndCalves;
+        if (prev == WorkoutType.upperAndCalves) return WorkoutType.chestAndBack;
+        // legacy fallbacks
         if (prev == WorkoutType.lower) return WorkoutType.push;
       }
-      return WorkoutType.push;
+      return trainingSequence.first;
     }
 
     final index = trainingSequence.indexOf(last);
@@ -709,11 +1208,18 @@ class WorkoutCatalog {
   static WorkoutDefinition? getWorkoutForDate(DateTime date) {
     final type = WorkoutDateUtils.getWorkoutTypeForDay(date);
     if (type == WorkoutType.rest) return null;
-    return getWorkoutByType(type);
+    return workouts.firstWhere(
+      (w) => w.id == type.name,
+      orElse: () => getWorkoutByType(type)!,
+    );
   }
 
   static WorkoutDefinition? getWorkoutByType(WorkoutType type) {
     try {
+      if (type == WorkoutType.legs) {
+        final legs8Day = workouts.where((w) => w.id == 'legs_8day');
+        if (legs8Day.isNotEmpty) return legs8Day.first;
+      }
       return workouts.firstWhere(
         (w) =>
             w.type == type &&

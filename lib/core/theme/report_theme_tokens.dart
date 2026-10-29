@@ -31,12 +31,21 @@ class ReportThemeTokens {
   static const Color textSecondary = Color(0xFF8A8F9E);
   static const Color textMuted = Color(0xFF555968);
 
-  // Standard Radii
-  static const double cardRadius = 20.0;
+  // Standard Radii & Dimensions
+  static const double cardRadius = 22.0;
+  static const double sheetRadius = 28.0;
   static const double chipRadius = 12.0;
   static const double buttonRadius = 16.0;
+  static const double minTouchTarget = 48.0;
+  static const double screenPadding = 16.0;
+  static const double itemGap = 12.0;
+
+  // Solid Semi-Transparent Elevated Surfaces (NO BLUR)
+  static const Color sheetSurfaceDark = Color(0xF214171F); // 95% #14171F
+  static const Color sheetSurfaceLight = Color(0xF5FFFFFF);
 
   static BorderRadius get cardBorderRadius => BorderRadius.circular(cardRadius);
+  static BorderRadius get sheetBorderRadius => BorderRadius.circular(sheetRadius);
   static BorderRadius get chipBorderRadius => BorderRadius.circular(chipRadius);
 
   // Typography - Arabic (Cairo / Noto Kufi Arabic)
@@ -99,11 +108,13 @@ class ReportThemeTokens {
     double fontSize = 12,
     FontWeight fontWeight = FontWeight.w600,
     Color color = textSecondary,
+    double? letterSpacing,
   }) {
     return GoogleFonts.outfit(
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color,
+      letterSpacing: letterSpacing,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
   }

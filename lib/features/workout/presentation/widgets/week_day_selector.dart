@@ -16,10 +16,23 @@ class WeekDaySelector extends StatelessWidget {
     required this.onDateSelected,
   });
 
+  /// Returns a unique 1–2 char label for the weekday to avoid Tue/Thu collision.
+  static String _dayLabel(DateTime date) {
+    switch (date.weekday) {
+      case DateTime.monday:    return 'M';
+      case DateTime.tuesday:   return 'T';
+      case DateTime.wednesday: return 'W';
+      case DateTime.thursday:  return 'Th';
+      case DateTime.friday:    return 'F';
+      case DateTime.saturday:  return 'S';
+      case DateTime.sunday:    return 'Su';
+      default:                 return '?';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final weekDays = WorkoutDateUtils.getWeekDays(selectedDate);
-    final dayNameFormat = DateFormat('E'); // Mon, Tue...
     final dayNumberFormat = DateFormat('d');
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -113,9 +126,9 @@ class WeekDaySelector extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                dayNameFormat.format(date)[0], // M, T, W...
+                                _dayLabel(date),
                                 style: GoogleFonts.outfit(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                   color: isSelected
                                       ? Colors.white

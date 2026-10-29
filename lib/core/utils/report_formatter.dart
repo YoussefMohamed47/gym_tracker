@@ -41,6 +41,10 @@ class ReportFormatter {
   /// Localizes workout type names cleanly without mixing Arabic and English
   static String localizeArabicWorkoutType(String typeName) {
     final lower = typeName.toLowerCase().trim();
+    if (lower.contains('chest') || lower.contains('back')) return 'تمرين صدر وظهر';
+    if (lower.contains('shoulder') || lower.contains('arm')) return 'تمرين أكتاف وذراعين';
+    if (lower.contains('full')) return 'تمرين الجسم كامل';
+    if (lower.contains('calv') || (lower.contains('upper') && lower.contains('calv'))) return 'تمرين علوي وبطات';
     if (lower.contains('push')) return 'تمرين دفع';
     if (lower.contains('pull')) return 'تمرين سحب';
     if (lower.contains('leg')) return 'تمرين أرجل';

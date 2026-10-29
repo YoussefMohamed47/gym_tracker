@@ -23,7 +23,15 @@ class AppColors {
   // Status Colors
   static const Color completedGreen = Color(0xFF3DDC97);
   static const Color restAmber = Color(0xFFFFB800);
+  static const Color warningAmber = Color(0xFFFFB800);
   static const Color destructiveRed = Color(0xFFFF5252);
+
+  // Accent & Text Colors
+  static const Color indigoAccent = Color(0xFF6C7BFF);
+  static const Color violetAccent = Color(0xFF9B6CFF);
+  static const Color textPrimary = Color(0xFFF0F2F8);
+  static const Color textSecondary = Color(0xFF8A8F9E);
+  static const Color textMuted = Color(0xFF555968);
 
   // --- Light Palette Fallback ---
   static const Color primary = Color(0xFF6C7BFF);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/report_theme_tokens.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/workout_definition.dart';
@@ -9,289 +9,372 @@ import '../cubit/workout_cubit.dart';
 import '../cubit/workout_state.dart';
 import '../utils/video_launcher.dart';
 
-class WarmupSection extends StatelessWidget {
+class WarmupSection extends StatefulWidget {
   const WarmupSection({super.key});
+
+  @override
+  State<WarmupSection> createState() => _WarmupSectionState();
+}
+
+class _WarmupSectionState extends State<WarmupSection> {
+  bool _isExpanded = true;
+  bool _hasAutoCollapsed = false;
 
   @override
   Widget build(BuildContext context) {
     final warmup = WorkoutCatalog.getUpperBodyWarmup();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-          child: Text(
-            'WARM-UP',
-            style: GoogleFonts.outfit(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.1,
-              color: Theme.of(context).colorScheme.primary,
+    return BlocBuilder<WorkoutCubit, WorkoutState>(
+      buildWhen: (prev, curr) {
+        for (final slot in warmup.exercises) {
+          if (prev.exerciseLogs[slot.exerciseId] != curr.exerciseLogs[slot.exerciseId]) {
+            return true;
+          }
+        }
+        return false;
+      },
+      builder: (context, state) {
+        final totalWarmupItems = warmup.exercises.length;
+        int completedWarmupItems = 0;
+
+        for (final slot in warmup.exercises) {
+          final log = state.exerciseLogs[slot.exerciseId];
+          if (log != null && log.sets.isNotEmpty && log.sets.every((s) => s.isPerformed)) {
+            completedWarmupItems++;
+          }
+        }
+
+        final isAllComplete = totalWarmupItems > 0 && completedWarmupItems == totalWarmupItems;
+
+        if (isAllComplete && !_hasAutoCollapsed && _isExpanded) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _isExpanded = false;
+                _hasAutoCollapsed = true;
+              });
+            }
+          });
+        }
+
+        final progress = totalWarmupItems > 0 ? completedWarmupItems / totalWarmupItems : 0.0;
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: isAllComplete
+                  ? AppColors.completedGreen.withValues(alpha: 0.6)
+                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
+              width: isAllComplete ? 1.5 : 1.0,
             ),
           ),
-        ),
-        ...warmup.exercises.map((slot) {
-          return _WarmupCard(slot: slot);
-        }),
-      ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Column(
+              children: [
+                // Collapsible Header Bar
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(22),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: isAllComplete
+                                      ? AppColors.completedGreen.withValues(alpha: 0.15)
+                                      : const Color(0xFFFF9500).withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isAllComplete ? Icons.check_circle_rounded : Icons.local_fire_department_rounded,
+                                  size: 18,
+                                  color: isAllComplete ? AppColors.completedGreen : const Color(0xFFFF9500),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Upper Body Warm-up',
+                                      style: ReportThemeTokens.outfitHeader(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w900,
+                                        color: isAllComplete
+                                            ? AppColors.completedGreen
+                                            : (isDark ? AppColors.textPrimary : Colors.black87),
+                                      ),
+                                    ),
+                                    Text(
+                                      'Shoulder & Scapula activation before pressing',
+                                      style: ReportThemeTokens.outfitSubtext(
+                                        fontSize: 11,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isAllComplete
+                                      ? AppColors.completedGreen.withValues(alpha: 0.15)
+                                      : (isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7)),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '$completedWarmupItems/$totalWarmupItems done',
+                                  style: ReportThemeTokens.outfitNumber(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    color: isAllComplete
+                                        ? AppColors.completedGreen
+                                        : (isDark ? AppColors.textPrimary : Colors.black87),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              AnimatedRotation(
+                                turns: _isExpanded ? 0.5 : 0.0,
+                                duration: const Duration(milliseconds: 200),
+                                child: const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 3,
+                              backgroundColor: isDark ? Colors.white10 : Colors.black12,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                isAllComplete ? AppColors.completedGreen : const Color(0xFFFF9500),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Collapsible Cards List
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 250),
+                  crossFadeState: _isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                  firstChild: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    child: Column(
+                      children: warmup.exercises.map((slot) {
+                        return _WarmupItemCard(slot: slot, isDark: isDark);
+                      }).toList(),
+                    ),
+                  ),
+                  secondChild: const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
-class _WarmupCard extends StatelessWidget {
+class _WarmupItemCard extends StatelessWidget {
   final ExerciseSlot slot;
+  final bool isDark;
 
-  const _WarmupCard({required this.slot});
+  const _WarmupItemCard({
+    required this.slot,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
     final exercise = WorkoutCatalog.getExerciseById(slot.exerciseId);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 0,
-      color: Theme.of(context).cardTheme.color,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context)
-              .colorScheme
-              .outline
-              .withValues(alpha: 0.5),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        exercise.name,
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${slot.prescribedSets} × ${slot.prescribedReps}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (exercise.videoUrl != null)
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: Icon(
-                      Icons.play_circle_fill_rounded,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    label: Text(
-                      'Watch',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    onPressed: () => VideoLauncher.launch(
-                      context,
-                      exercise.videoUrl!,
-                    ),
-                  ),
-              ],
+    return BlocBuilder<WorkoutCubit, WorkoutState>(
+      buildWhen: (prev, curr) =>
+          prev.exerciseLogs[slot.exerciseId] != curr.exerciseLogs[slot.exerciseId],
+      builder: (context, state) {
+        final log = state.exerciseLogs[slot.exerciseId];
+        final isCompleted = log != null &&
+            log.sets.isNotEmpty &&
+            log.sets.every((s) => s.isPerformed);
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? AppColors.completedGreen.withValues(alpha: 0.05)
+                : (isDark ? AppColors.darkElevated : const Color(0xFFF7F8FC)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isCompleted
+                  ? AppColors.completedGreen.withValues(alpha: 0.35)
+                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
+              width: 1,
             ),
-            const Divider(height: 16),
-            BlocBuilder<WorkoutCubit, WorkoutState>(
-              builder: (context, state) {
-                final log = state.exerciseLogs[slot.exerciseId];
-                if (log == null) return const SizedBox.shrink();
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            exercise.name,
+                            style: ReportThemeTokens.outfitHeader(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: isCompleted
+                                  ? AppColors.completedGreen
+                                  : (isDark ? AppColors.textPrimary : Colors.black87),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${slot.prescribedSets} sets × ${slot.prescribedReps}',
+                            style: ReportThemeTokens.outfitSubtext(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (exercise.videoUrl != null)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => VideoLauncher.launch(context, exercise.videoUrl!),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF9500).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.play_circle_fill_rounded,
+                                  size: 14,
+                                  color: Color(0xFFFF9500),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Guide',
+                                  style: ReportThemeTokens.outfitSubtext(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFFF9500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
 
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 12,
-                  children: List.generate(slot.prescribedSets, (index) {
-                    final setLog = log.sets.length > index
-                        ? log.sets[index]
-                        : null;
-                    final isPerformed = setLog?.isPerformed ?? false;
+                // Set check circles row
+                Row(
+                  children: List.generate(slot.prescribedSets, (setIdx) {
+                    final setLog = (log != null && log.sets.length > setIdx) ? log.sets[setIdx] : null;
+                    final isSetDone = setLog?.isPerformed ?? false;
 
-                    return _WarmupSetChip(
-                      exerciseId: slot.exerciseId,
-                      index: index,
-                      actualReps: setLog?.actualReps,
-                      isPerformed: isPerformed,
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.read<WorkoutCubit>().toggleSetPerformed(slot.exerciseId, setIdx);
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSetDone
+                                ? AppColors.completedGreen
+                                : (isDark ? AppColors.darkCard : Colors.white),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSetDone
+                                  ? AppColors.completedGreen
+                                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isSetDone ? Icons.check_rounded : Icons.circle_outlined,
+                                size: 14,
+                                color: isSetDone ? Colors.black : AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Set ${setIdx + 1}',
+                                style: ReportThemeTokens.outfitNumber(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: isSetDone ? Colors.black : AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     );
                   }),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WarmupSetChip extends StatefulWidget {
-  final String exerciseId;
-  final int index;
-  final int? actualReps;
-  final bool isPerformed;
-
-  const _WarmupSetChip({
-    required this.exerciseId,
-    required this.index,
-    this.actualReps,
-    required this.isPerformed,
-  });
-
-  @override
-  State<_WarmupSetChip> createState() => _WarmupSetChipState();
-}
-
-class _WarmupSetChipState extends State<_WarmupSetChip> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(
-      text: widget.actualReps?.toString() ?? '',
-    );
-  }
-
-  @override
-  void didUpdateWidget(_WarmupSetChip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.actualReps != widget.actualReps) {
-      final newText = widget.actualReps?.toString() ?? '';
-      if (_controller.text != newText) {
-        _controller.text = newText;
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 80,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: widget.isPerformed
-            ? AppColors.completedGreen.withValues(alpha: 0.15)
-            : Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: widget.isPerformed
-              ? AppColors.completedGreen
-              : Theme.of(context)
-                  .colorScheme
-                  .outline
-                  .withValues(alpha: 0.5),
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'S${widget.index + 1}',
-                style: GoogleFonts.outfit(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: widget.isPerformed
-                      ? AppColors.completedGreen
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ),
-              GestureDetector(
-                onTap: () => context.read<WorkoutCubit>().toggleSetPerformed(
-                      widget.exerciseId,
-                      widget.index,
-                    ),
-                child: Icon(
-                  widget.isPerformed
-                      ? Icons.check_circle_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  size: 14,
-                  color: widget.isPerformed
-                      ? AppColors.completedGreen
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant
-                          .withValues(alpha: 0.5),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          TextField(
-            controller: _controller,
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              border: InputBorder.none,
-              hintText: '0',
+              ],
             ),
-            style: GoogleFonts.outfit(
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            onChanged: (value) {
-              final reps = int.tryParse(value);
-              if (reps != null && reps > 0) {
-                context.read<WorkoutCubit>().updateSetReps(
-                      widget.exerciseId,
-                      widget.index,
-                      reps,
-                    );
-              } else if (value.isEmpty) {
-                context.read<WorkoutCubit>().updateSetReps(
-                      widget.exerciseId,
-                      widget.index,
-                      null,
-                    );
-              }
-            },
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -2,6 +2,8 @@ class ExerciseDefinition {
   final String id;
   final String name;
   final String? videoUrl;
+  final List<String>? pairedVideoUrls;
+  final String? tempoNote;
   final bool isWeightAllowed;
   final List<String> alternatives;
 
@@ -9,6 +11,8 @@ class ExerciseDefinition {
     required this.id,
     required this.name,
     this.videoUrl,
+    this.pairedVideoUrls,
+    this.tempoNote,
     this.isWeightAllowed = true,
     this.alternatives = const [],
   });
