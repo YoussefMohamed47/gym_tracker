@@ -82,17 +82,23 @@ void main() {
       }
     });
 
-    test('Day 2 (Shoulder & Arms) handles superset video URLs for Forearms', () {
+    test('Day 2 (Shoulder & Arms) contains individual Forearm exercises', () {
       final day = repository.getDay(2);
-      expect(day.exercises.length, 6);
+      expect(day.exercises.length, 7);
 
-      final forearmSuperset = day.exercises.firstWhere(
-        (e) => e.id == 'c_cable_wrist_flexion_extension',
+      final wristFlexion = day.exercises.firstWhere(
+        (e) => e.id == 'c_cable_wrist_flexion',
       );
-      expect(forearmSuperset.name, 'Cable Wrist Flexion + Cable Wrist Extension');
-      expect(forearmSuperset.videoUrl, contains('youtu.be/WVAaKJvToe0'));
-      expect(forearmSuperset.pairedVideoUrls, isNotNull);
-      expect(forearmSuperset.pairedVideoUrls!.first, contains('youtube.com/shorts/_JiYn7I9F_k'));
+      expect(wristFlexion.name, 'Cable Wrist Flexion');
+      expect(wristFlexion.videoUrl, contains('youtu.be/WVAaKJvToe0'));
+      expect(wristFlexion.pairedVideoUrls, isNull);
+
+      final wristExtension = day.exercises.firstWhere(
+        (e) => e.id == 'c_cable_wrist_extension',
+      );
+      expect(wristExtension.name, 'Cable Wrist Extension');
+      expect(wristExtension.videoUrl, contains('youtube.com/shorts/_JiYn7I9F_k'));
+      expect(wristExtension.pairedVideoUrls, isNull);
     });
 
     test('Day 3 (Legs) contains 7 prescribed exercises', () {

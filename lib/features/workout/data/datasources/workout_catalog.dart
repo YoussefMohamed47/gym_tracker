@@ -383,10 +383,15 @@ class WorkoutCatalog {
       alternatives: ['pull_sa_db_preacher_bicep_curl'],
     ),
     ExerciseDefinition(
-      id: 'c_cable_wrist_flexion_extension',
-      name: 'Cable Wrist Flexion + Cable Wrist Extension',
+      id: 'c_cable_wrist_flexion',
+      name: 'Cable Wrist Flexion',
       videoUrl: 'https://youtu.be/WVAaKJvToe0',
-      pairedVideoUrls: ['https://youtube.com/shorts/_JiYn7I9F_k'],
+      alternatives: ['push_forearm_exercise_variations'],
+    ),
+    ExerciseDefinition(
+      id: 'c_cable_wrist_extension',
+      name: 'Cable Wrist Extension',
+      videoUrl: 'https://youtube.com/shorts/_JiYn7I9F_k',
       alternatives: ['push_forearm_exercise_variations'],
     ),
 
@@ -991,8 +996,15 @@ class WorkoutCatalog {
           prescribedRest: '2-3m',
         ),
         ExerciseSlot(
-          exerciseId: 'c_cable_wrist_flexion_extension',
+          exerciseId: 'c_cable_wrist_flexion',
           order: 6,
+          prescribedSets: 2,
+          prescribedReps: '6-10',
+          prescribedRest: '1-2m',
+        ),
+        ExerciseSlot(
+          exerciseId: 'c_cable_wrist_extension',
+          order: 7,
           prescribedSets: 2,
           prescribedReps: '6-10',
           prescribedRest: '1-2m',
