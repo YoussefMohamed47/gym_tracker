@@ -26,6 +26,9 @@ class WorkoutState extends Equatable {
   final int restTimerTargetSeconds;
   final String restTimerExerciseName;
 
+  // PR Gamification
+  final String? prAchievedForPlannedId;
+
   const WorkoutState({
     required this.status,
     required this.selectedDate,
@@ -40,6 +43,7 @@ class WorkoutState extends Equatable {
     this.restTimerSeconds = 0,
     this.restTimerTargetSeconds = 0,
     this.restTimerExerciseName = '',
+    this.prAchievedForPlannedId,
   });
 
   factory WorkoutState.initial() {
@@ -74,6 +78,8 @@ class WorkoutState extends Equatable {
     int? restTimerSeconds,
     int? restTimerTargetSeconds,
     String? restTimerExerciseName,
+    String? prAchievedForPlannedId,
+    bool clearPR = false,
   }) {
     return WorkoutState(
       status: status ?? this.status,
@@ -92,6 +98,7 @@ class WorkoutState extends Equatable {
           restTimerTargetSeconds ?? this.restTimerTargetSeconds,
       restTimerExerciseName:
           restTimerExerciseName ?? this.restTimerExerciseName,
+      prAchievedForPlannedId: clearPR ? null : (prAchievedForPlannedId ?? this.prAchievedForPlannedId),
     );
   }
 
@@ -110,5 +117,6 @@ class WorkoutState extends Equatable {
     restTimerSeconds,
     restTimerTargetSeconds,
     restTimerExerciseName,
+    prAchievedForPlannedId,
   ];
 }

@@ -175,6 +175,7 @@ class NutritionCatalog {
     ),
   ];
 
+  // We will pass the training list dynamically now, but keep this as a fallback if needed
   static const List<MealCategoryOptions> training = [
     MealCategoryOptions(
       categoryName: 'نوع التمرين',

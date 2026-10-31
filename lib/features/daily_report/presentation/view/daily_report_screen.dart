@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +14,8 @@ import '../cubit/daily_report_cubit.dart';
 import '../cubit/daily_report_state.dart';
 import '../widgets/daily_meals_report_card.dart';
 import '../widgets/daily_report_form.dart';
+import '../widgets/report_completion_header.dart';
+import '../../../workout/domain/repositories/workout_catalog_repository.dart';
 
 class DailyReportScreen extends StatefulWidget {
   const DailyReportScreen({super.key});
@@ -27,12 +30,33 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final catalogRepo = di.sl<WorkoutCatalogRepository>();
+    final days = catalogRepo.getEightDayRotation();
+    final trainingOptions = days.map((e) => e.title).toSet().toList();
+    if (!trainingOptions.contains('Cardio')) {
+      trainingOptions.add('Cardio');
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Report'),
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            tooltip: 'Copy from yesterday',
+            icon: const Icon(Icons.auto_fix_high_rounded, color: Colors.amber),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.read<DailyReportCubit>().copyFromYesterday();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('تم نسخ بيانات الأمس! ✨'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
           IconButton(
             key: _themeButtonKey,
             icon: Icon(
@@ -41,6 +65,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                   : Icons.dark_mode_rounded,
             ),
             onPressed: () {
+              HapticFeedback.lightImpact();
               di.sl<ThemeTransitionController>().animateThemeToggle(
                     context: context,
                     buttonKey: _themeButtonKey,
@@ -51,6 +76,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
+              HapticFeedback.selectionClick();
               Navigator.pushNamed(context, AppRouter.history);
             },
           ),
@@ -112,9 +138,12 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               children: [
+                                ReportCompletionHeader(report: state.report),
+                                const SizedBox(height: 8),
                                 DailyReportForm(
                                   key: ValueKey(state.report.id),
                                   report: state.report,
+                                  trainingOptions: trainingOptions,
                                   onChanged: (updatedReport) {
                                     context.read<DailyReportCubit>().updateField(
                                           breakfast: updatedReport.breakfast,
@@ -138,6 +167,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                                           state.report.isEmpty)
                                       ? null
                                       : () async {
+                                          HapticFeedback.heavyImpact();
                                           if (state.report.water.trim().isEmpty) {
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(

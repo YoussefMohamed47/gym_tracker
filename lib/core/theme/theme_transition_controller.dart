@@ -51,6 +51,11 @@ class ThemeTransitionController {
         pixelRatio: MediaQuery.of(context).devicePixelRatio,
       );
 
+      if (!context.mounted) {
+        _isTransitioning = false;
+        return;
+      }
+
       // 3. Insert transition overlay
       final overlayState = Overlay.of(context);
       late OverlayEntry entry;

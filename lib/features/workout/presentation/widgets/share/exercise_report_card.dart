@@ -24,24 +24,25 @@ class ExerciseReportCard extends StatelessWidget {
     // Determine muscle tag based on exercise ID or name
     String muscleTag = 'MAIN LIFT';
     final exId = exercise.id.toLowerCase();
-    if (exId.contains('chest') || exId.contains('bench'))
+    if (exId.contains('chest') || exId.contains('bench')) {
       muscleTag = 'CHEST';
-    else if (exId.contains('row') ||
+    } else if (exId.contains('row') ||
         exId.contains('lat') ||
-        exId.contains('pull'))
+        exId.contains('pull')) {
       muscleTag = 'BACK';
-    else if (exId.contains('shoulder') ||
+    } else if (exId.contains('shoulder') ||
         exId.contains('delt') ||
-        exId.contains('lateral'))
+        exId.contains('lateral')) {
       muscleTag = 'SHOULDERS';
-    else if (exId.contains('bicep') || exId.contains('curl'))
+    } else if (exId.contains('bicep') || exId.contains('curl')) {
       muscleTag = 'BICEPS';
-    else if (exId.contains('tricep') || exId.contains('push_down'))
+    } else if (exId.contains('tricep') || exId.contains('push_down')) {
       muscleTag = 'TRICEPS';
-    else if (exId.contains('squat') ||
+    } else if (exId.contains('squat') ||
         exId.contains('leg') ||
-        exId.contains('calve'))
+        exId.contains('calve')) {
       muscleTag = 'LEGS';
+    }
 
     // Calculate best set & check PR
     double bestWeight = 0;

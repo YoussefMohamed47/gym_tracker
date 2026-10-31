@@ -21,7 +21,7 @@ class DailyReportCubit extends Cubit<DailyReportState> {
   }
 
   Future<void> initTodayTrainingDefault() async {
-    if (state.report.training.isNotEmpty || _workoutRepository == null) return;
+    if (_workoutRepository == null) return;
 
     try {
       final now = DateTime.now();
@@ -29,9 +29,14 @@ class DailyReportCubit extends Cubit<DailyReportState> {
       final session = await _workoutRepository.getSessionForDate(dateKey);
 
       String defaultTraining;
+      bool hasCompletedSession = false;
+
       if (session != null) {
         defaultTraining = session.workoutType.displayName;
+        hasCompletedSession = true;
       } else {
+        if (state.report.training.isNotEmpty) return; // Don't override if user set something manually and no session completed
+
         final history = await _workoutRepository.getHistory();
         final pastTypes = history
             .where((s) => s.dateKey.compareTo(dateKey) < 0)
@@ -54,8 +59,10 @@ class DailyReportCubit extends Cubit<DailyReportState> {
         defaultTraining = suggestedType.displayName;
       }
 
-      if (state.report.training.isEmpty) {
-        emit(DailyReportUpdating(state.report.copyWith(training: defaultTraining)));
+      if (state.report.training.isEmpty || hasCompletedSession) {
+        if (state.report.training != defaultTraining) {
+          emit(DailyReportUpdating(state.report.copyWith(training: defaultTraining)));
+        }
       }
     } catch (_) {
       // Fallback gracefully if repository or box is not initialized
@@ -100,6 +107,35 @@ class DailyReportCubit extends Cubit<DailyReportState> {
 
   void restoreReport(DailyReport report) {
     emit(DailyReportUpdating(report));
+  }
+
+  Future<void> copyFromYesterday() async {
+    final result = await _repository.getReportHistory();
+    if (result is ApiSuccess<List<DailyReport>>) {
+      final history = result.data;
+      if (history.isNotEmpty) {
+        history.sort((a, b) {
+          final dateA = a.dateTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final dateB = b.dateTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return dateB.compareTo(dateA);
+        });
+        
+        final lastReport = history.first;
+        
+        final updatedReport = state.report.copyWith(
+          breakfast: lastReport.breakfast,
+          lunch: lastReport.lunch,
+          snack: lastReport.snack,
+          beforeTraining: lastReport.beforeTraining,
+          afterTraining: lastReport.afterTraining,
+          dinner: lastReport.dinner,
+          water: lastReport.water,
+          supplements: lastReport.supplements,
+          sleepTime: lastReport.sleepTime,
+        );
+        emit(DailyReportUpdating(updatedReport));
+      }
+    }
   }
 
   Future<void> generateAndCacheImage(Uint8List imageBytes) async {

@@ -32,7 +32,7 @@ void main() {
         ).thenAnswer((_) async => ApiSuccess(tReports));
 
         // act & assert
-        final expectedStates = [HistoryLoading(), HistoryLoaded(tReports)];
+        final expectedStates = [HistoryLoading(), HistoryLoaded(reports: tReports)];
 
         expectLater(cubit.stream, emitsInOrder(expectedStates));
 

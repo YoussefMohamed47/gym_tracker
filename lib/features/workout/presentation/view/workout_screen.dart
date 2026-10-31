@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:confetti/confetti.dart';
 
 import '../../domain/entities/workout_session.dart';
 import '../../domain/usecases/get_exercise_history.dart';
@@ -27,10 +28,12 @@ class WorkoutScreen extends StatefulWidget {
 class _WorkoutScreenState extends State<WorkoutScreen> {
   final PhotoService _photoService = PhotoService();
   final ScrollController _scrollController = ScrollController();
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<WorkoutCubit>().loadDate(DateTime.now());
     });
@@ -38,6 +41,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   @override
   void dispose() {
+    _confettiController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -136,8 +140,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return BlocListener<WorkoutCubit, WorkoutState>(
       listenWhen: (previous, current) =>
           previous.status != current.status ||
-          previous.errorMessage != current.errorMessage,
+          previous.errorMessage != current.errorMessage ||
+          previous.prAchievedForPlannedId != current.prAchievedForPlannedId,
       listener: (context, state) {
+        if (state.prAchievedForPlannedId != null) {
+          _confettiController.play();
+        }
+        
         if (state.status == WorkoutStatus.failure &&
             state.errorMessage != null) {
           if (state.errorMessage!.startsWith('REVIEW_REQUIRED:')) {
@@ -214,6 +223,20 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       bottom: 0,
                       child: BottomDock(state: state),
                     ),
+
+                  // Confetti Overlay
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: ConfettiWidget(
+                      confettiController: _confettiController,
+                      blastDirectionality: BlastDirectionality.explosive,
+                      maxBlastForce: 20,
+                      minBlastForce: 10,
+                      emissionFrequency: 0.05,
+                      numberOfParticles: 20,
+                      gravity: 0.2,
+                    ),
+                  ),
                 ],
               ),
             ),

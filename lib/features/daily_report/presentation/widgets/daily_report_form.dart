@@ -8,11 +8,13 @@ import 'supplement_selector.dart';
 class DailyReportForm extends StatelessWidget {
   final DailyReport report;
   final Function(DailyReport) onChanged;
+  final List<String> trainingOptions;
 
   const DailyReportForm({
     super.key,
     required this.report,
     required this.onChanged,
+    required this.trainingOptions,
   });
 
   @override
@@ -78,7 +80,12 @@ class DailyReportForm extends StatelessWidget {
             ),
             MealOptionSelector(
               label: 'نوع وحجم التمرين (Training Name)',
-              categories: NutritionCatalog.training,
+              categories: [
+                MealCategoryOptions(
+                  categoryName: 'نوع التمرين',
+                  options: trainingOptions,
+                ),
+              ],
               initialValue: report.training,
               onChanged: (val) => onChanged(report.copyWith(training: val)),
             ),

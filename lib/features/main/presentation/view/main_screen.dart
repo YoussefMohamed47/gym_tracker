@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gym_tracker_report/features/daily_report/presentation/cubit/daily_report_cubit.dart';
 import 'package:gym_tracker_report/features/daily_report/presentation/view/daily_report_screen.dart';
 import 'package:gym_tracker_report/features/workout/presentation/view/workout_screen.dart';
 import '../widgets/floating_nav_bar.dart';
@@ -29,6 +31,9 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: FloatingNavBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
+          if (index == 0) {
+            context.read<DailyReportCubit>().initTodayTrainingDefault();
+          }
           setState(() {
             _selectedIndex = index;
           });

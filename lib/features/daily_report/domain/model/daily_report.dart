@@ -49,6 +49,26 @@ class DailyReport extends Equatable {
       sleepTime.isEmpty &&
       (notes?.isEmpty ?? true);
 
+  double get mealsCompletionRatio {
+    int filled = 0;
+    if (breakfast.trim().isNotEmpty) filled++;
+    if (lunch.trim().isNotEmpty) filled++;
+    if (dinner.trim().isNotEmpty) filled++;
+    if (snack.trim().isNotEmpty) filled++;
+    return filled / 4.0;
+  }
+
+  double get overallCompletionRatio {
+    int total = 5;
+    int filled = 0;
+    if (breakfast.trim().isNotEmpty || lunch.trim().isNotEmpty || dinner.trim().isNotEmpty) filled++;
+    if (water.trim().isNotEmpty) filled++;
+    if (sleepTime.trim().isNotEmpty) filled++;
+    if (training.trim().isNotEmpty) filled++;
+    if (supplements.trim().isNotEmpty) filled++;
+    return filled / total.toDouble();
+  }
+
   factory DailyReport.empty() => DailyReport(
     id: DateTime.now().millisecondsSinceEpoch.toString(),
     breakfast: '',

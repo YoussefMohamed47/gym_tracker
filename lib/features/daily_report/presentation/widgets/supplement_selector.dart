@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SupplementSelector extends StatefulWidget {
@@ -131,6 +132,7 @@ class _SupplementSelectorState extends State<SupplementSelector> {
                     dense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     onChanged: (val) {
+                      HapticFeedback.lightImpact();
                       setState(() {
                         _zandrosChecked = val ?? false;
                         _notifyChange();
@@ -154,6 +156,7 @@ class _SupplementSelectorState extends State<SupplementSelector> {
                     dense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     onChanged: (val) {
+                      HapticFeedback.lightImpact();
                       setState(() {
                         _totavitChecked = val ?? false;
                         _notifyChange();

@@ -8,13 +8,15 @@ import '../../domain/entities/workout_definition.dart';
 import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../domain/repositories/workout_repository.dart';
+import '../../domain/usecases/check_pr_usecase.dart';
 import '../../utils/date_utils.dart';
 import 'workout_state.dart';
 
 class WorkoutCubit extends Cubit<WorkoutState> {
   final WorkoutRepository repository;
+  final CheckPRUseCase? checkPRUseCase;
 
-  WorkoutCubit({required this.repository}) : super(WorkoutState.initial());
+  WorkoutCubit({required this.repository, this.checkPRUseCase}) : super(WorkoutState.initial());
 
   Future<void> loadDate(DateTime date) async {
     emit(state.copyWith(status: WorkoutStatus.loading, selectedDate: date));
@@ -228,7 +230,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
-  void toggleSetPerformed(String plannedId, int setIndex) {
+  Future<void> toggleSetPerformed(String plannedId, int setIndex) async {
     final logs = Map<String, ExerciseLog>.from(state.exerciseLogs);
     final log = logs[plannedId];
 
@@ -252,7 +254,26 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
       emit(state.copyWith(exerciseLogs: logs, alternativeDrafts: altDrafts));
 
-      if (newPerformed) {
+      if (newPerformed && checkPRUseCase != null) {
+        // Check for PR
+        final currentSet = updatedSets[setIndex];
+        if (currentSet.weightKg != null || currentSet.actualReps != null) {
+          final isPR = await checkPRUseCase!(
+            exerciseId: log.performedExerciseId,
+            weightKg: currentSet.weightKg,
+            actualReps: currentSet.actualReps,
+            currentDateKey: state.dateKey,
+          );
+
+          if (isPR) {
+            emit(state.copyWith(prAchievedForPlannedId: plannedId));
+            // Clear PR flag after a short delay so it can be re-triggered for other sets
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (!isClosed) emit(state.copyWith(clearPR: true));
+            });
+          }
+        }
+
         final exerciseDef = WorkoutCatalog.getExerciseById(log.performedExerciseId);
         final workoutDef = WorkoutCatalog.getWorkoutByType(state.workoutType);
         ExerciseSlot? foundSlot;

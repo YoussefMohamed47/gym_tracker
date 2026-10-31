@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/datasources/nutrition_catalog.dart';
@@ -224,6 +225,7 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
                             ),
 
                             onTap: () {
+                              HapticFeedback.lightImpact();
                               setState(() {
                                 _selectedOptions[category.categoryName] = null;
                                 _notifyChange();
@@ -282,6 +284,7 @@ class _MealOptionSelectorState extends State<MealOptionSelector> {
                       );
                     }).toList(),
                     onChanged: (newValue) {
+                      HapticFeedback.lightImpact();
                       setState(() {
                         _selectedOptions[category.categoryName] = newValue;
                         _notifyChange();

@@ -10,6 +10,7 @@ import '../../features/daily_report/data/repository/daily_report_repository_impl
 import '../../features/daily_report/data/service/image_service.dart';
 import '../../features/daily_report/data/datasources/daily_report_local_datasource.dart';
 import '../../features/daily_report/domain/repository/daily_report_repository.dart';
+import '../../features/daily_report/domain/usecases/get_meal_adherence_usecase.dart';
 import '../../features/daily_report/presentation/cubit/daily_report_cubit.dart';
 import '../../features/history/presentation/cubit/history_cubit.dart';
 import '../../features/workout/presentation/cubit/workout_cubit.dart';
@@ -24,6 +25,8 @@ import '../../features/workout/domain/usecases/get_previous_exercise_log.dart';
 import '../../features/workout/domain/usecases/get_workout_for_date.dart';
 import '../../features/workout/domain/usecases/save_workout_session.dart';
 import '../../features/workout/domain/usecases/get_exercise_history.dart';
+import '../../features/workout/domain/usecases/check_pr_usecase.dart';
+import '../../features/workout/domain/usecases/get_30_day_volume_usecase.dart';
 import '../../features/daily_report/data/models/daily_report_hive_model.dart';
 import '../../features/workout/data/models/workout_session_hive_model.dart';
 import '../storage/hive/models/app_settings_hive_model.dart';
@@ -59,8 +62,8 @@ Future<void> init() async {
   // Cubits
   sl.registerLazySingleton(() => ThemeCubit(sl<HiveLocalStorage>().getBox(HiveBoxes.preferences)));
   sl.registerLazySingleton(() => DailyReportCubit(sl(), workoutRepository: sl()));
-  sl.registerFactory(() => HistoryCubit(sl()));
-  sl.registerFactory(() => WorkoutCubit(repository: sl()));
+  sl.registerFactory(() => HistoryCubit(sl(), get30DayVolume: sl(), getMealAdherence: sl()));
+  sl.registerFactory(() => WorkoutCubit(repository: sl(), checkPRUseCase: sl()));
   sl.registerFactory(() => WorkoutCatalogCubit(getWorkoutCatalog: sl()));
 
   // Repositories
@@ -77,6 +80,8 @@ Future<void> init() async {
       ),
     ),
   );
+  
+  sl.registerLazySingleton(() => GetMealAdherenceUseCase(sl()));
 
   // Features - Workout
   // Data sources
@@ -104,5 +109,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SaveWorkoutSession(sl()));
   sl.registerLazySingleton(() => GetPreviousExerciseLog(sl()));
   sl.registerLazySingleton(() => GetExerciseHistory(sl()));
+  sl.registerLazySingleton(() => CheckPRUseCase(sl()));
+  sl.registerLazySingleton(() => Get30DayVolumeTonnageUseCase(sl()));
   sl.registerLazySingleton(() => GetWorkoutCatalog(sl()));
 }
