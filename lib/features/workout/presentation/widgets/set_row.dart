@@ -67,8 +67,8 @@ class SetRow extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: isCompleted
             ? AppColors.completedGreen.withValues(alpha: 0.08)
@@ -85,7 +85,7 @@ class SetRow extends StatelessWidget {
         children: [
           // Set Number + Ghosted Previous
           SizedBox(
-            width: 44,
+            width: 38,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -105,19 +105,19 @@ class SetRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ReportThemeTokens.outfitSubtext(
-                    fontSize: 10,
+                    fontSize: 9,
                     color: AppColors.textMuted,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
 
           // Weight Stepper
           if (isWeightAllowed) ...[
             Expanded(
-              flex: 5,
+              flex: 1,
               child: NumberStepper(
                 label: 'WEIGHT',
                 valueText: weightStr,
@@ -142,13 +142,13 @@ class SetRow extends StatelessWidget {
                 onTapValue: onTapWeight,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
           ],
 
           // Reps Stepper
           if (isRepsAllowed) ...[
             Expanded(
-              flex: 4,
+              flex: 1,
               child: NumberStepper(
                 label: 'REPS',
                 valueText: repsStr,
@@ -172,7 +172,7 @@ class SetRow extends StatelessWidget {
                 onTapValue: onTapReps,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
           ],
 
           // Done Checkbox (RepaintBoundary isolated)
@@ -185,8 +185,8 @@ class SetRow extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: isCompleted
                       ? AppColors.completedGreen
@@ -209,13 +209,13 @@ class SetRow extends StatelessWidget {
                             Icons.check_rounded,
                             key: ValueKey('check'),
                             color: Colors.black,
-                            size: 22,
+                            size: 20,
                           )
                         : Icon(
                             Icons.check_rounded,
                             key: const ValueKey('uncheck'),
                             color: isDark ? Colors.white24 : Colors.black26,
-                            size: 18,
+                            size: 16,
                           ),
                   ),
                 ),
@@ -225,11 +225,11 @@ class SetRow extends StatelessWidget {
 
           // Delete set option (if provided)
           if (onDeleteSet != null) ...[
-            const SizedBox(width: 4),
+            const SizedBox(width: 2),
             IconButton(
               icon: const Icon(
                 Icons.remove_circle_outline_rounded,
-                size: 18,
+                size: 16,
                 color: AppColors.textMuted,
               ),
               onPressed: () {
@@ -238,7 +238,7 @@ class SetRow extends StatelessWidget {
               },
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 48),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 40),
             ),
           ],
         ],
