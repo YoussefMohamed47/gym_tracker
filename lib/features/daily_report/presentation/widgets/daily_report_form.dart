@@ -172,7 +172,7 @@ class _DailyReportFormState extends State<DailyReportForm> {
         child: DropdownButtonFormField<String>(
           key: ValueKey('training-${report.id}-${widget.trainingOptions.join('|')}'),
           initialValue: widget.trainingOptions.contains(report.training) ? report.training : null,
-          isExpanded: true,
+          isExpanded: true,icon: const Icon(Icons.keyboard_arrow_down_rounded),
           decoration: InputDecoration(
             labelText: 'نوع التمرين', labelStyle: GoogleFonts.cairo(fontSize: 12),
             prefixIcon: Icon(Icons.fitness_center_outlined, color: scheme.primary),

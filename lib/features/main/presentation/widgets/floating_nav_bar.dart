@@ -12,7 +12,7 @@ class FloatingNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final items = <(IconData, String, String)>[
-      (Icons.grid_view_rounded, 'JOURNAL', '01'),
+      (Icons.description_rounded, 'JOURNAL', '01'),
       (Icons.fitness_center_rounded, 'TRAINING', '02'),
     ];
     return SafeArea(top: false, child: Container(

@@ -44,11 +44,12 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
             style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: scheme.onSurfaceVariant)),
         ]),
         actions: [
-          IconButton(tooltip: 'نسخ آخر تقرير', icon: const Icon(Icons.content_copy_rounded),
+          IconButton(tooltip: 'نسخ آخر تقرير', icon: const Icon(Icons.auto_fix_high_rounded),
             onPressed: () { context.read<DailyReportCubit>().copyFromYesterday();
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ آخر تقرير متاح'))); }),
           IconButton(key: _themeButtonKey, tooltip: 'Change theme',
-            icon: Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+            icon: Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_rounded
+                : Icons.dark_mode_rounded),
             onPressed: () => di.sl<ThemeTransitionController>().animateThemeToggle(
               context: context, buttonKey: _themeButtonKey,
               onToggle: () => context.read<ThemeCubit>().toggleTheme())),
