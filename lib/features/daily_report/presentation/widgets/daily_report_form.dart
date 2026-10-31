@@ -183,7 +183,7 @@ class _DailyReportFormState extends State<DailyReportForm> {
       ),
       _field('مدة الكارديو', report.cardio, (v) => widget.onChanged(report.copyWith(cardio: v)), icon: Icons.directions_run_outlined),
       const SizedBox(height: 22),
-      const AthleticSectionTitle(number: '03', title: 'Recovery notes', description: 'النوم والمكملات والملاحظات.'),
+      const AthleticSectionTitle(number: '03', title: 'Recovery Notes', description: 'النوم والمكملات والملاحظات.'),
       _field('مدة النوم', report.sleepTime, (v) => widget.onChanged(report.copyWith(sleepTime: v)), icon: Icons.bedtime_outlined),
       SupplementSelector(initialValue: report.supplements,
         onChanged: (v) => widget.onChanged(report.copyWith(supplements: v))),
