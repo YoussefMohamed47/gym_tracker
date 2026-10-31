@@ -156,15 +156,25 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           } else {
             final errorMsg = state.errorMessage!;
             context.read<WorkoutCubit>().resetStatus();
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(errorMsg)));
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 2),
+                  content: Text(errorMsg),
+                ),
+              );
           }
         } else if (state.status == WorkoutStatus.saved) {
           context.read<WorkoutCubit>().resetStatus();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Workout saved and finished!')),
-          );
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              const SnackBar(
+                duration: Duration(seconds: 2),
+                content: Text('Workout saved and finished!'),
+              ),
+            );
           _handleShare(state);
         }
       },

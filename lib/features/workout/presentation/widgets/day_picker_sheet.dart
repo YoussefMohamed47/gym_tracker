@@ -322,17 +322,20 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                     context.read<WorkoutCubit>().clearWorkout();
                     Navigator.pop(context);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Reset day to schedule suggestion'),
-                        action: SnackBarAction(
-                          label: 'UNDO',
-                          onPressed: () {
-                            context.read<WorkoutCubit>().changeWorkoutType(previousType);
-                          },
+                    ScaffoldMessenger.of(context)
+                      ..clearSnackBars()
+                      ..showSnackBar(
+                        SnackBar(
+                          duration: const Duration(seconds: 2),
+                          content: const Text('Reset day to schedule suggestion'),
+                          action: SnackBarAction(
+                            label: 'UNDO',
+                            onPressed: () {
+                              context.read<WorkoutCubit>().changeWorkoutType(previousType);
+                            },
+                          ),
                         ),
-                      ),
-                    );
+                      );
                   },
                   icon: const Icon(
                     Icons.restart_alt_rounded,

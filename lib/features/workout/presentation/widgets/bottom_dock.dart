@@ -157,35 +157,40 @@ class BottomDock extends StatelessWidget {
             // Save & Share Button
             SizedBox(
               width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(sheetContext);
-                  workoutCubit.saveWorkout();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.indigoAccent,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+              height: 52,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.gradientStart.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(16),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(sheetContext);
+                    workoutCubit.saveWorkout();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    elevation: 0,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'SAVE & VIEW REPORT',
-                      style: ReportThemeTokens.outfitHeader(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                        color: Colors.white,
-                      ),
+                  child: Text(
+                    'SAVE & VIEW REPORT',
+                    style: ReportThemeTokens.outfitHeader(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      color: Colors.black,
                     ),
                   ),
                 ),

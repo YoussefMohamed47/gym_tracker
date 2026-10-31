@@ -45,8 +45,12 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
         ]),
         actions: [
           IconButton(tooltip: 'نسخ آخر تقرير', icon: const Icon(Icons.auto_fix_high_rounded),
-            onPressed: () { context.read<DailyReportCubit>().copyFromYesterday();
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ آخر تقرير متاح'))); }),
+            onPressed: () {
+              context.read<DailyReportCubit>().copyFromYesterday();
+              ScaffoldMessenger.of(context)
+                ..clearSnackBars()
+                ..showSnackBar(const SnackBar(duration: Duration(seconds: 2), content: Text('تم نسخ آخر تقرير متاح')));
+            }),
           IconButton(key: _themeButtonKey, tooltip: 'Change theme',
             icon: Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_rounded
                 : Icons.dark_mode_rounded),
@@ -61,11 +65,15 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       body: BlocConsumer<DailyReportCubit, DailyReportState>(
         listener: (context, state) {
           if (state is DailyReportSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حفظ التقرير')));
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(const SnackBar(duration: Duration(seconds: 2), content: Text('تم حفظ التقرير')));
             SharePlus.instance.share(ShareParams(files: [XFile(state.imagePath)], text: 'تقرير الوجبات اليومي عبر SAMAFIT'));
             context.read<DailyReportCubit>().resetForm();
           } else if (state is DailyReportError) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(SnackBar(duration: const Duration(seconds: 2), content: Text('Error: ${state.message}')));
           }
         },
         builder: (context, state) => Stack(children: [

@@ -459,8 +459,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   void stepReps(String plannedId, int setIndex, int deltaAmount) {
     final log = state.exerciseLogs[plannedId];
     if (log != null && log.sets.length > setIndex) {
-      final currentReps = log.sets[setIndex].actualReps ?? 0;
-      final newReps = (currentReps + deltaAmount).clamp(0, 999);
+      final currentReps = log.sets[setIndex].actualReps;
+      final int baseReps = currentReps ?? (deltaAmount > 0 ? 10 : 0);
+      final newReps = (currentReps != null ? currentReps + deltaAmount : baseReps).clamp(0, 999);
       updateSetReps(plannedId, setIndex, newReps);
     }
   }

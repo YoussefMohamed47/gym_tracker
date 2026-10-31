@@ -121,14 +121,28 @@ class DailyReport extends Equatable {
     List<MealEntry>? beforeTrainingEntries,
     List<MealEntry>? afterTrainingEntries,
   }) {
+    final bEntries = breakfastEntries ?? this.breakfastEntries;
+    final lEntries = lunchEntries ?? this.lunchEntries;
+    final sEntries = snackEntries ?? this.snackEntries;
+    final btEntries = beforeTrainingEntries ?? this.beforeTrainingEntries;
+    final atEntries = afterTrainingEntries ?? this.afterTrainingEntries;
+    final dEntries = dinnerEntries ?? this.dinnerEntries;
+
+    final bText = breakfast ?? (breakfastEntries != null ? mealEntriesToLegacyText(bEntries) : this.breakfast);
+    final lText = lunch ?? (lunchEntries != null ? mealEntriesToLegacyText(lEntries) : this.lunch);
+    final sText = snack ?? (snackEntries != null ? mealEntriesToLegacyText(sEntries) : this.snack);
+    final btText = beforeTraining ?? (beforeTrainingEntries != null ? mealEntriesToLegacyText(btEntries) : this.beforeTraining);
+    final atText = afterTraining ?? (afterTrainingEntries != null ? mealEntriesToLegacyText(atEntries) : this.afterTraining);
+    final dText = dinner ?? (dinnerEntries != null ? mealEntriesToLegacyText(dEntries) : this.dinner);
+
     return DailyReport(
       id: id ?? this.id,
-      breakfast: breakfast ?? this.breakfast,
-      lunch: lunch ?? this.lunch,
-      snack: snack ?? this.snack,
-      beforeTraining: beforeTraining ?? this.beforeTraining,
-      afterTraining: afterTraining ?? this.afterTraining,
-      dinner: dinner ?? this.dinner,
+      breakfast: bText,
+      lunch: lText,
+      snack: sText,
+      beforeTraining: btText,
+      afterTraining: atText,
+      dinner: dText,
       water: water ?? this.water,
       training: training ?? this.training,
       cardio: cardio ?? this.cardio,
@@ -137,12 +151,12 @@ class DailyReport extends Equatable {
       notes: notes ?? this.notes,
       dateTime: dateTime ?? this.dateTime,
       imagePath: imagePath ?? this.imagePath,
-      breakfastEntries: breakfastEntries ?? this.breakfastEntries,
-      lunchEntries: lunchEntries ?? this.lunchEntries,
-      dinnerEntries: dinnerEntries ?? this.dinnerEntries,
-      snackEntries: snackEntries ?? this.snackEntries,
-      beforeTrainingEntries: beforeTrainingEntries ?? this.beforeTrainingEntries,
-      afterTrainingEntries: afterTrainingEntries ?? this.afterTrainingEntries,
+      breakfastEntries: bEntries,
+      lunchEntries: lEntries,
+      dinnerEntries: dEntries,
+      snackEntries: sEntries,
+      beforeTrainingEntries: btEntries,
+      afterTrainingEntries: atEntries,
     );
   }
 

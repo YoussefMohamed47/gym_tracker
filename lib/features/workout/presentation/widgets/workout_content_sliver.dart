@@ -257,7 +257,7 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
               return ExerciseCard(
                 log: log,
                 slot: slot,
-                displayUnit: widget.state.displayUnit,
+                displayUnit: log.displayUnit,
                 isExpanded: true,
                 onExpandToggle: () {},
                 onWeightChanged: (setIndex, weight) {

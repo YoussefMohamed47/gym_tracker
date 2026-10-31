@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/theme/report_theme_tokens.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/utils/app_colors.dart';
 
 class NumberStepper extends StatefulWidget {
@@ -102,33 +102,36 @@ class _NumberStepperState extends State<NumberStepper> {
               onTap: widget.onTapValue,
               behavior: HitTestBehavior.opaque,
               child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      widget.valueText.isEmpty ? '—' : widget.valueText,
-                      style: ReportThemeTokens.outfitNumber(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: widget.valueText.isEmpty
-                            ? AppColors.textMuted
-                            : (isDark ? AppColors.textPrimary : Colors.black87),
-                      ),
-                    ),
-                    if (widget.unit != null && widget.valueText.isNotEmpty) ...[
-                      const SizedBox(width: 2),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                       Text(
-                        widget.unit!,
-                        style: ReportThemeTokens.outfitSubtext(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textSecondary,
+                        widget.valueText.isEmpty ? '—' : widget.valueText,
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: widget.valueText.isEmpty
+                              ? (isDark ? Colors.white38 : Colors.black38)
+                              : (isDark ? AppColors.textPrimary : Colors.black87),
                         ),
                       ),
+                      if (widget.unit != null && widget.valueText.isNotEmpty) ...[
+                        const SizedBox(width: 3),
+                        Text(
+                          widget.unit!,
+                          style: GoogleFonts.outfit(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? AppColors.gradientStart : AppColors.indigoAccent,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
