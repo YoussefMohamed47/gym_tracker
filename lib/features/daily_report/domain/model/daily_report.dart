@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'meal_entry.dart';
 
 class DailyReport extends Equatable {
   final String id;
@@ -16,6 +17,12 @@ class DailyReport extends Equatable {
   final String? notes;
   final DateTime? dateTime;
   final String? imagePath;
+  final List<MealEntry> breakfastEntries;
+  final List<MealEntry> lunchEntries;
+  final List<MealEntry> dinnerEntries;
+  final List<MealEntry> snackEntries;
+  final List<MealEntry> beforeTrainingEntries;
+  final List<MealEntry> afterTrainingEntries;
 
   const DailyReport({
     required this.id,
@@ -33,15 +40,21 @@ class DailyReport extends Equatable {
     this.notes,
     this.dateTime,
     this.imagePath,
+    this.breakfastEntries = const [],
+    this.lunchEntries = const [],
+    this.dinnerEntries = const [],
+    this.snackEntries = const [],
+    this.beforeTrainingEntries = const [],
+    this.afterTrainingEntries = const [],
   });
 
   bool get isEmpty =>
-      breakfast.isEmpty &&
-      lunch.isEmpty &&
-      snack.isEmpty &&
-      beforeTraining.isEmpty &&
-      afterTraining.isEmpty &&
-      dinner.isEmpty &&
+      breakfast.isEmpty && breakfastEntries.isEmpty &&
+      lunch.isEmpty && lunchEntries.isEmpty &&
+      snack.isEmpty && snackEntries.isEmpty &&
+      beforeTraining.isEmpty && beforeTrainingEntries.isEmpty &&
+      afterTraining.isEmpty && afterTrainingEntries.isEmpty &&
+      dinner.isEmpty && dinnerEntries.isEmpty &&
       water.isEmpty &&
       training.isEmpty &&
       cardio.isEmpty &&
@@ -51,17 +64,17 @@ class DailyReport extends Equatable {
 
   double get mealsCompletionRatio {
     int filled = 0;
-    if (breakfast.trim().isNotEmpty) filled++;
-    if (lunch.trim().isNotEmpty) filled++;
-    if (dinner.trim().isNotEmpty) filled++;
-    if (snack.trim().isNotEmpty) filled++;
+    if (breakfast.trim().isNotEmpty || breakfastEntries.isNotEmpty) filled++;
+    if (lunch.trim().isNotEmpty || lunchEntries.isNotEmpty) filled++;
+    if (dinner.trim().isNotEmpty || dinnerEntries.isNotEmpty) filled++;
+    if (snack.trim().isNotEmpty || snackEntries.isNotEmpty) filled++;
     return filled / 4.0;
   }
 
   double get overallCompletionRatio {
     int total = 5;
     int filled = 0;
-    if (breakfast.trim().isNotEmpty || lunch.trim().isNotEmpty || dinner.trim().isNotEmpty) filled++;
+    if (breakfast.trim().isNotEmpty || breakfastEntries.isNotEmpty || lunch.trim().isNotEmpty || lunchEntries.isNotEmpty || dinner.trim().isNotEmpty || dinnerEntries.isNotEmpty) filled++;
     if (water.trim().isNotEmpty) filled++;
     if (sleepTime.trim().isNotEmpty) filled++;
     if (training.trim().isNotEmpty) filled++;
@@ -101,6 +114,12 @@ class DailyReport extends Equatable {
     String? notes,
     DateTime? dateTime,
     String? imagePath,
+    List<MealEntry>? breakfastEntries,
+    List<MealEntry>? lunchEntries,
+    List<MealEntry>? dinnerEntries,
+    List<MealEntry>? snackEntries,
+    List<MealEntry>? beforeTrainingEntries,
+    List<MealEntry>? afterTrainingEntries,
   }) {
     return DailyReport(
       id: id ?? this.id,
@@ -118,6 +137,12 @@ class DailyReport extends Equatable {
       notes: notes ?? this.notes,
       dateTime: dateTime ?? this.dateTime,
       imagePath: imagePath ?? this.imagePath,
+      breakfastEntries: breakfastEntries ?? this.breakfastEntries,
+      lunchEntries: lunchEntries ?? this.lunchEntries,
+      dinnerEntries: dinnerEntries ?? this.dinnerEntries,
+      snackEntries: snackEntries ?? this.snackEntries,
+      beforeTrainingEntries: beforeTrainingEntries ?? this.beforeTrainingEntries,
+      afterTrainingEntries: afterTrainingEntries ?? this.afterTrainingEntries,
     );
   }
 
@@ -138,6 +163,12 @@ class DailyReport extends Equatable {
       'notes': notes,
       'dateTime': dateTime?.toIso8601String(),
       'imagePath': imagePath,
+      'breakfastEntries': breakfastEntries.map((e) => e.toJson()).toList(),
+      'lunchEntries': lunchEntries.map((e) => e.toJson()).toList(),
+      'dinnerEntries': dinnerEntries.map((e) => e.toJson()).toList(),
+      'snackEntries': snackEntries.map((e) => e.toJson()).toList(),
+      'beforeTrainingEntries': beforeTrainingEntries.map((e) => e.toJson()).toList(),
+      'afterTrainingEntries': afterTrainingEntries.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -160,7 +191,18 @@ class DailyReport extends Equatable {
           ? DateTime.parse(json['dateTime'] as String)
           : null,
       imagePath: json['imagePath'] as String?,
+      breakfastEntries: _entriesFromJson(json['breakfastEntries']),
+      lunchEntries: _entriesFromJson(json['lunchEntries']),
+      dinnerEntries: _entriesFromJson(json['dinnerEntries']),
+      snackEntries: _entriesFromJson(json['snackEntries']),
+      beforeTrainingEntries: _entriesFromJson(json['beforeTrainingEntries']),
+      afterTrainingEntries: _entriesFromJson(json['afterTrainingEntries']),
     );
+  }
+
+  static List<MealEntry> _entriesFromJson(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw.whereType<Map>().map((value) => MealEntry.fromJson(Map<String, dynamic>.from(value))).toList();
   }
 
   @override
@@ -180,5 +222,7 @@ class DailyReport extends Equatable {
     notes,
     dateTime,
     imagePath,
+    breakfastEntries, lunchEntries, dinnerEntries, snackEntries,
+    beforeTrainingEntries, afterTrainingEntries,
   ];
 }

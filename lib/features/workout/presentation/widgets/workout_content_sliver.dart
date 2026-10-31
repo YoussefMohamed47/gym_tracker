@@ -32,6 +32,15 @@ class WorkoutContentSliver extends StatefulWidget {
 class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
   int _expandedIndex = 0;
 
+  @override
+  void didUpdateWidget(covariant WorkoutContentSliver oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.state.dateKey != widget.state.dateKey ||
+        oldWidget.state.workoutType != widget.state.workoutType) {
+      _expandedIndex = 0;
+    }
+  }
+
   void _onSetPerformedToggle(
     String exerciseId,
     int setIndex,
@@ -158,7 +167,7 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
           const SliverToBoxAdapter(child: WarmupSection()),
 
         // Main Exercises Section (Focus Mode)
-        if (widget.state.workoutType != WorkoutType.rest && workoutDef != null) ...[
+        if (widget.state.workoutType != WorkoutType.rest && workoutDef != null && workoutDef.exercises.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -193,25 +202,64 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
               ),
             ),
           ),
-          SliverList.builder(
-            itemCount: workoutDef.exercises.length,
-            itemBuilder: (context, index) {
-              final slot = workoutDef.exercises[index];
-              final log = widget.state.exerciseLogs[slot.exerciseId];
-              if (log == null) return const SizedBox.shrink();
-
-              final performedExercise = WorkoutCatalog.getExerciseById(log.performedExerciseId);
-
+          SliverToBoxAdapter(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Padding(padding: const EdgeInsets.fromLTRB(20, 12, 20, 12), child: Row(children: [
+                Text('EXERCISE FOCUS', style: TextStyle(color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w900, letterSpacing: 1.3, fontSize: 12)),
+                const Spacer(),
+                Text('${_expandedIndex.clamp(0, workoutDef.exercises.length - 1) + 1} / ${workoutDef.exercises.length}',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              ])),
+              SizedBox(height: 80, child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                scrollDirection: Axis.horizontal,
+                itemCount: workoutDef.exercises.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final slot = workoutDef.exercises[index];
+                  final log = widget.state.exerciseLogs[slot.exerciseId];
+                  final done = log != null && log.sets.isNotEmpty && log.sets.every((s) => s.isPerformed);
+                  final selected = index == _expandedIndex;
+                  final colors = Theme.of(context).colorScheme;
+                  return Material(color: selected ? colors.primary : colors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: () => setState(() => _expandedIndex = index),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(width: 185, padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            Text('0${index + 1}', style: TextStyle(fontWeight: FontWeight.w900,
+                              color: selected ? colors.onPrimary : colors.primary)),
+                            const Spacer(),
+                            if (done) Icon(Icons.check_circle_rounded, size: 16,
+                              color: selected ? colors.onPrimary : colors.primary),
+                          ]),
+                          const SizedBox(height: 6),
+                          Text(log == null ? slot.exerciseId : WorkoutCatalog.getExerciseById(log.performedExerciseId).name,
+                            overflow: TextOverflow.ellipsis, maxLines: 1,
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12,
+                              color: selected ? colors.onPrimary : colors.onSurface)),
+                        ]),
+                      ),
+                    ),
+                  );
+                },
+              )),
+              const SizedBox(height: 18),
+              Builder(builder: (context) {
+                final index = _expandedIndex.clamp(0, workoutDef.exercises.length - 1).toInt();
+                final slot = workoutDef.exercises[index];
+                final log = widget.state.exerciseLogs[slot.exerciseId];
+                if (log == null) return const SizedBox.shrink();
+                final performedExercise = WorkoutCatalog.getExerciseById(log.performedExerciseId);
               return ExerciseCard(
                 log: log,
                 slot: slot,
                 displayUnit: widget.state.displayUnit,
-                isExpanded: index == _expandedIndex,
-                onExpandToggle: () {
-                  setState(() {
-                    _expandedIndex = _expandedIndex == index ? -1 : index;
-                  });
-                },
+                isExpanded: true,
+                onExpandToggle: () {},
                 onWeightChanged: (setIndex, weight) {
                   context.read<WorkoutCubit>().updateSetWeight(
                         slot.exerciseId,
@@ -270,9 +318,23 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                 onRemoveSet: (setIndex) =>
                     context.read<WorkoutCubit>().removeSet(slot.exerciseId, setIndex),
               );
-            },
+
+              }),
+              const SizedBox(height: 18),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(children: [
+                  Expanded(child: OutlinedButton.icon(
+                    onPressed: _expandedIndex <= 0 ? null : () => setState(() => _expandedIndex--),
+                    icon: const Icon(Icons.arrow_back_rounded, size: 16), label: const Text('PREVIOUS'))),
+                  const SizedBox(width: 10),
+                  Expanded(child: FilledButton.icon(
+                    onPressed: _expandedIndex >= workoutDef.exercises.length - 1 ? null
+                      : () => setState(() => _expandedIndex++),
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 16), label: const Text('NEXT'))),
+                ])),
+            ]),
           ),
-        ] else if (widget.state.workoutType != WorkoutType.rest && workoutDef == null)
+        ] else if (widget.state.workoutType != WorkoutType.rest && (workoutDef == null || workoutDef.exercises.isEmpty))
           const SliverFillRemaining(
             hasScrollBody: false,
             child: Padding(

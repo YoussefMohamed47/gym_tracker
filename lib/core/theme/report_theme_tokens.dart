@@ -3,33 +3,33 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ReportThemeTokens {
   // Dark Premium Palette
-  static const Color background = Color(0xFF0B0D12);
-  static const Color cardBackground = Color(0xFF14171F);
-  static const Color elevatedCard = Color(0xFF1B1F2A);
+  static const Color background = Color(0xFF090E12);
+  static const Color cardBackground = Color(0xFF121B20);
+  static const Color elevatedCard = Color(0xFF1C292D);
   
   // Borders & Dividers
   static const Color borderSubtle = Color(0x0FFFFFFF); // White @ 6%
   static const Color borderMedium = Color(0x1AFFFFFF); // White @ 10%
   
   // Brand Accent Gradient
-  static const Color indigoAccent = Color(0xFF6C7BFF);
-  static const Color violetAccent = Color(0xFF9B6CFF);
+  static const Color indigoAccent = Color(0xFFC7F476);
+  static const Color violetAccent = Color(0xFF99B8EF);
   
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [indigoAccent, violetAccent],
+    colors: [Color(0xFF3A7052), Color(0xFF1E514A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   // Status Colors
-  static const Color completedGreen = Color(0xFF3DDC97);
+  static const Color completedGreen = Color(0xFF76DDAB);
   static const Color warningAmber = Color(0xFFFFB800);
   static const Color destructiveRed = Color(0xFFFF5252);
 
   // Text Colors
-  static const Color textPrimary = Color(0xFFF0F2F8);
-  static const Color textSecondary = Color(0xFF8A8F9E);
-  static const Color textMuted = Color(0xFF555968);
+  static const Color textPrimary = Color(0xFFF0F4EE);
+  static const Color textSecondary = Color(0xFF9BAEA9);
+  static const Color textMuted = Color(0xFF6B8280);
 
   // Standard Radii & Dimensions
   static const double cardRadius = 22.0;
@@ -41,7 +41,7 @@ class ReportThemeTokens {
   static const double itemGap = 12.0;
 
   // Solid Semi-Transparent Elevated Surfaces (NO BLUR)
-  static const Color sheetSurfaceDark = Color(0xF214171F); // 95% #14171F
+  static const Color sheetSurfaceDark = Color(0xF2121B20); // 95% #14171F
   static const Color sheetSurfaceLight = Color(0xF5FFFFFF);
 
   static BorderRadius get cardBorderRadius => BorderRadius.circular(cardRadius);

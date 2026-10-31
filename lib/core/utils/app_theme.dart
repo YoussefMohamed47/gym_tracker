@@ -3,116 +3,72 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData get light => _createTheme(Brightness.light);
-  static ThemeData get dark => _createTheme(Brightness.dark);
+  static ThemeData get light => _build(Brightness.light);
+  static ThemeData get dark => _build(Brightness.dark);
 
-  static ThemeData _createTheme(Brightness brightness) {
-    final isDark = brightness == Brightness.dark;
-    
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.gradientStart,
+  static ThemeData _build(Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    final scheme = ColorScheme.fromSeed(
+      seedColor: dark ? AppColors.gradientStart : AppColors.primary,
       brightness: brightness,
-      primary: isDark ? AppColors.gradientStart : AppColors.primary,
-      secondary: AppColors.gradientEnd,
-      surface: isDark ? AppColors.darkCard : AppColors.surface,
-      surfaceContainerHigh: isDark ? AppColors.darkElevated : AppColors.surface,
-      onSurface: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-      onSurfaceVariant: isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant,
+      primary: dark ? AppColors.gradientStart : AppColors.primary,
+      onPrimary: dark ? AppColors.darkBackground : Colors.white,
+      secondary: dark ? AppColors.violetAccent : AppColors.secondary,
+      surface: dark ? AppColors.darkCard : AppColors.surface,
+      onSurface: dark ? AppColors.textPrimary : AppColors.onSurface,
+      onSurfaceVariant: dark ? AppColors.textSecondary : AppColors.onSurfaceVariant,
+      surfaceContainerHigh: dark ? AppColors.darkElevated : const Color(0xFFE3ECE5),
+      outline: dark ? AppColors.borderSubtle : AppColors.outline,
       error: AppColors.destructiveRed,
-      outline: isDark ? AppColors.borderSubtle : AppColors.outline,
     );
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: brightness,
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      
-      // Typography
-      textTheme: GoogleFonts.outfitTextTheme(
-        ThemeData(brightness: brightness).textTheme,
-      ).copyWith(
-        displayMedium: GoogleFonts.outfit(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          fontFeatures: const [FontFeature.tabularFigures()],
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        ),
-        headlineLarge: GoogleFonts.outfit(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          fontFeatures: const [FontFeature.tabularFigures()],
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        ),
-        titleLarge: GoogleFonts.outfit(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        ),
-        titleMedium: GoogleFonts.outfit(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        ),
-        bodyMedium: GoogleFonts.outfit(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        ),
-        bodySmall: GoogleFonts.outfit(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-          color: isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant,
-        ),
-        labelSmall: GoogleFonts.outfit(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant,
-        ),
+    final base = ThemeData(brightness: brightness, useMaterial3: true);
+    return base.copyWith(
+      colorScheme: scheme,
+      scaffoldBackgroundColor: dark ? AppColors.darkBackground : AppColors.background,
+      textTheme: GoogleFonts.outfitTextTheme(base.textTheme).apply(
+        bodyColor: scheme.onSurface,
+        displayColor: scheme.onSurface,
       ),
-
-      // Card Theme
-      cardTheme: CardThemeData(
-        color: isDark ? AppColors.darkCard : AppColors.surface,
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22),
-          side: BorderSide(
-            color: isDark ? AppColors.borderSubtle : AppColors.borderSubtleLight, 
-            width: 1,
-          ),
-        ),
-      ),
-
-      // AppBar Theme
       appBarTheme: AppBarTheme(
-        backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-        elevation: 0,
+        backgroundColor: dark ? AppColors.darkBackground : AppColors.background,
         scrolledUnderElevation: 0,
+        elevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.outfit(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        titleTextStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: scheme.onSurface),
+        iconTheme: IconThemeData(color: scheme.onSurface),
       ),
-
-      // Button Theme
+      cardTheme: CardThemeData(
+        margin: EdgeInsets.zero,
+        elevation: 0,
+        color: scheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gradientStart,
-          foregroundColor: Colors.white,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          textStyle: GoogleFonts.outfit(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
+          minimumSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+          textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w800),
         ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.surfaceContainerHigh.withValues(alpha: 0.55),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surface,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: scheme.primary,
+        unselectedLabelColor: scheme.onSurfaceVariant,
+        indicatorColor: scheme.primary,
+        dividerColor: Colors.transparent,
       ),
     );
   }

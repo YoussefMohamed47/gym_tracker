@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../../domain/model/meal_entry.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/error/api_result.dart';
 import '../../../workout/data/datasources/workout_catalog.dart';
@@ -82,6 +83,12 @@ class DailyReportCubit extends Cubit<DailyReportState> {
     String? supplements,
     String? sleepTime,
     String? notes,
+    List<MealEntry>? breakfastEntries,
+    List<MealEntry>? lunchEntries,
+    List<MealEntry>? dinnerEntries,
+    List<MealEntry>? snackEntries,
+    List<MealEntry>? beforeTrainingEntries,
+    List<MealEntry>? afterTrainingEntries,
   }) {
     final updatedReport = state.report.copyWith(
       breakfast: breakfast,
@@ -96,6 +103,12 @@ class DailyReportCubit extends Cubit<DailyReportState> {
       supplements: supplements,
       sleepTime: sleepTime,
       notes: notes,
+      breakfastEntries: breakfastEntries,
+      lunchEntries: lunchEntries,
+      dinnerEntries: dinnerEntries,
+      snackEntries: snackEntries,
+      beforeTrainingEntries: beforeTrainingEntries,
+      afterTrainingEntries: afterTrainingEntries,
     );
     emit(DailyReportUpdating(updatedReport));
   }
@@ -132,6 +145,13 @@ class DailyReportCubit extends Cubit<DailyReportState> {
           water: lastReport.water,
           supplements: lastReport.supplements,
           sleepTime: lastReport.sleepTime,
+          breakfastEntries: lastReport.breakfastEntries,
+          lunchEntries: lastReport.lunchEntries,
+          dinnerEntries: lastReport.dinnerEntries,
+          snackEntries: lastReport.snackEntries,
+          beforeTrainingEntries: lastReport.beforeTrainingEntries,
+          afterTrainingEntries: lastReport.afterTrainingEntries,
+
         );
         emit(DailyReportUpdating(updatedReport));
       }

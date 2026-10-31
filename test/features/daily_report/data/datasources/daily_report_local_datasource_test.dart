@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:gym_tracker_report/features/daily_report/domain/model/meal_entry.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:gym_tracker_report/features/daily_report/data/datasources/daily_report_local_datasource.dart';
@@ -40,6 +41,18 @@ void main() {
       expect(history.length, 1);
       expect(history.first.id, '1');
       expect(history.first.breakfast, 'Oats');
+    });
+
+    test('Structured quantity round trip retains legacy text', () async {
+      final report = DailyReport.empty().copyWith(
+        id: 'structured-1',
+        lunch: 'صدر دجاج مشوي (180 جم)',
+        lunchEntries: const [MealEntry(name: 'صدر دجاج مشوي', category: 'بروتين', quantity: 180, unit: 'جم')],
+      );
+      await dataSource.saveReport(report);
+      final restored = (await dataSource.getReportHistory()).single;
+      expect(restored.lunch, report.lunch);
+      expect(restored.lunchEntries, report.lunchEntries);
     });
 
     test('Delete report', () async {

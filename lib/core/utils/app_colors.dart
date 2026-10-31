@@ -1,59 +1,44 @@
 import 'package:flutter/material.dart';
 
+/// Shared athletic design system. All existing semantic names are retained so
+/// report exports and legacy widgets consume the same palette.
 class AppColors {
-  // --- Dark First Core Palette ---
-  static const Color darkBackground = Color(0xFF0B0D12);
-  static const Color darkCard = Color(0xFF14171F);
-  static const Color darkElevated = Color(0xFF1B1F2A);
-  
-  // Borders & Dividers
-  static const Color borderSubtle = Color(0x0FFFFFFF); // White at 6% opacity
-  static const Color borderSubtleLight = Color(0x14000000); // Black at 8% opacity
-
-  // Primary Gradient Colors
-  static const Color gradientStart = Color(0xFF6C7BFF); // Indigo
-  static const Color gradientEnd = Color(0xFF9B6CFF);   // Violet
-  
-  static const LinearGradient primaryGradient = LinearGradient(
-    colors: [gradientStart, gradientEnd],
+  static const darkBackground = Color(0xFF090E12);
+  static const darkCard = Color(0xFF121B20);
+  static const darkElevated = Color(0xFF1C292D);
+  static const borderSubtle = Color(0x22B9C8C3);
+  static const borderSubtleLight = Color(0x1B18251E);
+  static const gradientStart = Color(0xFFC7F476);
+  static const gradientEnd = Color(0xFFA4E3A0);
+  static const primaryGradient = LinearGradient(
+    colors: [Color(0xFF3A7052), Color(0xFF1E514A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-
-  // Status Colors
-  static const Color completedGreen = Color(0xFF3DDC97);
-  static const Color restAmber = Color(0xFFFFB800);
-  static const Color warningAmber = Color(0xFFFFB800);
-  static const Color destructiveRed = Color(0xFFFF5252);
-
-  // Accent & Text Colors
-  static const Color indigoAccent = Color(0xFF6C7BFF);
-  static const Color violetAccent = Color(0xFF9B6CFF);
-  static const Color textPrimary = Color(0xFFF0F2F8);
-  static const Color textSecondary = Color(0xFF8A8F9E);
-  static const Color textMuted = Color(0xFF555968);
-
-  // --- Light Palette Fallback ---
-  static const Color primary = Color(0xFF6C7BFF);
-  static const Color secondary = Color(0xFF9B6CFF);
-  static const Color success = Color(0xFF3DDC97);
-  static const Color warning = Color(0xFFFFB800);
-  static const Color error = Color(0xFFFF5252);
-  
-  static const Color background = Color(0xFFF5F7FA);
-  static const Color surface = Colors.white;
-  static const Color onSurface = Color(0xFF12141D);
-  static const Color onSurfaceVariant = Color(0xFF65697B);
-  static const Color outline = Color(0xFFE2E6EE);
-
-  // --- Dark Palette Scheme Mappings ---
-  static const Color primaryDark = Color(0xFF6C7BFF);
-  static const Color darkSurface = Color(0xFF14171F);
-  static const Color darkSurfaceVariant = Color(0xFF1B1F2A);
-  static const Color darkOnSurface = Color(0xFFF0F2F8);
-  static const Color darkOnSurfaceVariant = Color(0xFF8A8F9E);
-  static const Color darkOutline = Color(0x1AFFFFFF);
-
-  // Legacy
-  static const Color primaryBlue = Color(0xFF6C7BFF);
+  static const completedGreen = Color(0xFF76DDAB);
+  static const restAmber = Color(0xFFF8C575);
+  static const warningAmber = restAmber;
+  static const destructiveRed = Color(0xFFFF777C);
+  static const indigoAccent = gradientStart;
+  static const violetAccent = Color(0xFF99B8EF);
+  static const textPrimary = Color(0xFFF0F4EE);
+  static const textSecondary = Color(0xFF9BAEA9);
+  static const textMuted = Color(0xFF6B8280);
+  static const primary = Color(0xFF426D35);
+  static const secondary = Color(0xFF56886A);
+  static const success = completedGreen;
+  static const warning = restAmber;
+  static const error = destructiveRed;
+  static const background = Color(0xFFF0F4EF);
+  static const surface = Color(0xFFFFFFFF);
+  static const onSurface = Color(0xFF13221F);
+  static const onSurfaceVariant = Color(0xFF64776F);
+  static const outline = Color(0xFFD8E3DB);
+  static const primaryDark = gradientStart;
+  static const darkSurface = darkCard;
+  static const darkSurfaceVariant = darkElevated;
+  static const darkOnSurface = textPrimary;
+  static const darkOnSurfaceVariant = textSecondary;
+  static const darkOutline = borderSubtle;
+  static const primaryBlue = gradientStart;
 }

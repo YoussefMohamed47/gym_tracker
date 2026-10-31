@@ -1,3 +1,4 @@
+import '../../domain/model/meal_entry.dart';
 import 'package:hive_ce/hive.dart';
 import '../models/daily_report_hive_model.dart';
 import '../../domain/model/daily_report.dart';
@@ -53,6 +54,13 @@ class HiveDailyReportLocalDataSource implements DailyReportLocalDataSource {
       notes: report.notes,
       dateTime: report.dateTime,
       imagePath: report.imagePath,
+      breakfastEntries: encodeMealEntries(report.breakfastEntries),
+      lunchEntries: encodeMealEntries(report.lunchEntries),
+      dinnerEntries: encodeMealEntries(report.dinnerEntries),
+      snackEntries: encodeMealEntries(report.snackEntries),
+      beforeTrainingEntries: encodeMealEntries(report.beforeTrainingEntries),
+      afterTrainingEntries: encodeMealEntries(report.afterTrainingEntries),
+
     );
   }
 
@@ -73,6 +81,13 @@ class HiveDailyReportLocalDataSource implements DailyReportLocalDataSource {
       notes: model.notes,
       dateTime: model.dateTime,
       imagePath: model.imagePath,
+      breakfastEntries: decodeMealEntries(model.breakfastEntries),
+      lunchEntries: decodeMealEntries(model.lunchEntries),
+      dinnerEntries: decodeMealEntries(model.dinnerEntries),
+      snackEntries: decodeMealEntries(model.snackEntries),
+      beforeTrainingEntries: decodeMealEntries(model.beforeTrainingEntries),
+      afterTrainingEntries: decodeMealEntries(model.afterTrainingEntries),
+
     );
   }
 }

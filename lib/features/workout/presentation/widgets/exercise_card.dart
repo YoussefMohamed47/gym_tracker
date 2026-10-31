@@ -56,6 +56,25 @@ class ExerciseCard extends StatelessWidget {
     this.onRemoveSet,
   });
 
+  Color _getTagColor(String tag) {
+    switch (tag) {
+      case 'CHEST':
+      case 'SHOULDERS':
+        return const Color(0xFFFF6B6B);
+      case 'BACK':
+        return const Color(0xFF00C9FF);
+      case 'LEGS':
+      case 'CALVES':
+        return const Color(0xFF20C997);
+      case 'BICEPS':
+      case 'TRICEPS':
+      case 'FOREARMS':
+        return const Color(0xFF9B6CFF);
+      default:
+        return AppColors.gradientStart;
+    }
+  }
+
   List<String> _extractTags(String exerciseId, String exerciseName) {
     final tags = <String>[];
     final text = '${exerciseId}_$exerciseName'.toLowerCase();
@@ -148,18 +167,16 @@ class ExerciseCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isAllCompleted
-              ? AppColors.completedGreen.withValues(alpha: 0.5)
-              : isExpanded
-                  ? AppColors.indigoAccent.withValues(alpha: 0.4)
-                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
-          width: isExpanded || isAllCompleted ? 1.5 : 1.0,
+        border: Border(
+          left: BorderSide(
+            color: isAllCompleted ? AppColors.completedGreen : AppColors.indigoAccent,
+            width: isExpanded ? 5 : 3,
+          ),
+          top: BorderSide(color: isDark ? AppColors.borderSubtle : AppColors.outline),
+          bottom: BorderSide(color: isDark ? AppColors.borderSubtle : AppColors.outline),
         ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+      child: ClipRect(
         child: AnimatedSize(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
@@ -250,7 +267,7 @@ class ExerciseCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7),
+                        color: _getTagColor(tags.first).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -258,7 +275,7 @@ class ExerciseCard extends StatelessWidget {
                         style: ReportThemeTokens.outfitSubtext(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textSecondary,
+                          color: _getTagColor(tags.first),
                         ),
                       ),
                     ),
@@ -357,13 +374,14 @@ class ExerciseCard extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 children: tags.map((t) {
+                  final color = _getTagColor(t);
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                        color: color.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -372,7 +390,7 @@ class ExerciseCard extends StatelessWidget {
                       style: ReportThemeTokens.outfitSubtext(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textSecondary,
+                        color: color,
                       ),
                     ),
                   );
@@ -384,18 +402,12 @@ class ExerciseCard extends StatelessWidget {
               _buildUnitToggle(isDark),
               const SizedBox(width: 8),
 
-              // Collapse button
-              IconButton(
-                icon: const Icon(Icons.expand_less_rounded, size: 22),
-                color: AppColors.textSecondary,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onExpandToggle();
-                },
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              ),
+              // The parent exercise rail owns focus; no inert collapse button.
+              if (!isExpanded)
+                IconButton(
+                  icon: const Icon(Icons.expand_less_rounded, size: 22),
+                  onPressed: onExpandToggle,
+                ),
             ],
           ),
           const SizedBox(height: 10),

@@ -1,244 +1,195 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/widgets/athletic_ui.dart';
 import '../../data/datasources/nutrition_catalog.dart';
 import '../../domain/model/daily_report.dart';
+import '../../domain/model/meal_entry.dart';
 import 'meal_option_selector.dart';
 import 'supplement_selector.dart';
 
-class DailyReportForm extends StatelessWidget {
+/// A focused journal rather than a long scroll of generic form cards.
+/// All changes still go through the existing DailyReportCubit callback.
+class DailyReportForm extends StatefulWidget {
   final DailyReport report;
-  final Function(DailyReport) onChanged;
+  final ValueChanged<DailyReport> onChanged;
   final List<String> trainingOptions;
+  const DailyReportForm({super.key, required this.report, required this.onChanged, required this.trainingOptions});
 
-  const DailyReportForm({
-    super.key,
-    required this.report,
-    required this.onChanged,
-    required this.trainingOptions,
-  });
+  @override
+  State<DailyReportForm> createState() => _DailyReportFormState();
+}
+
+class _DailyReportFormState extends State<DailyReportForm> {
+  int selectedMeal = 0;
+
+  static const _names = ['الإفطار', 'الغداء', 'العشاء', 'السناك', 'قبل التمرين', 'بعد التمرين'];
+  static const _symbols = [Icons.wb_sunny_outlined, Icons.lunch_dining_outlined, Icons.nightlight_outlined, Icons.cookie_outlined, Icons.bolt_outlined, Icons.fitness_center_outlined];
+
+  String _textFor(int index) {
+    final r = widget.report;
+    switch (index) {
+      case 0: return r.breakfast;
+      case 1: return r.lunch;
+      case 2: return r.dinner;
+      case 3: return r.snack;
+      case 4: return r.beforeTraining;
+      default: return r.afterTraining;
+    }
+  }
+
+  List<MealEntry> _entriesFor(int index) {
+    final r = widget.report;
+    switch (index) {
+      case 0: return r.breakfastEntries;
+      case 1: return r.lunchEntries;
+      case 2: return r.dinnerEntries;
+      case 3: return r.snackEntries;
+      case 4: return r.beforeTrainingEntries;
+      default: return r.afterTrainingEntries;
+    }
+  }
+
+  List<MealCategoryOptions> _catalogFor(int index) {
+    switch (index) {
+      case 0: return NutritionCatalog.breakfast;
+      case 1: return NutritionCatalog.lunch;
+      case 2: return NutritionCatalog.dinner;
+      case 3: return NutritionCatalog.snack;
+      case 4: return NutritionCatalog.beforeTraining;
+      default: return NutritionCatalog.afterTraining;
+    }
+  }
+
+  void _setMeal(List<MealEntry> entries) {
+    final r = widget.report;
+    final text = mealEntriesToLegacyText(entries);
+    switch (selectedMeal) {
+      case 0: widget.onChanged(r.copyWith(breakfast: text, breakfastEntries: entries)); return;
+      case 1: widget.onChanged(r.copyWith(lunch: text, lunchEntries: entries)); return;
+      case 2: widget.onChanged(r.copyWith(dinner: text, dinnerEntries: entries)); return;
+      case 3: widget.onChanged(r.copyWith(snack: text, snackEntries: entries)); return;
+      case 4: widget.onChanged(r.copyWith(beforeTraining: text, beforeTrainingEntries: entries)); return;
+      case 5: widget.onChanged(r.copyWith(afterTraining: text, afterTrainingEntries: entries)); return;
+    }
+  }
+
+  Widget _field(String label, String value, ValueChanged<String> onChanged, {IconData? icon, int lines = 1}) {
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        key: ValueKey(label),
+        initialValue: value,
+        maxLines: lines,
+        style: GoogleFonts.cairo(fontSize: 13, fontWeight: FontWeight.w600),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: GoogleFonts.cairo(fontSize: 12, color: colors.onSurfaceVariant),
+          prefixIcon: icon == null ? null : Icon(icon, size: 19, color: colors.primary),
+        ),
+        onChanged: onChanged,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSection(
-          context,
-          'Meals & Nutrition',
-          Icons.restaurant_menu,
-          [
-            MealOptionSelector(
-              label: 'الإفطار (Breakfast)',
-              categories: NutritionCatalog.breakfast,
-              initialValue: report.breakfast,
-              onChanged: (val) => onChanged(report.copyWith(breakfast: val)),
-            ),
-            MealOptionSelector(
-              label: 'الغداء (Lunch)',
-              categories: NutritionCatalog.lunch,
-              initialValue: report.lunch,
-              onChanged: (val) => onChanged(report.copyWith(lunch: val)),
-            ),
-            MealOptionSelector(
-              label: 'العشاء (Dinner)',
-              categories: NutritionCatalog.dinner,
-              initialValue: report.dinner,
-              onChanged: (val) => onChanged(report.copyWith(dinner: val)),
-            ),
-            MealOptionSelector(
-              label: 'السناك (Snack)',
-              categories: NutritionCatalog.snack,
-              initialValue: report.snack,
-              onChanged: (val) => onChanged(report.copyWith(snack: val)),
-            ),
-            _buildTextField(
-              'Water Intake (كمية المياه) *',
-              report.water,
-              (val) => onChanged(report.copyWith(water: val)),
-              isRequired: true,
-            ),
-          ],
-          0,
-        ),
-        const SizedBox(height: 24),
-        _buildSection(
-          context,
-          'Training',
-          Icons.fitness_center,
-          [
-            MealOptionSelector(
-              label: 'قبل التمرين (Before Training)',
-              categories: NutritionCatalog.beforeTraining,
-              initialValue: report.beforeTraining,
-              onChanged: (val) => onChanged(report.copyWith(beforeTraining: val)),
-            ),
-            MealOptionSelector(
-              label: 'بعد التمرين (After Training)',
-              categories: NutritionCatalog.afterTraining,
-              initialValue: report.afterTraining,
-              onChanged: (val) => onChanged(report.copyWith(afterTraining: val)),
-            ),
-            MealOptionSelector(
-              label: 'نوع وحجم التمرين (Training Name)',
-              categories: [
-                MealCategoryOptions(
-                  categoryName: 'نوع التمرين',
-                  options: trainingOptions,
+    final scheme = Theme.of(context).colorScheme;
+    final report = widget.report;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const AthleticSectionTitle(number: '01', title: 'Nutrition studio', description: 'سجّل الوجبات وعدّل الكميات من مكان واحد.'),
+      // A six-position meal rail; the editor only shows the active meal.
+      SizedBox(height: 104, child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _names.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final active = index == selectedMeal;
+          final completed = _textFor(index).trim().isNotEmpty || _entriesFor(index).isNotEmpty;
+          return Semantics(
+            selected: active,
+            button: true,
+            label: _names[index],
+            child: InkWell(
+              onTap: () => setState(() => selectedMeal = index),
+              borderRadius: BorderRadius.circular(15),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                width: 92,
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: active ? scheme.primary : scheme.surface,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: active ? scheme.primary : scheme.outline.withValues(alpha: 0.3)),
                 ),
-              ],
-              initialValue: report.training,
-              onChanged: (val) => onChanged(report.copyWith(training: val)),
-            ),
-            _buildTextField(
-              'Cardio Duration (مدة الكارديو)',
-              report.cardio,
-              (val) => onChanged(report.copyWith(cardio: val)),
-            ),
-          ],
-          1,
-        ),
-        const SizedBox(height: 24),
-        _buildSection(
-          context,
-          'Others',
-          Icons.more_horiz,
-          [
-            SupplementSelector(
-              initialValue: report.supplements,
-              onChanged: (val) => onChanged(report.copyWith(supplements: val)),
-            ),
-            _buildTextField(
-              'Sleep Time (مدة النوم)',
-              report.sleepTime,
-              (val) => onChanged(report.copyWith(sleepTime: val)),
-            ),
-            _buildTextField(
-              'Notes (ملاحظات عامة)',
-              report.notes ?? '',
-              (val) => onChanged(report.copyWith(notes: val)),
-              maxLines: 4,
-            ),
-          ],
-          2,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context,
-    String title,
-    IconData icon,
-    List<Widget> children,
-    int index,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Icon(icon, color: Theme.of(context).colorScheme.primary, size: 22),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: Theme.of(context).colorScheme.primary,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(children: children),
-          ),
-        ],
-      ),
-    )
-        .animate(delay: (index * 150).ms)
-        .fadeIn(duration: 400.ms)
-        .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
-  }
-
-  Widget _buildTextField(
-    String label,
-    String value,
-    Function(String) onChanged, {
-    int maxLines = 1,
-    bool isRequired = false,
-  }) {
-    final isMissingRequired = isRequired && value.trim().isEmpty;
-
-    return Builder(
-      builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: TextFormField(
-          initialValue: value,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: TextStyle(
-              color: isMissingRequired
-                  ? Theme.of(context).colorScheme.error
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
-            filled: true,
-            fillColor: isMissingRequired
-                ? Theme.of(context).colorScheme.error.withValues(alpha: 0.08)
-                : Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.3),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: isMissingRequired
-                  ? BorderSide(color: Theme.of(context).colorScheme.error)
-                  : BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: isMissingRequired
-                  ? BorderSide(color: Theme.of(context).colorScheme.error)
-                  : BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: isMissingRequired
-                    ? Theme.of(context).colorScheme.error
-                    : Theme.of(context).colorScheme.primary,
-                width: 2,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Icon(_symbols[index], size: 22, color: active ? scheme.onPrimary : scheme.primary),
+                  const Spacer(),
+                  Text(_names[index], maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.cairo(fontSize: 11, fontWeight: FontWeight.w800, color: active ? scheme.onPrimary : scheme.onSurface)),
+                  const SizedBox(height: 4),
+                  Container(width: completed ? 32 : 12, height: 3, decoration: BoxDecoration(
+                    color: active ? scheme.onPrimary : completed ? scheme.primary : scheme.outline,
+                    borderRadius: BorderRadius.circular(4),
+                  )),
+                ]),
               ),
             ),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
+          );
+        },
+      )),
+      const SizedBox(height: 18),
+      Container(
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: scheme.outline.withValues(alpha: 0.35)),
+        ),
+        padding: const EdgeInsets.fromLTRB(18, 20, 18, 22),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(children: [
+            Expanded(child: Text(_names[selectedMeal], style: GoogleFonts.cairo(fontSize: 20, fontWeight: FontWeight.w800))),
+            Text('${_entriesFor(selectedMeal).length} عناصر', style: GoogleFonts.cairo(color: scheme.onSurfaceVariant, fontSize: 11)),
+          ]),
+          Divider(height: 27, color: scheme.outline.withValues(alpha: .35)),
+          MealOptionSelector(
+            key: ValueKey('${report.id}-$selectedMeal'),
+            label: _names[selectedMeal],
+            initialValue: _textFor(selectedMeal),
+            initialEntries: _entriesFor(selectedMeal),
+            categories: _catalogFor(selectedMeal),
+            onChanged: (legacy) => _setMeal([MealEntry(name: legacy, category: 'Custom')]),
+            onEntriesChanged: _setMeal,
           ),
-          maxLines: maxLines,
-          onChanged: onChanged,
+        ]),
+      ),
+      const SizedBox(height: 32),
+      const AthleticSectionTitle(number: '02', title: 'Hydration & training', description: 'المياه والنشاط اليومي.'),
+      _field('كمية المياه *', report.water, (v) => widget.onChanged(report.copyWith(water: v)), icon: Icons.water_drop_outlined),
+      // Existing training values remain the source of truth; no new plans.
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: DropdownButtonFormField<String>(
+          key: ValueKey('training-${report.id}-${widget.trainingOptions.join('|')}'),
+          initialValue: widget.trainingOptions.contains(report.training) ? report.training : null,
+          isExpanded: true,
+          decoration: InputDecoration(
+            labelText: 'نوع التمرين', labelStyle: GoogleFonts.cairo(fontSize: 12),
+            prefixIcon: Icon(Icons.fitness_center_outlined, color: scheme.primary),
+          ),
+          items: widget.trainingOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis))).toList(),
+          onChanged: (v) => widget.onChanged(report.copyWith(training: v ?? '')),
         ),
       ),
-    );
+      _field('مدة الكارديو', report.cardio, (v) => widget.onChanged(report.copyWith(cardio: v)), icon: Icons.directions_run_outlined),
+      const SizedBox(height: 22),
+      const AthleticSectionTitle(number: '03', title: 'Recovery notes', description: 'النوم والمكملات والملاحظات.'),
+      _field('مدة النوم', report.sleepTime, (v) => widget.onChanged(report.copyWith(sleepTime: v)), icon: Icons.bedtime_outlined),
+      SupplementSelector(initialValue: report.supplements,
+        onChanged: (v) => widget.onChanged(report.copyWith(supplements: v))),
+      const SizedBox(height: 12),
+      _field('ملاحظات عامة', report.notes ?? '', (v) => widget.onChanged(report.copyWith(notes: v)),
+        icon: Icons.edit_note_outlined, lines: 3),
+    ]);
   }
 }

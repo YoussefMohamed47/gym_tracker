@@ -49,6 +49,24 @@ class DailyReportHiveModel extends HiveObject {
   @HiveField(14)
   final String? imagePath;
 
+  @HiveField(15)
+  final List<String>? breakfastEntries;
+
+  @HiveField(16)
+  final List<String>? lunchEntries;
+
+  @HiveField(17)
+  final List<String>? dinnerEntries;
+
+  @HiveField(18)
+  final List<String>? snackEntries;
+
+  @HiveField(19)
+  final List<String>? beforeTrainingEntries;
+
+  @HiveField(20)
+  final List<String>? afterTrainingEntries;
+
   DailyReportHiveModel({
     required this.id,
     required this.breakfast,
@@ -65,5 +83,12 @@ class DailyReportHiveModel extends HiveObject {
     this.notes,
     this.dateTime,
     this.imagePath,
+    this.breakfastEntries,
+    this.lunchEntries,
+    this.dinnerEntries,
+    this.snackEntries,
+    this.beforeTrainingEntries,
+    this.afterTrainingEntries,
+
   });
 }

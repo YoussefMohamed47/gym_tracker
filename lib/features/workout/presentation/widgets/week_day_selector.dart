@@ -2,178 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/utils/app_colors.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../utils/date_utils.dart';
 
+/// A horizontal date track, separate from the exercise workspace.
 class WeekDaySelector extends StatelessWidget {
   final DateTime selectedDate;
-  final Function(DateTime) onDateSelected;
-
-  const WeekDaySelector({
-    super.key,
-    required this.selectedDate,
-    required this.onDateSelected,
-  });
-
-  /// Returns a unique 1–2 char label for the weekday to avoid Tue/Thu collision.
-  static String _dayLabel(DateTime date) {
-    switch (date.weekday) {
-      case DateTime.monday:    return 'M';
-      case DateTime.tuesday:   return 'T';
-      case DateTime.wednesday: return 'W';
-      case DateTime.thursday:  return 'Th';
-      case DateTime.friday:    return 'F';
-      case DateTime.saturday:  return 'S';
-      case DateTime.sunday:    return 'Su';
-      default:                 return '?';
-    }
-  }
+  final ValueChanged<DateTime> onDateSelected;
+  const WeekDaySelector({super.key, required this.selectedDate, required this.onDateSelected});
 
   @override
   Widget build(BuildContext context) {
-    final weekDays = WorkoutDateUtils.getWeekDays(selectedDate);
-    final dayNumberFormat = DateFormat('d');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final selectedIndex = weekDays.indexWhere(
-      (d) =>
-          d.year == selectedDate.year &&
-          d.month == selectedDate.month &&
-          d.day == selectedDate.day,
-    );
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDark ? AppColors.borderSubtle : AppColors.outline,
-        ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final itemWidth = constraints.maxWidth / 7.0;
-
-          return Stack(
-            children: [
-              // Animated Sliding Gradient Pill Indicator
-              if (selectedIndex != -1)
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  left: selectedIndex * itemWidth,
-                  top: 0,
-                  bottom: 0,
-                  width: itemWidth,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.gradientStart.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              // 7 Day Tap Buttons
-              Row(
-                children: weekDays.map((date) {
-                  final isSelected =
-                      date.year == selectedDate.year &&
-                      date.month == selectedDate.month &&
-                      date.day == selectedDate.day;
-
-                  final workoutType = WorkoutDateUtils.getWorkoutTypeForDay(date);
-                  final isRestDay = workoutType == WorkoutType.rest;
-                  final isPast = date.isBefore(
-                    DateTime(
-                      DateTime.now().year,
-                      DateTime.now().month,
-                      DateTime.now().day,
-                    ),
-                  );
-
-                  // Dot color: Green if completed/past, Accent if planned, Grey if rest
-                  Color dotColor = Colors.grey.shade600;
-                  if (!isRestDay) {
-                    if (isPast) {
-                      dotColor = AppColors.completedGreen;
-                    } else {
-                      dotColor = AppColors.gradientStart;
-                    }
-                  }
-
-                  return Expanded(
-                    child: SizedBox(
-                      height: 64,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            onDateSelected(date);
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _dayLabel(date),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                dayNumberFormat.format(date),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-
-                              // Status Dot
-                              Container(
-                                width: 4,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isSelected ? Colors.white : dotColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+    final colors = Theme.of(context).colorScheme;
+    final week = WorkoutDateUtils.getWeekDays(selectedDate);
+    return Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 16), child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Text('THE WEEK', style: GoogleFonts.outfit(fontSize: 11, letterSpacing: 1.9,
+            color: colors.onSurfaceVariant, fontWeight: FontWeight.w800)),
+          const Spacer(),
+          Text(DateFormat('MMMM yyyy').format(selectedDate).toUpperCase(),
+            style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w800, color: colors.primary)),
+        ]),
+        const SizedBox(height: 12),
+        Row(children: [for (final day in week)
+          Expanded(child: Builder(builder: (context) {
+            final active = day.year == selectedDate.year && day.month == selectedDate.month && day.day == selectedDate.day;
+            final rest = WorkoutDateUtils.getWorkoutTypeForDay(day) == WorkoutType.rest;
+            return Padding(padding: const EdgeInsets.symmetric(horizontal: 2), child: Material(
+              color: active ? colors.primary : colors.surface,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () { HapticFeedback.selectionClick(); onDateSelected(day); },
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(height: 72, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Text(DateFormat('E').format(day).substring(0, 1),
+                    style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.w700,
+                      color: active ? colors.onPrimary : colors.onSurfaceVariant)),
+                  const SizedBox(height: 3),
+                  Text('${day.day}', style: GoogleFonts.outfit(fontSize: 19, fontWeight: FontWeight.w900,
+                    color: active ? colors.onPrimary : colors.onSurface)),
+                  const SizedBox(height: 3),
+                  Container(height: 3, width: 12, decoration: BoxDecoration(
+                    color: active ? colors.onPrimary : rest ? colors.outline : colors.primary,
+                    borderRadius: BorderRadius.circular(4))),
+                ])),
               ),
-            ],
-          );
-        },
-      ),
-    );
+            ));
+          })),
+        ]),
+      ],
+    ));
   }
 }

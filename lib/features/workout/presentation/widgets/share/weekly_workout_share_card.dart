@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../../core/utils/weight_converter.dart';
+import '../../../../../core/utils/weight_converter.dart';
 import '../../../data/datasources/workout_catalog.dart';
 import '../../../domain/entities/workout_session.dart';
 
@@ -14,7 +14,7 @@ class WeeklyWorkoutShareCard extends StatelessWidget {
       width: 450,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A46A0),
+        color: const Color(0xFF121B20),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -85,7 +85,7 @@ class WeeklyWorkoutShareCard extends StatelessWidget {
           Text(
             '${session.dateKey} — ${session.workoutType.name.toUpperCase()}',
             style: const TextStyle(
-              color: Colors.amber,
+              color: const Color(0xFFC7F476),
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,

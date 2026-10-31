@@ -25,12 +25,12 @@ class DailyMealsReportCard extends StatelessWidget {
 
   int _calculateLoggedMealsCount() {
     int count = 0;
-    if (report.breakfast.trim().isNotEmpty) count++;
-    if (report.snack.trim().isNotEmpty) count++;
-    if (report.beforeTraining.trim().isNotEmpty) count++;
-    if (report.lunch.trim().isNotEmpty) count++;
-    if (report.afterTraining.trim().isNotEmpty) count++;
-    if (report.dinner.trim().isNotEmpty) count++;
+    if (report.breakfast.trim().isNotEmpty || report.breakfastEntries.isNotEmpty) count++;
+    if (report.snack.trim().isNotEmpty || report.snackEntries.isNotEmpty) count++;
+    if (report.beforeTraining.trim().isNotEmpty || report.beforeTrainingEntries.isNotEmpty) count++;
+    if (report.lunch.trim().isNotEmpty || report.lunchEntries.isNotEmpty) count++;
+    if (report.afterTraining.trim().isNotEmpty || report.afterTrainingEntries.isNotEmpty) count++;
+    if (report.dinner.trim().isNotEmpty || report.dinnerEntries.isNotEmpty) count++;
     return count;
   }
 
@@ -75,7 +75,7 @@ class DailyMealsReportCard extends StatelessWidget {
               tagLine: 'ADVANCE LIKE LIGHTNING',
               reportTitle: 'تقرير الوجبات اليومية',
               dateText: dateStr,
-              showCheckBadge: true,
+              showCheckBadge: false,
               direction: TextDirection.rtl,
             ),
             const SizedBox(height: 16),
@@ -128,36 +128,42 @@ class DailyMealsReportCard extends StatelessWidget {
               title: 'الإفطار',
               icon: Icons.free_breakfast_rounded,
               content: report.breakfast,
+              entries: report.breakfastEntries,
               isExportMode: isExportMode,
             ),
             MealTimelineItem(
               title: 'السناك الأول',
               icon: Icons.cookie_rounded,
               content: report.snack,
+              entries: report.snackEntries,
               isExportMode: isExportMode,
             ),
             MealTimelineItem(
               title: 'قبل التمرين',
               icon: Icons.bolt_rounded,
               content: report.beforeTraining,
+              entries: report.beforeTrainingEntries,
               isExportMode: isExportMode,
             ),
             MealTimelineItem(
               title: 'الغداء',
               icon: Icons.lunch_dining_rounded,
               content: report.lunch,
+              entries: report.lunchEntries,
               isExportMode: isExportMode,
             ),
             MealTimelineItem(
               title: 'بعد التمرين',
               icon: Icons.fitness_center_rounded,
               content: report.afterTraining,
+              entries: report.afterTrainingEntries,
               isExportMode: isExportMode,
             ),
             MealTimelineItem(
               title: 'العشاء',
               icon: Icons.nightlife_rounded,
               content: report.dinner,
+              entries: report.dinnerEntries,
               isLast: true,
               isExportMode: isExportMode,
             ),
@@ -240,7 +246,7 @@ class DailyMealsReportCard extends StatelessWidget {
               );
             },
             elevation: 8,
-            backgroundColor: ReportThemeTokens.indigoAccent,
+            backgroundColor: const Color(0xFF3A7052),
             icon: const Icon(Icons.share_rounded, color: Colors.white),
             label: Text(
               'مشاركة التقرير',

@@ -32,13 +32,20 @@ class DailyReportHiveModelAdapter extends TypeAdapter<DailyReportHiveModel> {
       notes: fields[12] as String?,
       dateTime: fields[13] as DateTime?,
       imagePath: fields[14] as String?,
+      breakfastEntries: (fields[15] as List?)?.cast<String>(),
+      lunchEntries: (fields[16] as List?)?.cast<String>(),
+      dinnerEntries: (fields[17] as List?)?.cast<String>(),
+      snackEntries: (fields[18] as List?)?.cast<String>(),
+      beforeTrainingEntries: (fields[19] as List?)?.cast<String>(),
+      afterTrainingEntries: (fields[20] as List?)?.cast<String>(),
+
     );
   }
 
   @override
   void write(BinaryWriter writer, DailyReportHiveModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(21)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +75,20 @@ class DailyReportHiveModelAdapter extends TypeAdapter<DailyReportHiveModel> {
       ..writeByte(13)
       ..write(obj.dateTime)
       ..writeByte(14)
-      ..write(obj.imagePath);
+      ..write(obj.imagePath)
+      ..writeByte(15)
+      ..write(obj.breakfastEntries)
+      ..writeByte(16)
+      ..write(obj.lunchEntries)
+      ..writeByte(17)
+      ..write(obj.dinnerEntries)
+      ..writeByte(18)
+      ..write(obj.snackEntries)
+      ..writeByte(19)
+      ..write(obj.beforeTrainingEntries)
+      ..writeByte(20)
+      ..write(obj.afterTrainingEntries);
+
   }
 
   @override
