@@ -130,8 +130,7 @@ class ExerciseCard extends StatelessWidget {
         unit: displayUnit.name,
       );
       if (val != null) {
-        final weightInKg = WeightConverter.convert(val, displayUnit, WeightUnit.kg);
-        onWeightChanged(setIndex, weightInKg);
+        onWeightChanged(setIndex, val);
       }
     } else {
       final val = await NumericKeypadSheet.showRepsKeypad(
@@ -292,7 +291,7 @@ class ExerciseCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      '$performedSets/$totalSets sets',
+                      '$performedSets/$totalSets Sets',
                       style: ReportThemeTokens.outfitNumber(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,

@@ -32,10 +32,8 @@ class WorkoutCompleteReportCard extends StatelessWidget {
     );
 
     final dailyRoutine = WorkoutCatalog.getDailyRoutine();
-    final workoutDef = WorkoutCatalog.workouts.firstWhere(
-      (w) => w.type == workoutType,
-      orElse: () => WorkoutCatalog.workouts.first,
-    );
+    final mainExercises =
+        WorkoutCatalog.getWorkoutByType(workoutType)?.exercises ?? const [];
 
     // Compute stats
     int totalSetsCount = 0;
@@ -150,7 +148,7 @@ class WorkoutCompleteReportCard extends StatelessWidget {
           ),
 
           // 5. Main Lift Exercise Cards
-          ...workoutDef.exercises.map((slot) {
+          ...mainExercises.map((slot) {
             final log = session.exerciseLogs[slot.exerciseId];
             if (log == null) return const SizedBox.shrink();
 
