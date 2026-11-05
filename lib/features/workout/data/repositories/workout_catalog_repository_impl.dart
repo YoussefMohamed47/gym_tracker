@@ -404,13 +404,9 @@ class WorkoutCatalogRepositoryImpl implements WorkoutCatalogRepository {
 
   @override
   CatalogDay? getDayByWorkoutType(WorkoutType type) {
-    try {
-      return _eightDayRotation.firstWhere(
-        (d) => d.workoutType == type && !d.isRestDay,
-      );
-    } catch (_) {
-      return null;
-    }
+    return _eightDayRotation
+        .where((d) => d.workoutType == type && !d.isRestDay)
+        .firstOrNull;
   }
 
   @override

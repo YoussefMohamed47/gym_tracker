@@ -11,10 +11,8 @@ class WorkoutShareService {
     try {
       await ReportExporter.captureAndShare(
         context: context,
-        builder: (ctx) => WorkoutCompleteReportCard(
-          session: session,
-          isExportMode: true,
-        ),
+        builder: (ctx) =>
+            WorkoutCompleteReportCard(session: session, isExportMode: true),
         fileName: 'workout_complete_${session.dateKey}',
         shareText:
             'Just finished my ${session.workoutType.name} workout! #GymTracker',

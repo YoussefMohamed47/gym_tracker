@@ -51,8 +51,9 @@ class ReportExporter {
       await WidgetsBinding.instance.endOfFrame;
       await Future.delayed(const Duration(milliseconds: 120));
 
-      final boundary = repaintKey.currentContext!.findRenderObject()
-          as RenderRepaintBoundary;
+      final boundary =
+          repaintKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
 
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -76,9 +77,9 @@ class ReportExporter {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share report: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to share report: $e')));
       }
     } finally {
       entry.remove();

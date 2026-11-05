@@ -28,7 +28,8 @@ class _WarmupSectionState extends State<WarmupSection> {
     return BlocBuilder<WorkoutCubit, WorkoutState>(
       buildWhen: (prev, curr) {
         for (final slot in warmup.exercises) {
-          if (prev.exerciseLogs[slot.exerciseId] != curr.exerciseLogs[slot.exerciseId]) {
+          if (prev.exerciseLogs[slot.exerciseId] !=
+              curr.exerciseLogs[slot.exerciseId]) {
             return true;
           }
         }
@@ -40,12 +41,15 @@ class _WarmupSectionState extends State<WarmupSection> {
 
         for (final slot in warmup.exercises) {
           final log = state.exerciseLogs[slot.exerciseId];
-          if (log != null && log.sets.isNotEmpty && log.sets.every((s) => s.isPerformed)) {
+          if (log != null &&
+              log.sets.isNotEmpty &&
+              log.sets.every((s) => s.isPerformed)) {
             completedWarmupItems++;
           }
         }
 
-        final isAllComplete = totalWarmupItems > 0 && completedWarmupItems == totalWarmupItems;
+        final isAllComplete =
+            totalWarmupItems > 0 && completedWarmupItems == totalWarmupItems;
 
         if (isAllComplete && !_hasAutoCollapsed && _isExpanded) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -58,7 +62,9 @@ class _WarmupSectionState extends State<WarmupSection> {
           });
         }
 
-        final progress = totalWarmupItems > 0 ? completedWarmupItems / totalWarmupItems : 0.0;
+        final progress = totalWarmupItems > 0
+            ? completedWarmupItems / totalWarmupItems
+            : 0.0;
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -99,14 +105,22 @@ class _WarmupSectionState extends State<WarmupSection> {
                                 height: 36,
                                 decoration: BoxDecoration(
                                   color: isAllComplete
-                                      ? AppColors.completedGreen.withValues(alpha: 0.15)
-                                      : const Color(0xFFFF9500).withValues(alpha: 0.15),
+                                      ? AppColors.completedGreen.withValues(
+                                          alpha: 0.15,
+                                        )
+                                      : const Color(
+                                          0xFFFF9500,
+                                        ).withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  isAllComplete ? Icons.check_circle_rounded : Icons.local_fire_department_rounded,
+                                  isAllComplete
+                                      ? Icons.check_circle_rounded
+                                      : Icons.local_fire_department_rounded,
                                   size: 18,
-                                  color: isAllComplete ? AppColors.completedGreen : const Color(0xFFFF9500),
+                                  color: isAllComplete
+                                      ? AppColors.completedGreen
+                                      : const Color(0xFFFF9500),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -121,7 +135,9 @@ class _WarmupSectionState extends State<WarmupSection> {
                                         fontWeight: FontWeight.w900,
                                         color: isAllComplete
                                             ? AppColors.completedGreen
-                                            : (isDark ? AppColors.textPrimary : Colors.black87),
+                                            : (isDark
+                                                  ? AppColors.textPrimary
+                                                  : Colors.black87),
                                       ),
                                     ),
                                     Text(
@@ -135,11 +151,18 @@ class _WarmupSectionState extends State<WarmupSection> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isAllComplete
-                                      ? AppColors.completedGreen.withValues(alpha: 0.15)
-                                      : (isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7)),
+                                      ? AppColors.completedGreen.withValues(
+                                          alpha: 0.15,
+                                        )
+                                      : (isDark
+                                            ? AppColors.darkElevated
+                                            : const Color(0xFFF0F2F7)),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -149,7 +172,9 @@ class _WarmupSectionState extends State<WarmupSection> {
                                     fontWeight: FontWeight.w900,
                                     color: isAllComplete
                                         ? AppColors.completedGreen
-                                        : (isDark ? AppColors.textPrimary : Colors.black87),
+                                        : (isDark
+                                              ? AppColors.textPrimary
+                                              : Colors.black87),
                                   ),
                                 ),
                               ),
@@ -171,9 +196,13 @@ class _WarmupSectionState extends State<WarmupSection> {
                             child: LinearProgressIndicator(
                               value: progress,
                               minHeight: 3,
-                              backgroundColor: isDark ? Colors.white10 : Colors.black12,
+                              backgroundColor: isDark
+                                  ? Colors.white10
+                                  : Colors.black12,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                isAllComplete ? AppColors.completedGreen : const Color(0xFFFF9500),
+                                isAllComplete
+                                    ? AppColors.completedGreen
+                                    : const Color(0xFFFF9500),
                               ),
                             ),
                           ),
@@ -186,7 +215,9 @@ class _WarmupSectionState extends State<WarmupSection> {
                 // Collapsible Cards List
                 AnimatedCrossFade(
                   duration: const Duration(milliseconds: 250),
-                  crossFadeState: _isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                  crossFadeState: _isExpanded
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
                   firstChild: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                     child: Column(
@@ -210,10 +241,7 @@ class _WarmupItemCard extends StatelessWidget {
   final ExerciseSlot slot;
   final bool isDark;
 
-  const _WarmupItemCard({
-    required this.slot,
-    required this.isDark,
-  });
+  const _WarmupItemCard({required this.slot, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -221,10 +249,12 @@ class _WarmupItemCard extends StatelessWidget {
 
     return BlocBuilder<WorkoutCubit, WorkoutState>(
       buildWhen: (prev, curr) =>
-          prev.exerciseLogs[slot.exerciseId] != curr.exerciseLogs[slot.exerciseId],
+          prev.exerciseLogs[slot.exerciseId] !=
+          curr.exerciseLogs[slot.exerciseId],
       builder: (context, state) {
         final log = state.exerciseLogs[slot.exerciseId];
-        final isCompleted = log != null &&
+        final isCompleted =
+            log != null &&
             log.sets.isNotEmpty &&
             log.sets.every((s) => s.isPerformed);
 
@@ -260,7 +290,9 @@ class _WarmupItemCard extends StatelessWidget {
                               fontWeight: FontWeight.w800,
                               color: isCompleted
                                   ? AppColors.completedGreen
-                                  : (isDark ? AppColors.textPrimary : Colors.black87),
+                                  : (isDark
+                                        ? AppColors.textPrimary
+                                        : Colors.black87),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -279,15 +311,23 @@ class _WarmupItemCard extends StatelessWidget {
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: () => VideoLauncher.launch(context, exercise.videoUrl!),
+                          onTap: () =>
+                              VideoLauncher.launch(context, exercise.videoUrl!),
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFF9500).withValues(alpha: 0.12),
+                              color: const Color(
+                                0xFFFF9500,
+                              ).withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+                                color: const Color(
+                                  0xFFFF9500,
+                                ).withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -320,7 +360,9 @@ class _WarmupItemCard extends StatelessWidget {
                 // Set check circles row
                 Row(
                   children: List.generate(slot.prescribedSets, (setIdx) {
-                    final setLog = (log != null && log.sets.length > setIdx) ? log.sets[setIdx] : null;
+                    final setLog = (log != null && log.sets.length > setIdx)
+                        ? log.sets[setIdx]
+                        : null;
                     final isSetDone = setLog?.isPerformed ?? false;
 
                     return Padding(
@@ -328,12 +370,18 @@ class _WarmupItemCard extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          context.read<WorkoutCubit>().toggleSetPerformed(slot.exerciseId, setIdx);
+                          context.read<WorkoutCubit>().toggleSetPerformed(
+                            slot.exerciseId,
+                            setIdx,
+                          );
                         },
                         behavior: HitTestBehavior.opaque,
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: isSetDone
                                 ? AppColors.completedGreen
@@ -342,7 +390,9 @@ class _WarmupItemCard extends StatelessWidget {
                             border: Border.all(
                               color: isSetDone
                                   ? AppColors.completedGreen
-                                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
+                                  : (isDark
+                                        ? AppColors.borderSubtle
+                                        : AppColors.outline),
                               width: 1.5,
                             ),
                           ),
@@ -350,9 +400,13 @@ class _WarmupItemCard extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isSetDone ? Icons.check_rounded : Icons.circle_outlined,
+                                isSetDone
+                                    ? Icons.check_rounded
+                                    : Icons.circle_outlined,
                                 size: 14,
-                                color: isSetDone ? Colors.black : AppColors.textSecondary,
+                                color: isSetDone
+                                    ? Colors.black
+                                    : AppColors.textSecondary,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -360,7 +414,9 @@ class _WarmupItemCard extends StatelessWidget {
                                 style: ReportThemeTokens.outfitNumber(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
-                                  color: isSetDone ? Colors.black : AppColors.textSecondary,
+                                  color: isSetDone
+                                      ? Colors.black
+                                      : AppColors.textSecondary,
                                 ),
                               ),
                             ],

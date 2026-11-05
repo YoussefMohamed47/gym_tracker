@@ -92,9 +92,7 @@ class _SupplementSelectorState extends State<SupplementSelector> {
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,7 +177,10 @@ class _SupplementSelectorState extends State<SupplementSelector> {
                   fontSize: 11,
                   color: colorScheme.onSurfaceVariant,
                 ),
-                prefixIcon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+                prefixIcon: const Icon(
+                  Icons.add_circle_outline_rounded,
+                  size: 18,
+                ),
                 filled: true,
                 fillColor: theme.cardColor,
                 isDense: true,

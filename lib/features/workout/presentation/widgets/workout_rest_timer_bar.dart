@@ -97,14 +97,12 @@ class _WorkoutRestTimerBarState extends State<WorkoutRestTimerBar> {
                   value: progress,
                   strokeWidth: 3.5,
                   backgroundColor: colorScheme.outline.withValues(alpha: 0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.primary,
+                  ),
                 ),
               ),
-              Icon(
-                Icons.timer_outlined,
-                size: 18,
-                color: colorScheme.primary,
-              ),
+              Icon(Icons.timer_outlined, size: 18, color: colorScheme.primary),
             ],
           ),
           const SizedBox(width: 12),
@@ -149,10 +147,7 @@ class _WorkoutRestTimerBarState extends State<WorkoutRestTimerBar> {
             icon: const Icon(Icons.add_rounded, size: 14),
             label: const Text(
               '+30s',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
             ),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

@@ -22,6 +22,12 @@ class SetRow extends StatelessWidget {
   final VoidCallback? onTapWeight;
   final VoidCallback? onTapReps;
 
+  /// The next set to do: outlined in the accent colour.
+  final bool isActive;
+
+  /// This set beat last time's best weight: highlighted in amber.
+  final bool isPersonalRecord;
+
   const SetRow({
     super.key,
     required this.index,
@@ -38,19 +44,29 @@ class SetRow extends StatelessWidget {
     this.onDeleteSet,
     this.onTapWeight,
     this.onTapReps,
+    this.isActive = false,
+    this.isPersonalRecord = false,
   });
 
   String _formatWeight(double? weightKg) {
     if (weightKg == null) return '';
-    final converted = WeightConverter.convert(weightKg, WeightUnit.kg, displayUnit);
-    return converted % 1 == 0 ? converted.toInt().toString() : converted.toStringAsFixed(1);
+    final converted = WeightConverter.convert(
+      weightKg,
+      WeightUnit.kg,
+      displayUnit,
+    );
+    return converted % 1 == 0
+        ? converted.toInt().toString()
+        : converted.toStringAsFixed(1);
   }
 
   String _formatPrevious() {
     if (previousSetLog == null) return '—';
     final parts = <String>[];
     if (isWeightAllowed && previousSetLog!.weightKg != null) {
-      parts.add('${_formatWeight(previousSetLog!.weightKg)} ${displayUnit.name}');
+      parts.add(
+        '${_formatWeight(previousSetLog!.weightKg)} ${displayUnit.name}',
+      );
     }
     if (isRepsAllowed && previousSetLog!.actualReps != null) {
       parts.add('${previousSetLog!.actualReps}r');
@@ -70,15 +86,21 @@ class SetRow extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: isCompleted
+        color: isPersonalRecord
+            ? AppColors.restAmber.withValues(alpha: 0.14)
+            : isCompleted
             ? AppColors.completedGreen.withValues(alpha: 0.08)
             : (isDark ? AppColors.darkCard : Colors.white),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isCompleted
+          color: isPersonalRecord
+              ? AppColors.restAmber.withValues(alpha: 0.55)
+              : isCompleted
               ? AppColors.completedGreen.withValues(alpha: 0.35)
+              : isActive
+              ? Theme.of(context).colorScheme.primary
               : (isDark ? AppColors.borderSubtle : AppColors.outline),
-          width: 1,
+          width: isActive && !isCompleted ? 1.5 : 1,
         ),
       ),
       child: Row(
@@ -127,7 +149,9 @@ class SetRow extends StatelessWidget {
                     onStepWeight!(displayUnit == WeightUnit.kg ? 2.5 : 5.0);
                   } else {
                     final cur = setLog.weightKg ?? 0.0;
-                    onWeightChanged(cur + (displayUnit == WeightUnit.kg ? 2.5 : 2.268));
+                    onWeightChanged(
+                      cur + (displayUnit == WeightUnit.kg ? 2.5 : 2.268),
+                    );
                   }
                 },
                 onDecrement: () {
@@ -190,7 +214,9 @@ class SetRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isCompleted
                       ? AppColors.completedGreen
-                      : (isDark ? AppColors.darkElevated : const Color(0xFFE8EBF2)),
+                      : (isDark
+                            ? AppColors.darkElevated
+                            : const Color(0xFFE8EBF2)),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isCompleted

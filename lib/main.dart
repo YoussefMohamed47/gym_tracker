@@ -50,12 +50,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => di.sl<ThemeCubit>(),
+    // ThemeCubit is a lazy singleton, so provide it by value (never closed here).
+    return BlocProvider.value(
+      value: di.sl<ThemeCubit>(),
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp(
-            title: 'Gym Tracker Report',
+            title: 'LiftFuel',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,

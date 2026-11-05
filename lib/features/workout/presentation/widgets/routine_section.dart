@@ -30,7 +30,8 @@ class _RoutineSectionState extends State<RoutineSection> {
       buildWhen: (prev, curr) {
         // Only rebuild if routine logs changed
         for (final slot in dailyRoutine.exercises) {
-          if (prev.exerciseLogs[slot.exerciseId] != curr.exerciseLogs[slot.exerciseId]) {
+          if (prev.exerciseLogs[slot.exerciseId] !=
+              curr.exerciseLogs[slot.exerciseId]) {
             return true;
           }
         }
@@ -42,12 +43,15 @@ class _RoutineSectionState extends State<RoutineSection> {
 
         for (final slot in dailyRoutine.exercises) {
           final log = state.exerciseLogs[slot.exerciseId];
-          if (log != null && log.sets.isNotEmpty && log.sets.every((s) => s.isPerformed)) {
+          if (log != null &&
+              log.sets.isNotEmpty &&
+              log.sets.every((s) => s.isPerformed)) {
             completedRoutineItems++;
           }
         }
 
-        final isAllComplete = totalRoutineItems > 0 && completedRoutineItems == totalRoutineItems;
+        final isAllComplete =
+            totalRoutineItems > 0 && completedRoutineItems == totalRoutineItems;
 
         // Auto-collapse once all completed if not already collapsed
         if (isAllComplete && !_hasAutoCollapsed && _isExpanded) {
@@ -61,7 +65,9 @@ class _RoutineSectionState extends State<RoutineSection> {
           });
         }
 
-        final progress = totalRoutineItems > 0 ? completedRoutineItems / totalRoutineItems : 0.0;
+        final progress = totalRoutineItems > 0
+            ? completedRoutineItems / totalRoutineItems
+            : 0.0;
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -102,14 +108,22 @@ class _RoutineSectionState extends State<RoutineSection> {
                                 height: 36,
                                 decoration: BoxDecoration(
                                   color: isAllComplete
-                                      ? AppColors.completedGreen.withValues(alpha: 0.15)
-                                      : AppColors.indigoAccent.withValues(alpha: 0.15),
+                                      ? AppColors.completedGreen.withValues(
+                                          alpha: 0.15,
+                                        )
+                                      : AppColors.indigoAccent.withValues(
+                                          alpha: 0.15,
+                                        ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  isAllComplete ? Icons.check_circle_rounded : Icons.accessibility_new_rounded,
+                                  isAllComplete
+                                      ? Icons.check_circle_rounded
+                                      : Icons.accessibility_new_rounded,
                                   size: 18,
-                                  color: isAllComplete ? AppColors.completedGreen : AppColors.indigoAccent,
+                                  color: isAllComplete
+                                      ? AppColors.completedGreen
+                                      : AppColors.indigoAccent,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -124,7 +138,9 @@ class _RoutineSectionState extends State<RoutineSection> {
                                         fontWeight: FontWeight.w900,
                                         color: isAllComplete
                                             ? AppColors.completedGreen
-                                            : (isDark ? AppColors.textPrimary : Colors.black87),
+                                            : (isDark
+                                                  ? AppColors.textPrimary
+                                                  : Colors.black87),
                                       ),
                                     ),
                                     Text(
@@ -154,9 +170,13 @@ class _RoutineSectionState extends State<RoutineSection> {
                             child: LinearProgressIndicator(
                               value: progress,
                               minHeight: 4,
-                              backgroundColor: isDark ? Colors.white10 : Colors.black12,
+                              backgroundColor: isDark
+                                  ? Colors.white10
+                                  : Colors.black12,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                isAllComplete ? AppColors.completedGreen : AppColors.indigoAccent,
+                                isAllComplete
+                                    ? AppColors.completedGreen
+                                    : AppColors.indigoAccent,
                               ),
                             ),
                           ),
@@ -176,7 +196,9 @@ class _RoutineSectionState extends State<RoutineSection> {
                             Divider(
                               height: 1,
                               thickness: 1,
-                              color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                              color: isDark
+                                  ? AppColors.borderSubtle
+                                  : AppColors.outline,
                             ),
                             ...dailyRoutine.exercises.map((slot) {
                               return _RoutineItemCard(slot: slot);
@@ -208,10 +230,14 @@ class _RoutineItemCard extends StatelessWidget {
 
     return BlocBuilder<WorkoutCubit, WorkoutState>(
       buildWhen: (prev, curr) =>
-          prev.exerciseLogs[slot.exerciseId] != curr.exerciseLogs[slot.exerciseId],
+          prev.exerciseLogs[slot.exerciseId] !=
+          curr.exerciseLogs[slot.exerciseId],
       builder: (context, state) {
         final log = state.exerciseLogs[slot.exerciseId];
-        final isFullyDone = log != null && log.sets.isNotEmpty && log.sets.every((s) => s.isPerformed);
+        final isFullyDone =
+            log != null &&
+            log.sets.isNotEmpty &&
+            log.sets.every((s) => s.isPerformed);
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -255,7 +281,9 @@ class _RoutineItemCard extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                         color: isFullyDone
                                             ? AppColors.completedGreen
-                                            : (isDark ? AppColors.textPrimary : Colors.black87),
+                                            : (isDark
+                                                  ? AppColors.textPrimary
+                                                  : Colors.black87),
                                       ),
                                     ),
                                     Text(
@@ -276,8 +304,14 @@ class _RoutineItemCard extends StatelessWidget {
                                     color: AppColors.indigoAccent,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                                  onPressed: () => VideoLauncher.launch(context, exercise.videoUrl!),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 36,
+                                    minHeight: 36,
+                                  ),
+                                  onPressed: () => VideoLauncher.launch(
+                                    context,
+                                    exercise.videoUrl!,
+                                  ),
                                 ),
                             ],
                           ),
@@ -287,8 +321,11 @@ class _RoutineItemCard extends StatelessWidget {
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
-                            children: List.generate(slot.prescribedSets, (index) {
-                              final setLog = (log != null && log.sets.length > index)
+                            children: List.generate(slot.prescribedSets, (
+                              index,
+                            ) {
+                              final setLog =
+                                  (log != null && log.sets.length > index)
                                   ? log.sets[index]
                                   : null;
                               final isPerformed = setLog?.isPerformed ?? false;
@@ -434,7 +471,10 @@ class _TimedSetCircleState extends State<_TimedSetCircle> {
           _isRunning = false;
         });
         HapticFeedback.heavyImpact();
-        context.read<WorkoutCubit>().toggleSetPerformed(widget.exerciseId, widget.setIndex);
+        context.read<WorkoutCubit>().toggleSetPerformed(
+          widget.exerciseId,
+          widget.setIndex,
+        );
       } else {
         setState(() {
           _secondsRemaining--;
@@ -461,7 +501,10 @@ class _TimedSetCircleState extends State<_TimedSetCircle> {
         onTap: () {
           if (widget.isPerformed) {
             HapticFeedback.mediumImpact();
-            context.read<WorkoutCubit>().toggleSetPerformed(widget.exerciseId, widget.setIndex);
+            context.read<WorkoutCubit>().toggleSetPerformed(
+              widget.exerciseId,
+              widget.setIndex,
+            );
           } else if (!_isRunning) {
             HapticFeedback.lightImpact();
             _startTimer();
@@ -482,15 +525,15 @@ class _TimedSetCircleState extends State<_TimedSetCircle> {
             color: widget.isPerformed
                 ? AppColors.completedGreen
                 : _isRunning
-                    ? AppColors.warningAmber.withValues(alpha: 0.15)
-                    : (isDark ? AppColors.darkCard : Colors.white),
+                ? AppColors.warningAmber.withValues(alpha: 0.15)
+                : (isDark ? AppColors.darkCard : Colors.white),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: widget.isPerformed
                   ? AppColors.completedGreen
                   : _isRunning
-                      ? AppColors.warningAmber
-                      : (isDark ? AppColors.borderSubtle : AppColors.outline),
+                  ? AppColors.warningAmber
+                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
               width: 1.5,
             ),
           ),
@@ -504,16 +547,14 @@ class _TimedSetCircleState extends State<_TimedSetCircle> {
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 2.5,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.warningAmber),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.warningAmber,
+                    ),
                     backgroundColor: Colors.white12,
                   ),
                 ),
               if (widget.isPerformed)
-                const Icon(
-                  Icons.check_rounded,
-                  size: 20,
-                  color: Colors.black,
-                )
+                const Icon(Icons.check_rounded, size: 20, color: Colors.black)
               else if (_isRunning)
                 Text(
                   '${_secondsRemaining}s',
@@ -527,7 +568,7 @@ class _TimedSetCircleState extends State<_TimedSetCircle> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                     Icon(
+                    Icon(
                       Icons.timer_outlined,
                       size: 13,
                       color: AppColors.indigoAccent,

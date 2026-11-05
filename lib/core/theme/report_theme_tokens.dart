@@ -6,15 +6,15 @@ class ReportThemeTokens {
   static const Color background = Color(0xFF090E12);
   static const Color cardBackground = Color(0xFF121B20);
   static const Color elevatedCard = Color(0xFF1C292D);
-  
+
   // Borders & Dividers
   static const Color borderSubtle = Color(0x0FFFFFFF); // White @ 6%
   static const Color borderMedium = Color(0x1AFFFFFF); // White @ 10%
-  
+
   // Brand Accent Gradient
   static const Color indigoAccent = Color(0xFFC7F476);
   static const Color violetAccent = Color(0xFF99B8EF);
-  
+
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [Color(0xFF3A7052), Color(0xFF1E514A)],
     begin: Alignment.topLeft,
@@ -45,7 +45,8 @@ class ReportThemeTokens {
   static const Color sheetSurfaceLight = Color(0xF5FFFFFF);
 
   static BorderRadius get cardBorderRadius => BorderRadius.circular(cardRadius);
-  static BorderRadius get sheetBorderRadius => BorderRadius.circular(sheetRadius);
+  static BorderRadius get sheetBorderRadius =>
+      BorderRadius.circular(sheetRadius);
   static BorderRadius get chipBorderRadius => BorderRadius.circular(chipRadius);
 
   // Typography - Arabic (Cairo / Noto Kufi Arabic)

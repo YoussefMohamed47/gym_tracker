@@ -10,6 +10,7 @@ import '../../domain/entities/exercise_set_log.dart';
 import '../../domain/entities/workout_definition.dart';
 import '../utils/video_launcher.dart';
 import 'numeric_keypad_sheet.dart';
+import 'last_time_panel.dart';
 import 'set_row.dart';
 
 class ExerciseCard extends StatelessWidget {
@@ -33,6 +34,9 @@ class ExerciseCard extends StatelessWidget {
   final VoidCallback? onAddSet;
   final Function(int setIndex)? onRemoveSet;
 
+  /// e.g. "EXERCISE 2 OF 6", shown above the name on the focused card.
+  final String? positionLabel;
+
   const ExerciseCard({
     super.key,
     required this.log,
@@ -54,7 +58,29 @@ class ExerciseCard extends StatelessWidget {
     this.onCopyPreviousSession,
     this.onAddSet,
     this.onRemoveSet,
+    this.positionLabel,
   });
+
+  double get _previousBestKg => (previousSets ?? const <ExerciseSetLog>[])
+      .map((s) => s.weightKg ?? 0)
+      .fold(0.0, (a, b) => b > a ? b : a);
+
+  /// Index of the heaviest performed set that beats last time's best, or -1.
+  int get _prSetIndex {
+    final best = _previousBestKg;
+    if (best <= 0) return -1;
+    var index = -1;
+    var top = best;
+    for (var i = 0; i < log.sets.length; i++) {
+      final s = log.sets[i];
+      final w = s.weightKg ?? 0;
+      if (s.isPerformed && w > top) {
+        top = w;
+        index = i;
+      }
+    }
+    return index;
+  }
 
   Color _getTagColor(String tag) {
     switch (tag) {
@@ -79,13 +105,20 @@ class ExerciseCard extends StatelessWidget {
     final tags = <String>[];
     final text = '${exerciseId}_$exerciseName'.toLowerCase();
 
-    if (text.contains('chest') || text.contains('bench') || text.contains('fly')) {
+    if (text.contains('chest') ||
+        text.contains('bench') ||
+        text.contains('fly')) {
       tags.add('CHEST');
     }
-    if (text.contains('back') || text.contains('row') || text.contains('pull down') || text.contains('lat')) {
+    if (text.contains('back') ||
+        text.contains('row') ||
+        text.contains('pull down') ||
+        text.contains('lat')) {
       tags.add('BACK');
     }
-    if (text.contains('shoulder') || text.contains('delt') || text.contains('lateral')) {
+    if (text.contains('shoulder') ||
+        text.contains('delt') ||
+        text.contains('lateral')) {
       tags.add('SHOULDERS');
     }
     if (text.contains('bicep') || text.contains('curl')) {
@@ -94,7 +127,10 @@ class ExerciseCard extends StatelessWidget {
     if (text.contains('tricep') || text.contains('push down')) {
       tags.add('TRICEPS');
     }
-    if (text.contains('leg') || text.contains('squat') || text.contains('adduction') || text.contains('hip thrust')) {
+    if (text.contains('leg') ||
+        text.contains('squat') ||
+        text.contains('adduction') ||
+        text.contains('hip thrust')) {
       tags.add('LEGS');
     }
     if (text.contains('calf') || text.contains('calves')) {
@@ -147,8 +183,12 @@ class ExerciseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final originalExercise = WorkoutCatalog.getExerciseById(log.plannedExerciseId);
-    final performedExercise = WorkoutCatalog.getExerciseById(log.performedExerciseId);
+    final originalExercise = WorkoutCatalog.getExerciseById(
+      log.plannedExerciseId,
+    );
+    final performedExercise = WorkoutCatalog.getExerciseById(
+      log.performedExerciseId,
+    );
     final isAlternative = log.plannedExerciseId != log.performedExerciseId;
 
     final exerciseName = performedExercise.name;
@@ -164,18 +204,39 @@ class ExerciseCard extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        border: Border(
-          left: BorderSide(
-            color: isAllCompleted ? AppColors.completedGreen : AppColors.indigoAccent,
-            width: isExpanded ? 5 : 3,
-          ),
-          top: BorderSide(color: isDark ? AppColors.borderSubtle : AppColors.outline),
-          bottom: BorderSide(color: isDark ? AppColors.borderSubtle : AppColors.outline),
-        ),
-      ),
-      child: ClipRect(
+      decoration: isExpanded
+          // The exercise you're on: a rounded card outlined in the accent.
+          ? BoxDecoration(
+              color: isDark ? AppColors.darkCard : Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color:
+                    (isAllCompleted
+                            ? AppColors.completedGreen
+                            : Theme.of(context).colorScheme.primary)
+                        .withValues(alpha: .55),
+                width: 1.5,
+              ),
+            )
+          : BoxDecoration(
+              color: isDark ? AppColors.darkCard : Colors.white,
+              border: Border(
+                left: BorderSide(
+                  color: isAllCompleted
+                      ? AppColors.completedGreen
+                      : AppColors.indigoAccent,
+                  width: 3,
+                ),
+                top: BorderSide(
+                  color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                ),
+                bottom: BorderSide(
+                  color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                ),
+              ),
+            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(isExpanded ? 22 : 0),
         child: AnimatedSize(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
@@ -242,7 +303,9 @@ class ExerciseCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: isAllCompleted
                           ? AppColors.completedGreen
-                          : (performedSets > 0 ? AppColors.indigoAccent : AppColors.textMuted),
+                          : (performedSets > 0
+                                ? AppColors.indigoAccent
+                                : AppColors.textMuted),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -264,7 +327,10 @@ class ExerciseCard extends StatelessWidget {
                   // Tag Pill
                   if (tags.isNotEmpty) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: _getTagColor(tags.first).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
@@ -283,11 +349,16 @@ class ExerciseCard extends StatelessWidget {
 
                   // Sets Progress Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isAllCompleted
                           ? AppColors.completedGreen.withValues(alpha: 0.15)
-                          : (isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7)),
+                          : (isDark
+                                ? AppColors.darkElevated
+                                : const Color(0xFFF0F2F7)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -336,7 +407,9 @@ class ExerciseCard extends StatelessWidget {
                   minHeight: 3,
                   backgroundColor: isDark ? Colors.white10 : Colors.black12,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isAllCompleted ? AppColors.completedGreen : AppColors.indigoAccent,
+                    isAllCompleted
+                        ? AppColors.completedGreen
+                        : AppColors.indigoAccent,
                   ),
                 ),
               ),
@@ -361,6 +434,8 @@ class ExerciseCard extends StatelessWidget {
   }) {
     final videoUrl = performedExercise.videoUrl;
     final pairedVideoUrls = performedExercise.pairedVideoUrls;
+    final activeSetIndex = log.sets.indexWhere((s) => !s.isPerformed);
+    final prSetIndex = _prSetIndex;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -375,7 +450,10 @@ class ExerciseCard extends StatelessWidget {
                 children: tags.map((t) {
                   final color = _getTagColor(t);
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
@@ -419,6 +497,17 @@ class ExerciseCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (positionLabel != null) ...[
+                      Text(
+                        positionLabel!,
+                        style: ReportThemeTokens.outfitSubtext(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: Theme.of(context).colorScheme.primary,
+                        ).copyWith(letterSpacing: 1.6),
+                      ),
+                      const SizedBox(height: 3),
+                    ],
                     Text(
                       performedExercise.name,
                       style: ReportThemeTokens.outfitHeader(
@@ -466,12 +555,14 @@ class ExerciseCard extends StatelessWidget {
                     color: AppColors.warningAmber,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    tempoNote,
-                    style: ReportThemeTokens.outfitSubtext(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.warningAmber,
+                  Flexible(
+                    child: Text(
+                      tempoNote,
+                      style: ReportThemeTokens.outfitSubtext(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.warningAmber,
+                      ),
                     ),
                   ),
                 ],
@@ -480,7 +571,7 @@ class ExerciseCard extends StatelessWidget {
           ],
           const SizedBox(height: 12),
 
-          // Action Pills: Form Guide (Single or Superset), Alternatives, History, Photo
+          // Action pills: How to (single or superset), Swap, History, Photo
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -490,29 +581,25 @@ class ExerciseCard extends StatelessWidget {
                 if (videoUrl != null)
                   _buildVideoPill(
                     context,
-                    label: 'Flexion Guide',
+                    label: 'How to · Flexion',
                     url: videoUrl,
                   ),
                 ...pairedVideoUrls.map((pUrl) {
                   return _buildVideoPill(
                     context,
-                    label: 'Extension Guide',
+                    label: 'How to · Extension',
                     url: pUrl,
                   );
                 }),
               ] else if (videoUrl != null) ...[
-                // Standard Form Guide Button
-                _buildVideoPill(
-                  context,
-                  label: 'Form Guide',
-                  url: videoUrl,
-                ),
+                // Standard "How to" button
+                _buildVideoPill(context, label: 'How to', url: videoUrl),
               ],
 
               // Alternatives / Swap Button
               _buildHeaderActionPill(
                 icon: Icons.swap_horiz_rounded,
-                label: 'Alternatives',
+                label: 'Swap',
                 onTap: onSelectAlternative,
                 isDark: isDark,
               ),
@@ -545,7 +632,65 @@ class ExerciseCard extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
+          // A swapped-in exercise shows its own suggested reps.
+          if (isAlternative && performedExercise.repRange != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              'Suggested for this swap: ${performedExercise.repRange} reps',
+              style: ReportThemeTokens.outfitSubtext(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.indigoAccent,
+              ),
+            ),
+          ],
+          if (performedExercise.howTo.isNotEmpty)
+            Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 6),
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                title: Text(
+                  'Steps',
+                  style: ReportThemeTokens.outfitSubtext(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.indigoAccent,
+                  ),
+                ),
+                children: [
+                  for (var i = 0; i < performedExercise.howTo.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '${i + 1}. ${performedExercise.howTo[i]}',
+                        style: ReportThemeTokens.outfitSubtext(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? AppColors.textPrimary
+                              : Colors.black87,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+
+          if (previousDate != null)
+            LastTimePanel(
+              previousDate: previousDate!,
+              previousSets: previousSets ?? const [],
+              currentSets: log.sets,
+              unit: displayUnit,
+              // "Same as last" already sits at the bottom of this card.
+            ),
 
           // Set Rows (using ListView.builder)
           ListView.builder(
@@ -554,13 +699,16 @@ class ExerciseCard extends StatelessWidget {
             itemCount: log.sets.length,
             itemBuilder: (context, setIndex) {
               final setLog = log.sets[setIndex];
-              final prevLog = (previousSets != null && previousSets!.length > setIndex)
+              final prevLog =
+                  (previousSets != null && previousSets!.length > setIndex)
                   ? previousSets![setIndex]
                   : null;
 
               return SetRow(
                 index: setIndex,
                 setLog: setLog,
+                isActive: setIndex == activeSetIndex,
+                isPersonalRecord: setIndex == prSetIndex,
                 previousSetLog: prevLog,
                 displayUnit: displayUnit,
                 isWeightAllowed: performedExercise.isWeightAllowed,
@@ -579,7 +727,11 @@ class ExerciseCard extends StatelessWidget {
                     : null,
                 onTapWeight: () {
                   final initial = setLog.weightKg != null
-                      ? WeightConverter.convert(setLog.weightKg!, WeightUnit.kg, displayUnit)
+                      ? WeightConverter.convert(
+                          setLog.weightKg!,
+                          WeightUnit.kg,
+                          displayUnit,
+                        )
                       : 0.0;
                   _openNumericKeypad(
                     context,
@@ -600,41 +752,56 @@ class ExerciseCard extends StatelessWidget {
               );
             },
           ),
+          if (prSetIndex >= 0)
+            PrBanner(
+              newKg: log.sets[prSetIndex].weightKg!,
+              oldKg: _previousBestKg,
+              unit: displayUnit,
+            ),
           const SizedBox(height: 8),
 
-          // Bottom Card Actions: Add Set & Copy Previous
+          // Bottom card actions: + Set and Same as last
           Row(
             children: [
               if (onAddSet != null)
-                TextButton.icon(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    onAddSet!();
-                  },
-                  icon: const Icon(Icons.add_rounded, size: 16),
-                  label: const Text('Add Set'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.indigoAccent,
-                    textStyle: ReportThemeTokens.outfitSubtext(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                Flexible(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      onAddSet!();
+                    },
+                    icon: const Icon(Icons.add_rounded, size: 16),
+                    label: const Text('Set', overflow: TextOverflow.ellipsis),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.indigoAccent,
+                      textStyle: ReportThemeTokens.outfitSubtext(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               const Spacer(),
-              if (onCopyPreviousSession != null && previousSets != null && previousSets!.isNotEmpty)
-                TextButton.icon(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    onCopyPreviousSession!();
-                  },
-                  icon: const Icon(Icons.copy_rounded, size: 14),
-                  label: const Text('Copy Previous'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
-                    textStyle: ReportThemeTokens.outfitSubtext(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+              if (onCopyPreviousSession != null &&
+                  previousSets != null &&
+                  previousSets!.isNotEmpty)
+                Flexible(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      onCopyPreviousSession!();
+                    },
+                    icon: const Icon(Icons.copy_rounded, size: 14),
+                    label: const Text(
+                      'Same as last',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      textStyle: ReportThemeTokens.outfitSubtext(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),

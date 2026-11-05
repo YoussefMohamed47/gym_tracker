@@ -7,6 +7,12 @@ class ExerciseDefinition {
   final bool isWeightAllowed;
   final List<String> alternatives;
 
+  /// Short coaching steps, shown under "How to" (empty when not written yet).
+  final List<String> howTo;
+
+  /// Suggested reps for this exercise when used as a swap, e.g. "8-12".
+  final String? repRange;
+
   const ExerciseDefinition({
     required this.id,
     required this.name,
@@ -15,6 +21,8 @@ class ExerciseDefinition {
     this.tempoNote,
     this.isWeightAllowed = true,
     this.alternatives = const [],
+    this.howTo = const [],
+    this.repRange,
   });
 
   @override

@@ -113,7 +113,10 @@ void main() {
       final upper = WorkoutCatalog.workouts.firstWhere((w) => w.id == 'upper');
       expect(upper.exercises.length, 8);
       expect(upper.exercises[0].exerciseId, 'upper_chest_fly_machine');
-      expect(upper.exercises[7].exerciseId, 'upper_forearm_exercise_variations');
+      expect(
+        upper.exercises[7].exerciseId,
+        'upper_forearm_exercise_variations',
+      );
 
       final forearm = upper.exercises[7];
       expect(forearm.prescribedSets, 3);
@@ -181,7 +184,9 @@ void main() {
 
       // Verify excluded exercises are NOT included in warmup
       for (final slot in warmup.exercises) {
-        final name = WorkoutCatalog.getExerciseById(slot.exerciseId).name.toLowerCase();
+        final name = WorkoutCatalog.getExerciseById(
+          slot.exerciseId,
+        ).name.toLowerCase();
         expect(name.contains('shoulder dislocates'), isFalse);
         expect(name.contains('upright row'), isFalse);
         expect(name.contains('strict press'), isFalse);

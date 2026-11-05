@@ -55,32 +55,35 @@ void main() {
       expect(days[7].isRestDay, isTrue);
     });
 
-    test('Day 1 (Chest & Back) contains 6 prescribed exercises with video links', () {
-      final day = repository.getDay(1);
-      expect(day.exercises.length, 6);
+    test(
+      'Day 1 (Chest & Back) contains 6 prescribed exercises with video links',
+      () {
+        final day = repository.getDay(1);
+        expect(day.exercises.length, 6);
 
-      final exerciseNames = day.exercises.map((e) => e.name).toList();
-      expect(exerciseNames, [
-        'Incline Chest Press Smith Machine',
-        'DB Chest Press',
-        'High to Low Cable Chest Fly',
-        'T-Bar Row Machine',
-        'SA Cable Lat Row',
-        'Cable Shrugs',
-      ]);
+        final exerciseNames = day.exercises.map((e) => e.name).toList();
+        expect(exerciseNames, [
+          'Incline Chest Press Smith Machine',
+          'DB Chest Press',
+          'High to Low Cable Chest Fly',
+          'T-Bar Row Machine',
+          'SA Cable Lat Row',
+          'Cable Shrugs',
+        ]);
 
-      // Verify tempo notes on first 3 exercises
-      expect(day.exercises[0].tempoNote, 'Light weight, slow tempo');
-      expect(day.exercises[1].tempoNote, 'Light weight, slow tempo');
-      expect(day.exercises[2].tempoNote, 'Light weight, slow tempo');
-      expect(day.exercises[3].tempoNote, isNull);
+        // Verify tempo notes on first 3 exercises
+        expect(day.exercises[0].tempoNote, 'Light weight, slow tempo');
+        expect(day.exercises[1].tempoNote, 'Light weight, slow tempo');
+        expect(day.exercises[2].tempoNote, 'Light weight, slow tempo');
+        expect(day.exercises[3].tempoNote, isNull);
 
-      // Verify all exercises have valid video URLs
-      for (final ex in day.exercises) {
-        expect(ex.videoUrl, isNotNull);
-        expect(ex.videoUrl, contains('youtu'));
-      }
-    });
+        // Verify all exercises have valid video URLs
+        for (final ex in day.exercises) {
+          expect(ex.videoUrl, isNotNull);
+          expect(ex.videoUrl, contains('youtu'));
+        }
+      },
+    );
 
     test('Day 2 (Shoulder & Arms) contains individual Forearm exercises', () {
       final day = repository.getDay(2);
@@ -97,7 +100,10 @@ void main() {
         (e) => e.id == 'c_cable_wrist_extension',
       );
       expect(wristExtension.name, 'Cable Wrist Extension');
-      expect(wristExtension.videoUrl, contains('youtube.com/shorts/_JiYn7I9F_k'));
+      expect(
+        wristExtension.videoUrl,
+        contains('youtube.com/shorts/_JiYn7I9F_k'),
+      );
       expect(wristExtension.pairedVideoUrls, isNull);
     });
 
@@ -151,21 +157,30 @@ void main() {
       }
     });
 
-    test('getDayByWorkoutType resolves correctly for all 8-day rotation types', () {
-      final chestAndBack = repository.getDayByWorkoutType(WorkoutType.chestAndBack);
-      expect(chestAndBack?.dayNumber, 1);
+    test(
+      'getDayByWorkoutType resolves correctly for all 8-day rotation types',
+      () {
+        final chestAndBack = repository.getDayByWorkoutType(
+          WorkoutType.chestAndBack,
+        );
+        expect(chestAndBack?.dayNumber, 1);
 
-      final shoulderAndArms = repository.getDayByWorkoutType(WorkoutType.shoulderAndArms);
-      expect(shoulderAndArms?.dayNumber, 2);
+        final shoulderAndArms = repository.getDayByWorkoutType(
+          WorkoutType.shoulderAndArms,
+        );
+        expect(shoulderAndArms?.dayNumber, 2);
 
-      final legs = repository.getDayByWorkoutType(WorkoutType.legs);
-      expect(legs?.dayNumber, 3);
+        final legs = repository.getDayByWorkoutType(WorkoutType.legs);
+        expect(legs?.dayNumber, 3);
 
-      final fullBody = repository.getDayByWorkoutType(WorkoutType.fullBody);
-      expect(fullBody?.dayNumber, 5);
+        final fullBody = repository.getDayByWorkoutType(WorkoutType.fullBody);
+        expect(fullBody?.dayNumber, 5);
 
-      final upperAndCalves = repository.getDayByWorkoutType(WorkoutType.upperAndCalves);
-      expect(upperAndCalves?.dayNumber, 7);
-    });
+        final upperAndCalves = repository.getDayByWorkoutType(
+          WorkoutType.upperAndCalves,
+        );
+        expect(upperAndCalves?.dayNumber, 7);
+      },
+    );
   });
 }

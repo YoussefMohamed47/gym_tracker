@@ -33,9 +33,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 1),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WorkoutCubit>().loadDate(DateTime.now());
+      // The main screen already loads today at app start; only load here if
+      // nothing has been loaded yet.
+      final cubit = context.read<WorkoutCubit>();
+      if (cubit.state.dateKey.isEmpty) cubit.loadDate(DateTime.now());
     });
   }
 
@@ -146,7 +151,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         if (state.prAchievedForPlannedId != null) {
           _confettiController.play();
         }
-        
+
         if (state.status == WorkoutStatus.failure &&
             state.errorMessage != null) {
           if (state.errorMessage!.startsWith('REVIEW_REQUIRED:')) {
@@ -195,7 +200,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       SliverToBoxAdapter(
                         child: WorkoutHeader(
                           state: state,
-                          onTypeTapped: () => WorkoutSwitcherSheet.show(context),
+                          onTypeTapped: () =>
+                              WorkoutSwitcherSheet.show(context),
                         ),
                       ),
 
@@ -218,9 +224,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
                       // Scroll Padding for Bottom Dock & Floating Nav
                       SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: keyboardOpen ? 24 : 140,
-                        ),
+                        child: SizedBox(height: keyboardOpen ? 24 : 140),
                       ),
                     ],
                   ),

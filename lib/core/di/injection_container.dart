@@ -6,6 +6,10 @@ import '../storage/hive/hive_boxes.dart';
 import '../storage/migration/legacy_persistence_migrator.dart';
 import '../storage/migration/media_migrator.dart';
 import '../theme/theme_transition_controller.dart';
+import '../../features/workout/data/datasources/custom_alternatives_store.dart';
+import '../../features/daily_report/domain/usecases/get_nutrition_insights_usecase.dart';
+import '../../features/daily_report/presentation/cubit/nutrition_insights_cubit.dart';
+import '../../features/daily_report/data/datasources/daily_report_draft_store.dart';
 import '../../features/daily_report/data/repository/daily_report_repository_impl.dart';
 import '../../features/daily_report/data/service/image_service.dart';
 import '../../features/daily_report/data/datasources/daily_report_local_datasource.dart';
@@ -60,10 +64,29 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ThemeTransitionController());
 
   // Cubits
-  sl.registerLazySingleton(() => ThemeCubit(sl<HiveLocalStorage>().getBox(HiveBoxes.preferences)));
-  sl.registerLazySingleton(() => DailyReportCubit(sl(), workoutRepository: sl()));
-  sl.registerFactory(() => HistoryCubit(sl(), get30DayVolume: sl(), getMealAdherence: sl()));
-  sl.registerFactory(() => WorkoutCubit(repository: sl(), checkPRUseCase: sl()));
+  sl.registerLazySingleton(
+    () => ThemeCubit(sl<HiveLocalStorage>().getBox(HiveBoxes.preferences)),
+  );
+  sl.registerLazySingleton(
+    () => CustomAlternativesStore(
+      sl<HiveLocalStorage>().getBox(HiveBoxes.preferences),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => DailyReportDraftStore(
+      sl<HiveLocalStorage>().getBox(HiveBoxes.preferences),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => DailyReportCubit(sl(), workoutRepository: sl(), draftStore: sl()),
+  );
+  sl.registerFactory(() => NutritionInsightsCubit(sl()));
+  sl.registerFactory(
+    () => HistoryCubit(sl(), get30DayVolume: sl(), getMealAdherence: sl()),
+  );
+  sl.registerFactory(
+    () => WorkoutCubit(repository: sl(), checkPRUseCase: sl()),
+  );
   sl.registerFactory(() => WorkoutCatalogCubit(getWorkoutCatalog: sl()));
 
   // Repositories
@@ -80,8 +103,9 @@ Future<void> init() async {
       ),
     ),
   );
-  
+
   sl.registerLazySingleton(() => GetMealAdherenceUseCase(sl()));
+  sl.registerLazySingleton(() => GetNutritionInsightsUseCase(sl()));
 
   // Features - Workout
   // Data sources

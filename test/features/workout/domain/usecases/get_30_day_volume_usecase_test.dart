@@ -34,10 +34,18 @@ void main() {
           performedExerciseId: 'ex1',
           timestamp: now,
           sets: [
-            ExerciseSetLog(weightKg: 100, actualReps: 5, isPerformed: true), // 500
-            ExerciseSetLog(weightKg: 100, actualReps: 5, isPerformed: true), // 500
+            ExerciseSetLog(
+              weightKg: 100,
+              actualReps: 5,
+              isPerformed: true,
+            ), // 500
+            ExerciseSetLog(
+              weightKg: 100,
+              actualReps: 5,
+              isPerformed: true,
+            ), // 500
           ],
-        )
+        ),
       },
     );
 

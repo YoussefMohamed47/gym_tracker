@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import '../../domain/model/meal_entry.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/error/api_result.dart';
@@ -8,17 +8,48 @@ import '../../../workout/domain/repositories/workout_repository.dart';
 import '../../../workout/utils/date_utils.dart';
 import '../../domain/model/daily_report.dart';
 import '../../domain/repository/daily_report_repository.dart';
+import '../../data/datasources/daily_report_draft_store.dart';
 import 'daily_report_state.dart';
 
 class DailyReportCubit extends Cubit<DailyReportState> {
   final DailyReportRepository _repository;
   final WorkoutRepository? _workoutRepository;
+  final DailyReportDraftStore? _draftStore;
 
   DailyReportCubit(
     this._repository, {
     this._workoutRepository,
-  })  : super(DailyReportInitial()) {
+    this._draftStore,
+  }) : super(_initialState(_draftStore)) {
     initTodayTrainingDefault();
+  }
+
+  /// Resume today's half-filled report after a restart, if there is one.
+  static DailyReportState _initialState(DailyReportDraftStore? store) {
+    final draft = store?.loadTodayDraft();
+    return draft == null ? DailyReportInitial() : DailyReportUpdating(draft);
+  }
+
+  double get waterTargetLiters =>
+      _draftStore?.waterTargetLiters ??
+      DailyReportDraftStore.defaultWaterTargetLiters;
+
+  Future<void> setWaterTargetLiters(double liters) async {
+    await _draftStore?.setWaterTargetLiters(liters);
+  }
+
+  @override
+  void onChange(Change<DailyReportState> change) {
+    super.onChange(change);
+    final store = _draftStore;
+    if (store == null) return;
+    final next = change.nextState;
+    // Shared reports live in history; a fresh form means no draft is left.
+    if (next is DailyReportInitial || next is DailyReportSuccess) {
+      store.clearDraft();
+    } else if (next is DailyReportUpdating) {
+      store.saveDraft(next.report);
+    }
   }
 
   Future<void> initTodayTrainingDefault() async {
@@ -36,24 +67,29 @@ class DailyReportCubit extends Cubit<DailyReportState> {
         defaultTraining = session.workoutType.displayName;
         hasCompletedSession = true;
       } else {
-        if (state.report.training.isNotEmpty) return; // Don't override if user set something manually and no session completed
+        // Don't override if user set something manually and no session completed
+        if (state.report.training.isNotEmpty) return;
 
         final history = await _workoutRepository.getHistory();
-        final pastTypes = history
-            .where((s) => s.dateKey.compareTo(dateKey) < 0)
-            .toList()
-          ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+        final pastTypes =
+            history.where((s) => s.dateKey.compareTo(dateKey) < 0).toList()
+              ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
 
         final workoutTypes = pastTypes.map((s) => s.workoutType).toList();
         WorkoutType suggestedType;
         if (workoutTypes.isEmpty) {
           suggestedType = WorkoutDateUtils.getWorkoutTypeForDay(now);
         } else {
-          final lastSessionDate = WorkoutDateUtils.parseDateKey(pastTypes.first.dateKey);
+          final lastSessionDate = WorkoutDateUtils.parseDateKey(
+            pastTypes.first.dateKey,
+          );
           final daysPassed = now.difference(lastSessionDate).inDays;
           suggestedType = workoutTypes.first;
           for (int i = 0; i < daysPassed; i++) {
-            suggestedType = WorkoutCatalog.getNextWorkoutType([suggestedType, ...workoutTypes.skip(1)]);
+            suggestedType = WorkoutCatalog.getNextWorkoutType([
+              suggestedType,
+              ...workoutTypes.skip(1),
+            ]);
             workoutTypes.insert(0, suggestedType);
           }
         }
@@ -62,11 +98,16 @@ class DailyReportCubit extends Cubit<DailyReportState> {
 
       if (state.report.training.isEmpty || hasCompletedSession) {
         if (state.report.training != defaultTraining) {
-          emit(DailyReportUpdating(state.report.copyWith(training: defaultTraining)));
+          emit(
+            DailyReportUpdating(
+              state.report.copyWith(training: defaultTraining),
+            ),
+          );
         }
       }
-    } catch (_) {
-      // Fallback gracefully if repository or box is not initialized
+    } catch (e, st) {
+      // Keep the form usable without a suggested training, but log why.
+      debugPrint('DailyReportCubit: training default failed: $e\n$st');
     }
   }
 
@@ -113,6 +154,13 @@ class DailyReportCubit extends Cubit<DailyReportState> {
     emit(DailyReportUpdating(updatedReport));
   }
 
+  /// Follow today's Workout tab: the training type is whatever day it shows.
+  void syncTrainingFromWorkout(String training) {
+    if (state is DailyReportGeneratingImage) return;
+    if (training.isEmpty || state.report.training == training) return;
+    updateField(training: training);
+  }
+
   void resetForm() {
     emit(DailyReportInitial());
     initTodayTrainingDefault();
@@ -132,9 +180,9 @@ class DailyReportCubit extends Cubit<DailyReportState> {
           final dateB = b.dateTime ?? DateTime.fromMillisecondsSinceEpoch(0);
           return dateB.compareTo(dateA);
         });
-        
+
         final lastReport = history.first;
-        
+
         final updatedReport = state.report.copyWith(
           breakfast: lastReport.breakfast,
           lunch: lastReport.lunch,
@@ -151,7 +199,6 @@ class DailyReportCubit extends Cubit<DailyReportState> {
           snackEntries: lastReport.snackEntries,
           beforeTrainingEntries: lastReport.beforeTrainingEntries,
           afterTrainingEntries: lastReport.afterTrainingEntries,
-
         );
         emit(DailyReportUpdating(updatedReport));
       }

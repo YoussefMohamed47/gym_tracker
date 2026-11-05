@@ -85,7 +85,7 @@ class WeeklyWorkoutShareCard extends StatelessWidget {
           Text(
             '${session.dateKey} — ${session.workoutType.name.toUpperCase()}',
             style: const TextStyle(
-              color: const Color(0xFFC7F476),
+              color: Color(0xFFC7F476),
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,

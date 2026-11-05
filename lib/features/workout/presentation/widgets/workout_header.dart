@@ -6,13 +6,21 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/theme_transition_controller.dart';
 import '../../../settings/presentation/cubit/theme_cubit.dart';
+import '../../../../core/utils/app_colors.dart';
+import '../../data/datasources/workout_catalog.dart';
+import '../../domain/entities/workout_type.dart';
+import '../../domain/repositories/workout_catalog_repository.dart';
 import '../cubit/workout_state.dart';
 
 /// Athletic editorial hero: a training session first, stats second.
 class WorkoutHeader extends StatefulWidget {
   final WorkoutState state;
   final VoidCallback onTypeTapped;
-  const WorkoutHeader({super.key, required this.state, required this.onTypeTapped});
+  const WorkoutHeader({
+    super.key,
+    required this.state,
+    required this.onTypeTapped,
+  });
   @override
   State<WorkoutHeader> createState() => _WorkoutHeaderState();
 }
@@ -30,45 +38,173 @@ class _WorkoutHeaderState extends State<WorkoutHeader> {
       done += log.sets.where((s) => s.isPerformed).length;
     }
     final progress = all == 0 ? 0.0 : done / all;
-    return Padding(padding: const EdgeInsets.fromLTRB(20, 24, 20, 12), child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(children: [
-          Expanded(child: Text('TRAINING / ${DateFormat('MMM d').format(widget.state.selectedDate).toUpperCase()}',
-            style: GoogleFonts.outfit(letterSpacing: 2.1, fontSize: 11, fontWeight: FontWeight.w900, color: scheme.primary))),
-          IconButton(key: _themeButtonKey, tooltip: 'Theme',
-            onPressed: () => di.sl<ThemeTransitionController>().animateThemeToggle(
-              context: context, buttonKey: _themeButtonKey,
-              onToggle: () => context.read<ThemeCubit>().toggleTheme()),
-            icon: Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined)),
-        ]),
-        const SizedBox(height: 14),
-        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('YOUR\nSESSION.', style: GoogleFonts.outfit(fontSize: 43, fontWeight: FontWeight.w900,
-              letterSpacing: -1.9, height: 0.92)),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(onPressed: () {
-              HapticFeedback.selectionClick();
-              widget.onTypeTapped();
-            }, icon: const Icon(Icons.swap_horiz_rounded, size: 17),
-              label: Text(widget.state.workoutType.displayName,
-                style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w800))),
-          ])),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('$done', style: GoogleFonts.outfit(fontSize: 72, fontWeight: FontWeight.w900,
-              letterSpacing: -3, height: .94, color: scheme.primary)),
-            Text('OF $all SETS', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: scheme.onSurfaceVariant)),
-          ]),
-        ]),
-        const SizedBox(height: 22),
-        ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(
-          minHeight: 6, value: progress, color: scheme.primary, backgroundColor: scheme.surfaceContainerHigh)),
-        const SizedBox(height: 5),
-        Text('SESSION PROGRESS  ·  ${(progress * 100).round()}%',
-          textAlign: TextAlign.end, style: GoogleFonts.outfit(fontSize: 10,
-            color: scheme.onSurfaceVariant, fontWeight: FontWeight.w800)),
-      ],
-    ));
+    // One segment per exercise: done, started, or not yet.
+    final mainIds =
+        WorkoutCatalog.getWorkoutByType(
+          widget.state.workoutType,
+        )?.exercises.map((e) => e.exerciseId).toList() ??
+        const <String>[];
+    final segments = [
+      for (final id in mainIds)
+        if (widget.state.exerciseLogs[id] case final log?
+            when log.sets.isNotEmpty)
+          log.sets.every((s) => s.isPerformed)
+              ? _Seg.done
+              : log.sets.any((s) => s.isPerformed)
+              ? _Seg.started
+              : _Seg.todo,
+    ];
+    final type = widget.state.workoutType;
+    final rotationDay = type == WorkoutType.rest
+        ? null
+        : di.sl<WorkoutCatalogRepository>().getDayByWorkoutType(type);
+    final eyebrow = [
+      if (rotationDay != null) 'DAY ${rotationDay.dayNumber} OF 8',
+      DateFormat('EEEE, MMM d').format(widget.state.selectedDate),
+    ].join('  ·  ').toUpperCase();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  eyebrow,
+                  style: GoogleFonts.outfit(
+                    letterSpacing: 2.1,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: scheme.primary,
+                  ),
+                ),
+              ),
+              IconButton(
+                key: _themeButtonKey,
+                tooltip: 'Theme',
+                onPressed: () =>
+                    di.sl<ThemeTransitionController>().animateThemeToggle(
+                      context: context,
+                      buttonKey: _themeButtonKey,
+                      onToggle: () => context.read<ThemeCubit>().toggleTheme(),
+                    ),
+                icon: Icon(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      type.displayName.toUpperCase(),
+                      maxLines: 2,
+                      style: GoogleFonts.outfit(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1.4,
+                        height: 0.95,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        widget.onTypeTapped();
+                      },
+                      icon: const Icon(Icons.swap_horiz_rounded, size: 17),
+                      label: Text(
+                        'Switch day',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$done',
+                    style: GoogleFonts.outfit(
+                      fontSize: 72,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -3,
+                      height: .94,
+                      color: scheme.primary,
+                    ),
+                  ),
+                  Text(
+                    'OF $all SETS',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          if (segments.isEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                minHeight: 6,
+                value: progress,
+                color: scheme.primary,
+                backgroundColor: scheme.surfaceContainerHigh,
+              ),
+            )
+          else
+            Row(
+              children: [
+                for (var i = 0; i < segments.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 4),
+                  Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      height: 6,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: switch (segments[i]) {
+                          _Seg.done => AppColors.completedGreen,
+                          _Seg.started => scheme.primary,
+                          _Seg.todo => scheme.surfaceContainerHigh,
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          const SizedBox(height: 5),
+          Text(
+            'SESSION PROGRESS  ·  ${(progress * 100).round()}%',
+            textAlign: TextAlign.end,
+            style: GoogleFonts.outfit(
+              fontSize: 10,
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
+
+enum _Seg { done, started, todo }

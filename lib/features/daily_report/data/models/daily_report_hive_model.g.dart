@@ -38,7 +38,6 @@ class DailyReportHiveModelAdapter extends TypeAdapter<DailyReportHiveModel> {
       snackEntries: (fields[18] as List?)?.cast<String>(),
       beforeTrainingEntries: (fields[19] as List?)?.cast<String>(),
       afterTrainingEntries: (fields[20] as List?)?.cast<String>(),
-
     );
   }
 
@@ -88,7 +87,6 @@ class DailyReportHiveModelAdapter extends TypeAdapter<DailyReportHiveModel> {
       ..write(obj.beforeTrainingEntries)
       ..writeByte(20)
       ..write(obj.afterTrainingEntries);
-
   }
 
   @override

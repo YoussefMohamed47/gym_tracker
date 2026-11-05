@@ -28,7 +28,9 @@ class CheckPRUseCase {
     );
 
     // Filter out the current session being edited
-    final pastHistory = history.where((entry) => entry.dateKey != currentDateKey).toList();
+    final pastHistory = history
+        .where((entry) => entry.dateKey != currentDateKey)
+        .toList();
 
     if (pastHistory.isEmpty) {
       // First time doing this exercise is not considered a "PR" visually to avoid spam

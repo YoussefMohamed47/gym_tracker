@@ -32,15 +32,81 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
   late List<ExerciseSlot> _exercises;
   late WorkoutType _currentType;
 
-  static const List<({int dayNum, String title, WorkoutType type, IconData icon, Color tint, bool isRest})> _rotationDays = [
-    (dayNum: 1, title: 'Chest & Back', type: WorkoutType.chestAndBack, icon: Icons.fitness_center_rounded, tint: Color(0xFF6C7BFF), isRest: false),
-    (dayNum: 2, title: 'Shoulder & Arms', type: WorkoutType.shoulderAndArms, icon: Icons.accessibility_new_rounded, tint: Color(0xFF9B6CFF), isRest: false),
-    (dayNum: 3, title: 'Legs', type: WorkoutType.legs, icon: Icons.directions_run_rounded, tint: Color(0xFFFF6C9B), isRest: false),
-    (dayNum: 4, title: 'Rest Day', type: WorkoutType.rest, icon: Icons.spa_rounded, tint: Color(0xFF3DDC97), isRest: true),
-    (dayNum: 5, title: 'Full Body', type: WorkoutType.fullBody, icon: Icons.sports_gymnastics_rounded, tint: Color(0xFF00C8FF), isRest: false),
-    (dayNum: 6, title: 'Rest Day', type: WorkoutType.rest, icon: Icons.spa_rounded, tint: Color(0xFF3DDC97), isRest: true),
-    (dayNum: 7, title: 'Upper + Calves', type: WorkoutType.upperAndCalves, icon: Icons.boy_rounded, tint: Color(0xFFFFB800), isRest: false),
-    (dayNum: 8, title: 'Rest Day', type: WorkoutType.rest, icon: Icons.spa_rounded, tint: Color(0xFF3DDC97), isRest: true),
+  static const List<
+    ({
+      int dayNum,
+      String title,
+      WorkoutType type,
+      IconData icon,
+      Color tint,
+      bool isRest,
+    })
+  >
+  _rotationDays = [
+    (
+      dayNum: 1,
+      title: 'Chest & Back',
+      type: WorkoutType.chestAndBack,
+      icon: Icons.fitness_center_rounded,
+      tint: Color(0xFF6C7BFF),
+      isRest: false,
+    ),
+    (
+      dayNum: 2,
+      title: 'Shoulder & Arms',
+      type: WorkoutType.shoulderAndArms,
+      icon: Icons.accessibility_new_rounded,
+      tint: Color(0xFF9B6CFF),
+      isRest: false,
+    ),
+    (
+      dayNum: 3,
+      title: 'Legs',
+      type: WorkoutType.legs,
+      icon: Icons.directions_run_rounded,
+      tint: Color(0xFFFF6C9B),
+      isRest: false,
+    ),
+    (
+      dayNum: 4,
+      title: 'Rest Day',
+      type: WorkoutType.rest,
+      icon: Icons.spa_rounded,
+      tint: Color(0xFF3DDC97),
+      isRest: true,
+    ),
+    (
+      dayNum: 5,
+      title: 'Full Body',
+      type: WorkoutType.fullBody,
+      icon: Icons.sports_gymnastics_rounded,
+      tint: Color(0xFF00C8FF),
+      isRest: false,
+    ),
+    (
+      dayNum: 6,
+      title: 'Rest Day',
+      type: WorkoutType.rest,
+      icon: Icons.spa_rounded,
+      tint: Color(0xFF3DDC97),
+      isRest: true,
+    ),
+    (
+      dayNum: 7,
+      title: 'Upper + Calves',
+      type: WorkoutType.upperAndCalves,
+      icon: Icons.boy_rounded,
+      tint: Color(0xFFFFB800),
+      isRest: false,
+    ),
+    (
+      dayNum: 8,
+      title: 'Rest Day',
+      type: WorkoutType.rest,
+      icon: Icons.spa_rounded,
+      tint: Color(0xFF3DDC97),
+      isRest: true,
+    ),
   ];
 
   @override
@@ -67,7 +133,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
         decoration: BoxDecoration(
-          color: isDark ? ReportThemeTokens.sheetSurfaceDark : ReportThemeTokens.sheetSurfaceLight,
+          color: isDark
+              ? ReportThemeTokens.sheetSurfaceDark
+              : ReportThemeTokens.sheetSurfaceLight,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(
             color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -147,16 +215,18 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                             : (isDark ? AppColors.darkCard : Colors.white),
                         borderRadius: BorderRadius.circular(16),
                         border: isSelected
-                            ? Border.all(
-                                color: day.tint,
-                                width: 2.0,
-                              )
+                            ? Border.all(color: day.tint, width: 2.0)
                             : Border.all(
-                                color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                                color: isDark
+                                    ? AppColors.borderSubtle
+                                    : AppColors.outline,
                                 width: 1.0,
                               ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 8,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -165,7 +235,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                             children: [
                               Icon(
                                 day.icon,
-                                color: isSelected ? day.tint : AppColors.textSecondary,
+                                color: isSelected
+                                    ? day.tint
+                                    : AppColors.textSecondary,
                                 size: 18,
                               ),
                               if (isSelected) ...[
@@ -184,7 +256,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                             style: ReportThemeTokens.outfitSubtext(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
-                              color: isSelected ? day.tint : AppColors.textMuted,
+                              color: isSelected
+                                  ? day.tint
+                                  : AppColors.textMuted,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -195,9 +269,13 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                             overflow: TextOverflow.ellipsis,
                             style: ReportThemeTokens.outfitSubtext(
                               fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                              fontWeight: isSelected
+                                  ? FontWeight.w900
+                                  : FontWeight.bold,
                               color: isSelected
-                                  ? (isDark ? AppColors.textPrimary : Colors.black87)
+                                  ? (isDark
+                                        ? AppColors.textPrimary
+                                        : Colors.black87)
                                   : AppColors.textSecondary,
                             ),
                           ),
@@ -212,7 +290,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
               // Animated Cross-fade for Reorder Section
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                child: state.workoutType != WorkoutType.rest && _exercises.isNotEmpty
+                child:
+                    state.workoutType != WorkoutType.rest &&
+                        _exercises.isNotEmpty
                     ? Column(
                         key: ValueKey(state.workoutType),
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +325,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                               color: isDark ? AppColors.darkCard : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                                color: isDark
+                                    ? AppColors.borderSubtle
+                                    : AppColors.outline,
                               ),
                             ),
                             child: ReorderableListView.builder(
@@ -261,16 +343,23 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                               },
                               itemBuilder: (context, index) {
                                 final slot = _exercises[index];
-                                final exercise = WorkoutCatalog.getExerciseById(slot.exerciseId);
+                                final exercise = WorkoutCatalog.getExerciseById(
+                                  slot.exerciseId,
+                                );
 
                                 return Container(
                                   key: ValueKey(slot.exerciseId),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 10,
+                                  ),
                                   decoration: BoxDecoration(
                                     border: index < _exercises.length - 1
                                         ? Border(
                                             bottom: BorderSide(
-                                              color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                                              color: isDark
+                                                  ? AppColors.borderSubtle
+                                                  : AppColors.outline,
                                             ),
                                           )
                                         : null,
@@ -292,7 +381,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                                           style: ReportThemeTokens.outfitHeader(
                                             fontSize: 13,
                                             fontWeight: FontWeight.bold,
-                                            color: isDark ? AppColors.textPrimary : Colors.black87,
+                                            color: isDark
+                                                ? AppColors.textPrimary
+                                                : Colors.black87,
                                           ),
                                         ),
                                       ),
@@ -327,11 +418,15 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                       ..showSnackBar(
                         SnackBar(
                           duration: const Duration(seconds: 2),
-                          content: const Text('Reset day to schedule suggestion'),
+                          content: const Text(
+                            'Reset day to schedule suggestion',
+                          ),
                           action: SnackBarAction(
                             label: 'UNDO',
                             onPressed: () {
-                              context.read<WorkoutCubit>().changeWorkoutType(previousType);
+                              context.read<WorkoutCubit>().changeWorkoutType(
+                                previousType,
+                              );
                             },
                           ),
                         ),

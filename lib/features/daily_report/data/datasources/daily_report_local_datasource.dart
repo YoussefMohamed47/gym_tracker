@@ -60,7 +60,6 @@ class HiveDailyReportLocalDataSource implements DailyReportLocalDataSource {
       snackEntries: encodeMealEntries(report.snackEntries),
       beforeTrainingEntries: encodeMealEntries(report.beforeTrainingEntries),
       afterTrainingEntries: encodeMealEntries(report.afterTrainingEntries),
-
     );
   }
 
@@ -87,7 +86,6 @@ class HiveDailyReportLocalDataSource implements DailyReportLocalDataSource {
       snackEntries: decodeMealEntries(model.snackEntries),
       beforeTrainingEntries: decodeMealEntries(model.beforeTrainingEntries),
       afterTrainingEntries: decodeMealEntries(model.afterTrainingEntries),
-
     );
   }
 }

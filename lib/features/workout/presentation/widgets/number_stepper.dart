@@ -57,7 +57,9 @@ class _NumberStepperState extends State<NumberStepper> {
 
     return Container(
       height: 42,
-      constraints: widget.width > 0 ? BoxConstraints(minWidth: widget.width) : null,
+      constraints: widget.width > 0
+          ? BoxConstraints(minWidth: widget.width)
+          : null,
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7),
         borderRadius: BorderRadius.circular(12),
@@ -116,17 +118,22 @@ class _NumberStepperState extends State<NumberStepper> {
                               fontWeight: FontWeight.w900,
                               color: widget.valueText.isEmpty
                                   ? (isDark ? Colors.white38 : Colors.black38)
-                                  : (isDark ? AppColors.textPrimary : Colors.black87),
+                                  : (isDark
+                                        ? AppColors.textPrimary
+                                        : Colors.black87),
                             ),
                           ),
-                          if (widget.unit != null && widget.valueText.isNotEmpty) ...[
+                          if (widget.unit != null &&
+                              widget.valueText.isNotEmpty) ...[
                             const SizedBox(width: 2),
                             Text(
                               widget.unit!,
                               style: GoogleFonts.outfit(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? AppColors.gradientStart : AppColors.indigoAccent,
+                                color: isDark
+                                    ? AppColors.gradientStart
+                                    : AppColors.indigoAccent,
                               ),
                             ),
                           ],
@@ -154,7 +161,9 @@ class _NumberStepperState extends State<NumberStepper> {
                   child: Icon(
                     Icons.add_rounded,
                     size: 16,
-                    color: isDark ? AppColors.gradientStart : AppColors.indigoAccent,
+                    color: isDark
+                        ? AppColors.gradientStart
+                        : AppColors.indigoAccent,
                   ),
                 ),
               ),

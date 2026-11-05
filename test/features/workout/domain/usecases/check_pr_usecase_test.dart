@@ -37,13 +37,13 @@ void main() {
         plannedExerciseId: 'test_id',
         performedExerciseId: 'test_id',
         timestamp: DateTime.now(),
-        sets: [
-          ExerciseSetLog(weightKg: 80, actualReps: 5, isPerformed: true),
-        ],
+        sets: [ExerciseSetLog(weightKg: 80, actualReps: 5, isPerformed: true)],
       ),
     );
 
-    when(() => mockGetHistory.call(any(), any())).thenAnswer((_) async => [entry]);
+    when(
+      () => mockGetHistory.call(any(), any()),
+    ).thenAnswer((_) async => [entry]);
 
     final result = await usecase(
       exerciseId: 'test_id',
@@ -63,13 +63,13 @@ void main() {
         plannedExerciseId: 'test_id',
         performedExerciseId: 'test_id',
         timestamp: DateTime.now(),
-        sets: [
-          ExerciseSetLog(weightKg: 80, actualReps: 5, isPerformed: true),
-        ],
+        sets: [ExerciseSetLog(weightKg: 80, actualReps: 5, isPerformed: true)],
       ),
     );
 
-    when(() => mockGetHistory.call(any(), any())).thenAnswer((_) async => [entry]);
+    when(
+      () => mockGetHistory.call(any(), any()),
+    ).thenAnswer((_) async => [entry]);
 
     final result = await usecase(
       exerciseId: 'test_id',

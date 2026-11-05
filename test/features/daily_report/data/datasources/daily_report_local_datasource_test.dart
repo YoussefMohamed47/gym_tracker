@@ -47,7 +47,14 @@ void main() {
       final report = DailyReport.empty().copyWith(
         id: 'structured-1',
         lunch: 'صدر دجاج مشوي (180 جم)',
-        lunchEntries: const [MealEntry(name: 'صدر دجاج مشوي', category: 'بروتين', quantity: 180, unit: 'جم')],
+        lunchEntries: const [
+          MealEntry(
+            name: 'صدر دجاج مشوي',
+            category: 'بروتين',
+            quantity: 180,
+            unit: 'جم',
+          ),
+        ],
       );
       await dataSource.saveReport(report);
       final restored = (await dataSource.getReportHistory()).single;

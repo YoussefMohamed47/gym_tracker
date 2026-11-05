@@ -16,15 +16,22 @@ class VolumeLineChart extends StatelessWidget {
       return const Center(child: Text("No volume data for last 30 days."));
     }
 
-    final maxY = report.points.fold<double>(
+    final maxY =
+        report.points.fold<double>(
           0.0,
           (max, point) => point.tonnage > max ? point.tonnage : max,
-        ) * 1.2;
+        ) *
+        1.2;
 
     return AspectRatio(
       aspectRatio: 1.70,
       child: Padding(
-        padding: const EdgeInsets.only(right: 18, left: 12, top: 24, bottom: 12),
+        padding: const EdgeInsets.only(
+          right: 18,
+          left: 12,
+          top: 24,
+          bottom: 12,
+        ),
         child: LineChart(
           LineChartData(
             gridData: FlGridData(
@@ -59,7 +66,8 @@ class VolumeLineChart extends StatelessWidget {
                   reservedSize: 30,
                   interval: 5,
                   getTitlesWidget: (value, meta) {
-                    if (value.toInt() < 0 || value.toInt() >= report.points.length) {
+                    if (value.toInt() < 0 ||
+                        value.toInt() >= report.points.length) {
                       return const SizedBox.shrink();
                     }
                     final date = report.points[value.toInt()].date;

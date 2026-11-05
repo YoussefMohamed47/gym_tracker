@@ -29,12 +29,12 @@ void main() {
 
     mockPrefs = MockSharedPreferences();
     when(() => mockPrefs.containsKey(any())).thenReturn(false);
-    
+
     // Open required boxes
     await Hive.openBox<MigrationMetaHiveModel>(HiveBoxes.migrationMeta);
     await Hive.openBox<AppSettingsHiveModel>(HiveBoxes.settings);
     await Hive.openBox<WorkoutSessionHiveModel>(HiveBoxes.workoutSessions);
-    
+
     migrator = LegacyPersistenceMigrator(
       prefs: mockPrefs,
       hiveStorage: HiveLocalStorage(),

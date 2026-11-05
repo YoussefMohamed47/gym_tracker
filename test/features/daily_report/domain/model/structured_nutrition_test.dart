@@ -41,9 +41,7 @@ void main() {
         unit: 'جم',
       );
 
-      final report = DailyReport.empty().copyWith(
-        breakfastEntries: [entry],
-      );
+      final report = DailyReport.empty().copyWith(breakfastEntries: [entry]);
 
       expect(report.breakfast, 'بيض مسلوق (100 جم)');
       expect(report.breakfastEntries, [entry]);

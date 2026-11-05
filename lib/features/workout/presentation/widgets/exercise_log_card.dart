@@ -273,9 +273,7 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                                       margin: const EdgeInsets.only(right: 6),
                                       decoration: BoxDecoration(
                                         color: AppColors.gradientStart
-                                            .withValues(
-                                          alpha: 0.12,
-                                        ),
+                                            .withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -374,89 +372,89 @@ class _ExerciseLogCardState extends State<ExerciseLogCard> {
                               ],
                             ),
                           ),
-                        const SizedBox(width: 8),
+                          const SizedBox(width: 8),
 
-                        // Progress mini pill or done badge
-                        if (isFullyPerformed)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.completedGreen.withValues(
-                                alpha: 0.15,
+                          // Progress mini pill or done badge
+                          if (isFullyPerformed)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
                               ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  size: 14,
-                                  color: AppColors.completedGreen,
+                              decoration: BoxDecoration(
+                                color: AppColors.completedGreen.withValues(
+                                  alpha: 0.15,
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'DONE',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 14,
                                     color: AppColors.completedGreen,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'DONE',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.completedGreen,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Text(
+                              '$performedSetsCount/$totalSetsCount SETS',
+                              style: GoogleFonts.outfit(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.gradientStart,
+                              ),
                             ),
-                          )
-                        else
-                          Text(
-                            '$performedSetsCount/$totalSetsCount SETS',
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.gradientStart,
+
+                          const SizedBox(width: 8),
+
+                          // Expand / Collapse Chevron
+                          AnimatedRotation(
+                            turns: widget.isExpanded ? 0.5 : 0.0,
+                            duration: const Duration(milliseconds: 250),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: theme.colorScheme.onSurfaceVariant,
+                              size: 22,
                             ),
                           ),
+                        ],
+                      ),
 
-                        const SizedBox(width: 8),
-
-                        // Expand / Collapse Chevron
-                        AnimatedRotation(
-                          turns: widget.isExpanded ? 0.5 : 0.0,
-                          duration: const Duration(milliseconds: 250),
-                          child: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: theme.colorScheme.onSurfaceVariant,
-                            size: 22,
+                      // Progress Mini Bar in collapsed mode
+                      if (!widget.isExpanded && totalSetsCount > 0) ...[
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: performedSetsCount / totalSetsCount,
+                            minHeight: 4,
+                            backgroundColor: isDark
+                                ? Colors.white10
+                                : Colors.black12,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              isFullyPerformed
+                                  ? AppColors.completedGreen
+                                  : AppColors.gradientStart,
+                            ),
                           ),
                         ),
                       ],
-                    ),
-
-                    // Progress Mini Bar in collapsed mode
-                    if (!widget.isExpanded && totalSetsCount > 0) ...[
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: performedSetsCount / totalSetsCount,
-                          minHeight: 4,
-                          backgroundColor: isDark
-                              ? Colors.white10
-                              : Colors.black12,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            isFullyPerformed
-                                ? AppColors.completedGreen
-                                : AppColors.gradientStart,
-                          ),
-                        ),
-                      ),
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
 
             // Expanded Card Body
             AnimatedSize(

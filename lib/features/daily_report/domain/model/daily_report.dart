@@ -49,12 +49,18 @@ class DailyReport extends Equatable {
   });
 
   bool get isEmpty =>
-      breakfast.isEmpty && breakfastEntries.isEmpty &&
-      lunch.isEmpty && lunchEntries.isEmpty &&
-      snack.isEmpty && snackEntries.isEmpty &&
-      beforeTraining.isEmpty && beforeTrainingEntries.isEmpty &&
-      afterTraining.isEmpty && afterTrainingEntries.isEmpty &&
-      dinner.isEmpty && dinnerEntries.isEmpty &&
+      breakfast.isEmpty &&
+      breakfastEntries.isEmpty &&
+      lunch.isEmpty &&
+      lunchEntries.isEmpty &&
+      snack.isEmpty &&
+      snackEntries.isEmpty &&
+      beforeTraining.isEmpty &&
+      beforeTrainingEntries.isEmpty &&
+      afterTraining.isEmpty &&
+      afterTrainingEntries.isEmpty &&
+      dinner.isEmpty &&
+      dinnerEntries.isEmpty &&
       water.isEmpty &&
       training.isEmpty &&
       cardio.isEmpty &&
@@ -74,7 +80,14 @@ class DailyReport extends Equatable {
   double get overallCompletionRatio {
     int total = 5;
     int filled = 0;
-    if (breakfast.trim().isNotEmpty || breakfastEntries.isNotEmpty || lunch.trim().isNotEmpty || lunchEntries.isNotEmpty || dinner.trim().isNotEmpty || dinnerEntries.isNotEmpty) filled++;
+    if (breakfast.trim().isNotEmpty ||
+        breakfastEntries.isNotEmpty ||
+        lunch.trim().isNotEmpty ||
+        lunchEntries.isNotEmpty ||
+        dinner.trim().isNotEmpty ||
+        dinnerEntries.isNotEmpty) {
+      filled++;
+    }
     if (water.trim().isNotEmpty) filled++;
     if (sleepTime.trim().isNotEmpty) filled++;
     if (training.trim().isNotEmpty) filled++;
@@ -128,12 +141,32 @@ class DailyReport extends Equatable {
     final atEntries = afterTrainingEntries ?? this.afterTrainingEntries;
     final dEntries = dinnerEntries ?? this.dinnerEntries;
 
-    final bText = breakfast ?? (breakfastEntries != null ? mealEntriesToLegacyText(bEntries) : this.breakfast);
-    final lText = lunch ?? (lunchEntries != null ? mealEntriesToLegacyText(lEntries) : this.lunch);
-    final sText = snack ?? (snackEntries != null ? mealEntriesToLegacyText(sEntries) : this.snack);
-    final btText = beforeTraining ?? (beforeTrainingEntries != null ? mealEntriesToLegacyText(btEntries) : this.beforeTraining);
-    final atText = afterTraining ?? (afterTrainingEntries != null ? mealEntriesToLegacyText(atEntries) : this.afterTraining);
-    final dText = dinner ?? (dinnerEntries != null ? mealEntriesToLegacyText(dEntries) : this.dinner);
+    final bText =
+        breakfast ??
+        (breakfastEntries != null
+            ? mealEntriesToLegacyText(bEntries)
+            : this.breakfast);
+    final lText =
+        lunch ??
+        (lunchEntries != null ? mealEntriesToLegacyText(lEntries) : this.lunch);
+    final sText =
+        snack ??
+        (snackEntries != null ? mealEntriesToLegacyText(sEntries) : this.snack);
+    final btText =
+        beforeTraining ??
+        (beforeTrainingEntries != null
+            ? mealEntriesToLegacyText(btEntries)
+            : this.beforeTraining);
+    final atText =
+        afterTraining ??
+        (afterTrainingEntries != null
+            ? mealEntriesToLegacyText(atEntries)
+            : this.afterTraining);
+    final dText =
+        dinner ??
+        (dinnerEntries != null
+            ? mealEntriesToLegacyText(dEntries)
+            : this.dinner);
 
     return DailyReport(
       id: id ?? this.id,
@@ -181,8 +214,12 @@ class DailyReport extends Equatable {
       'lunchEntries': lunchEntries.map((e) => e.toJson()).toList(),
       'dinnerEntries': dinnerEntries.map((e) => e.toJson()).toList(),
       'snackEntries': snackEntries.map((e) => e.toJson()).toList(),
-      'beforeTrainingEntries': beforeTrainingEntries.map((e) => e.toJson()).toList(),
-      'afterTrainingEntries': afterTrainingEntries.map((e) => e.toJson()).toList(),
+      'beforeTrainingEntries': beforeTrainingEntries
+          .map((e) => e.toJson())
+          .toList(),
+      'afterTrainingEntries': afterTrainingEntries
+          .map((e) => e.toJson())
+          .toList(),
     };
   }
 
@@ -216,7 +253,10 @@ class DailyReport extends Equatable {
 
   static List<MealEntry> _entriesFromJson(dynamic raw) {
     if (raw is! List) return const [];
-    return raw.whereType<Map>().map((value) => MealEntry.fromJson(Map<String, dynamic>.from(value))).toList();
+    return raw
+        .whereType<Map>()
+        .map((value) => MealEntry.fromJson(Map<String, dynamic>.from(value)))
+        .toList();
   }
 
   @override
@@ -236,7 +276,11 @@ class DailyReport extends Equatable {
     notes,
     dateTime,
     imagePath,
-    breakfastEntries, lunchEntries, dinnerEntries, snackEntries,
-    beforeTrainingEntries, afterTrainingEntries,
+    breakfastEntries,
+    lunchEntries,
+    dinnerEntries,
+    snackEntries,
+    beforeTrainingEntries,
+    afterTrainingEntries,
   ];
 }

@@ -34,14 +34,16 @@ class Get30DayVolumeTonnageUseCase {
         for (final set in log.sets) {
           if (set.isPerformed && set.weightKg != null) {
             // Tonnage = Weight * Reps
-            final reps = set.actualReps ?? 1; // fallback to 1 if no reps but weight
+            final reps =
+                set.actualReps ?? 1; // fallback to 1 if no reps but weight
             final weight = set.weightKg!;
             sessionTonnage += (weight * reps);
           }
         }
       }
 
-      dailyVolume[session.dateKey] = dailyVolume[session.dateKey]! + sessionTonnage;
+      dailyVolume[session.dateKey] =
+          dailyVolume[session.dateKey]! + sessionTonnage;
       totalTonnage += sessionTonnage;
     }
 

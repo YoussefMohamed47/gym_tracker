@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animations/animations.dart';
 import '../../features/daily_report/presentation/cubit/daily_report_cubit.dart';
+import '../../features/daily_report/presentation/cubit/nutrition_insights_cubit.dart';
 import '../../features/history/presentation/cubit/history_cubit.dart';
 import '../../features/history/presentation/view/report_history_screen.dart';
 import '../../features/splash/presentation/view/splash_screen.dart';
 import '../../features/daily_report/presentation/widgets/full_screen_image.dart';
 import '../../features/main/presentation/view/main_screen.dart';
 import '../../features/workout/presentation/cubit/workout_cubit.dart';
-import '../../features/workout/presentation/view/workout_screen.dart';
 import '../di/injection_container.dart' as di;
 
 class AppRouter {
@@ -18,7 +18,6 @@ class AppRouter {
       '/report-detail'; // Old dailyReport route renamed
   static const String history = '/history';
   static const String fullScreenImage = '/full-screen-image';
-  static const String workout = '/workout-detail';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -30,8 +29,15 @@ class AppRouter {
           pageBuilder: (context, animation, secondaryAnimation) =>
               MultiBlocProvider(
                 providers: [
-                  BlocProvider(create: (context) => di.sl<DailyReportCubit>()),
+                  // DailyReportCubit is a lazy singleton: use .value so this
+                  // route never closes it. With `create:`, tearing the route
+                  // down (e.g. back press on the root screen) closed the shared
+                  // instance, and every later emit threw, freezing all actions.
+                  BlocProvider.value(value: di.sl<DailyReportCubit>()),
                   BlocProvider(create: (context) => di.sl<WorkoutCubit>()),
+                  BlocProvider(
+                    create: (context) => di.sl<NutritionInsightsCubit>(),
+                  ),
                 ],
                 child: const MainScreen(),
               ),
@@ -79,22 +85,6 @@ class AppRouter {
             return FadeThroughTransition(
               animation: animation,
               secondaryAnimation: secondaryAnimation,
-              child: child,
-            );
-          },
-        );
-      case workout:
-        return PageRouteBuilder(
-          settings: settings,
-          pageBuilder: (context, animation, secondaryAnimation) => BlocProvider(
-            create: (context) => di.sl<WorkoutCubit>(),
-            child: const WorkoutScreen(),
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SharedAxisTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              transitionType: SharedAxisTransitionType.horizontal,
               child: child,
             );
           },

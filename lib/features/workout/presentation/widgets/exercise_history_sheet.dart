@@ -93,12 +93,17 @@ class ExerciseHistorySheet extends StatelessWidget {
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 itemCount: history.length,
                 separatorBuilder: (_, _) => Divider(
-                  height: 32, 
-                  thickness: 1, 
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)
+                  height: 32,
+                  thickness: 1,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.5),
                 ),
                 itemBuilder: (context, index) {
                   final entry = history[index];
@@ -120,9 +125,14 @@ class ExerciseHistorySheet extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -144,7 +154,9 @@ class ExerciseHistorySheet extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.amber.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
+                            border: Border.all(
+                              color: Colors.amber.withValues(alpha: 0.2),
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -204,10 +216,15 @@ class ExerciseHistorySheet extends StatelessWidget {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outline.withValues(alpha: 0.5),
                                 ),
                               ),
                               child: Text(
@@ -215,7 +232,9 @@ class ExerciseHistorySheet extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                               ),
                             );
@@ -239,14 +258,16 @@ class ExerciseHistorySheet extends StatelessWidget {
                             width: 80,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Theme.of(context).colorScheme.outline),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
-                                )
-                              ]
+                                ),
+                              ],
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(11),

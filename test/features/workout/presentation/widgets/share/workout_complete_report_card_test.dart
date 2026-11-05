@@ -12,8 +12,9 @@ import 'package:gym_tracker_report/features/workout/presentation/widgets/share/w
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('legs report renders every performed main lift from legs_8day',
-      (tester) async {
+  testWidgets('legs report renders every performed main lift from legs_8day', (
+    tester,
+  ) async {
     final legs = WorkoutCatalog.getWorkoutByType(WorkoutType.legs)!;
     final logs = {
       for (final slot in legs.exercises)
@@ -34,7 +35,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: WorkoutCompleteReportCard(session: session, isExportMode: true),
+          child: WorkoutCompleteReportCard(
+            session: session,
+            isExportMode: true,
+          ),
         ),
       ),
     );

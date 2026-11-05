@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/error/api_result.dart';
 import '../../../daily_report/domain/model/daily_report.dart';
@@ -45,11 +46,8 @@ class HistoryCubit extends Cubit<HistoryState> {
   final Get30DayVolumeTonnageUseCase? get30DayVolume;
   final GetMealAdherenceUseCase? getMealAdherence;
 
-  HistoryCubit(
-    this._repository, {
-    this.get30DayVolume,
-    this.getMealAdherence,
-  }) : super(HistoryInitial());
+  HistoryCubit(this._repository, {this.get30DayVolume, this.getMealAdherence})
+    : super(HistoryInitial());
 
   Future<void> loadHistory() async {
     emit(HistoryLoading());
@@ -61,8 +59,9 @@ class HistoryCubit extends Cubit<HistoryState> {
     if (volumeUseCase != null) {
       try {
         volumeReport = await volumeUseCase.call();
-      } catch (_) {
-        // ignore analytics load error
+      } catch (e, st) {
+        // Analytics are optional: keep the history list usable, but log why.
+        debugPrint('HistoryCubit: 30-day volume failed: $e\n$st');
       }
     }
 
@@ -70,14 +69,20 @@ class HistoryCubit extends Cubit<HistoryState> {
     if (adherenceUseCase != null) {
       try {
         mealAdherence = await adherenceUseCase.call();
-      } catch (_) {
-        // ignore analytics load error
+      } catch (e, st) {
+        debugPrint('HistoryCubit: meal adherence failed: $e\n$st');
       }
     }
 
     switch (result) {
       case ApiSuccess(data: final history):
-        emit(HistoryLoaded(reports: history, volumeReport: volumeReport, mealAdherence: mealAdherence));
+        emit(
+          HistoryLoaded(
+            reports: history,
+            volumeReport: volumeReport,
+            mealAdherence: mealAdherence,
+          ),
+        );
       case ApiFailure(failure: final failure):
         emit(HistoryError(failure.message));
     }

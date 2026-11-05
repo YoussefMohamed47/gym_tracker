@@ -41,11 +41,7 @@ class BottomDock extends StatelessWidget {
     }
 
     final displayVolume = WeightConverter.format(
-      WeightConverter.convert(
-        totalVolumeKg,
-        WeightUnit.kg,
-        state.displayUnit,
-      ),
+      WeightConverter.convert(totalVolumeKg, WeightUnit.kg, state.displayUnit),
     );
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -57,7 +53,9 @@ class BottomDock extends StatelessWidget {
       builder: (sheetContext) => Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         decoration: BoxDecoration(
-          color: isDark ? ReportThemeTokens.sheetSurfaceDark : ReportThemeTokens.sheetSurfaceLight,
+          color: isDark
+              ? ReportThemeTokens.sheetSurfaceDark
+              : ReportThemeTokens.sheetSurfaceLight,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(
             color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -94,10 +92,7 @@ class BottomDock extends StatelessWidget {
                   size: 38,
                   color: Colors.black,
                 ),
-              ).animate().scale(
-                    duration: 300.ms,
-                    curve: Curves.easeOutBack,
-                  ),
+              ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
             ),
             const SizedBox(height: 14),
 
@@ -185,7 +180,7 @@ class BottomDock extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'SAVE & VIEW REPORT',
+                    'Save & share report',
                     style: ReportThemeTokens.outfitHeader(
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
@@ -249,7 +244,8 @@ class BottomDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state.workoutType == WorkoutType.rest || state.status == WorkoutStatus.loading) {
+    if (state.workoutType == WorkoutType.rest ||
+        state.status == WorkoutStatus.loading) {
       return const SizedBox.shrink();
     }
 
@@ -267,8 +263,9 @@ class BottomDock extends StatelessWidget {
       performedSets += log.sets.where((s) => s.isPerformed).length;
     }
 
-    final double exerciseProgress =
-        totalExercises > 0 ? (performedExercises / totalExercises) : 0.0;
+    final double exerciseProgress = totalExercises > 0
+        ? (performedExercises / totalExercises)
+        : 0.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -281,7 +278,9 @@ class BottomDock extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? ReportThemeTokens.sheetSurfaceDark : ReportThemeTokens.sheetSurfaceLight,
+            color: isDark
+                ? ReportThemeTokens.sheetSurfaceDark
+                : ReportThemeTokens.sheetSurfaceLight,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -325,7 +324,9 @@ class BottomDock extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: exerciseProgress,
                         minHeight: 5,
-                        backgroundColor: isDark ? Colors.white10 : Colors.black12,
+                        backgroundColor: isDark
+                            ? Colors.white10
+                            : Colors.black12,
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           AppColors.completedGreen,
                         ),
@@ -340,16 +341,19 @@ class BottomDock extends StatelessWidget {
               GestureDetector(
                 onTap: () => _showSummaryBottomSheet(context),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 11,
+                  ),
                   decoration: BoxDecoration(
                     gradient: AppColors.primaryGradient,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    'FINISH WORKOUT',
+                    'Finish',
                     style: ReportThemeTokens.outfitHeader(
                       fontWeight: FontWeight.w900,
-                      fontSize: 11,
+                      fontSize: 14,
                       letterSpacing: 0.8,
                       color: Colors.white,
                     ),

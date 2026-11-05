@@ -24,12 +24,15 @@ class StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveIconColor = iconColor ?? ReportThemeTokens.indigoAccent;
-    final disableAnim = isExportMode || MediaQuery.of(context).disableAnimations;
+    final disableAnim =
+        isExportMode || MediaQuery.of(context).disableAnimations;
 
     // Parse numeric component for animation if possible
     final numMatch = RegExp(r'^(\d+)').firstMatch(value.trim());
     final intValue = numMatch != null ? int.tryParse(numMatch.group(1)!) : null;
-    final suffix = intValue != null ? value.trim().substring(numMatch!.group(1)!.length) : '';
+    final suffix = intValue != null
+        ? value.trim().substring(numMatch!.group(1)!.length)
+        : '';
 
     return Directionality(
       textDirection: direction,
@@ -38,10 +41,7 @@ class StatTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: ReportThemeTokens.cardBackground,
           borderRadius: ReportThemeTokens.cardBorderRadius,
-          border: Border.all(
-            color: ReportThemeTokens.borderSubtle,
-            width: 1.0,
-          ),
+          border: Border.all(color: ReportThemeTokens.borderSubtle, width: 1.0),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,11 +55,7 @@ class StatTile extends StatelessWidget {
                     color: effectiveIconColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 16,
-                    color: effectiveIconColor,
-                  ),
+                  child: Icon(icon, size: 16, color: effectiveIconColor),
                 ),
                 const SizedBox(width: 8),
                 Expanded(

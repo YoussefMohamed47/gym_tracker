@@ -6,7 +6,7 @@ class WorkoutCatalogCubit extends Cubit<WorkoutCatalogState> {
   final GetWorkoutCatalog getWorkoutCatalog;
 
   WorkoutCatalogCubit({required this.getWorkoutCatalog})
-      : super(const WorkoutCatalogInitial()) {
+    : super(const WorkoutCatalogInitial()) {
     loadCatalog();
   }
 

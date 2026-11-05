@@ -10,7 +10,9 @@ class RestTimeParser {
 
     // Check for minutes pattern, e.g. '2-3m', '2-3 min', '1m', '1 min', '2.5m'
     if (text.contains('m') || text.contains('min')) {
-      final rangeMatch = RegExp(r'(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)').firstMatch(text);
+      final rangeMatch = RegExp(
+        r'(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)',
+      ).firstMatch(text);
       if (rangeMatch != null) {
         final lower = double.tryParse(rangeMatch.group(1)!) ?? 2.0;
         return (lower * 60).round();

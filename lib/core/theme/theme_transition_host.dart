@@ -13,9 +13,6 @@ class ThemeTransitionHost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      key: controller.boundaryKey,
-      child: child,
-    );
+    return RepaintBoundary(key: controller.boundaryKey, child: child);
   }
 }

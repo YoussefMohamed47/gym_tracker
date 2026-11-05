@@ -16,7 +16,10 @@ class MockWorkoutRepository implements WorkoutRepository {
   final WorkoutSession? sessionToReturn;
   final List<WorkoutSession> historyToReturn;
 
-  MockWorkoutRepository({this.sessionToReturn, this.historyToReturn = const []});
+  MockWorkoutRepository({
+    this.sessionToReturn,
+    this.historyToReturn = const [],
+  });
 
   @override
   Future<WorkoutSession?> getSessionForDate(String dateKey) async {
@@ -47,26 +50,31 @@ void main() {
       expect(cubit.state.report.training, equals('Push'));
     });
 
-    test('initTodayTrainingDefault populates default training when session exists', () async {
-      final todayKey = WorkoutDateUtils.formatDateKey(DateTime.now());
-      final mockSession = WorkoutSession(
-        dateKey: todayKey,
-        workoutType: WorkoutType.push,
-        exerciseLogs: const {},
-        displayUnit: WeightUnit.kg,
-      );
+    test(
+      'initTodayTrainingDefault populates default training when session exists',
+      () async {
+        final todayKey = WorkoutDateUtils.formatDateKey(DateTime.now());
+        final mockSession = WorkoutSession(
+          dateKey: todayKey,
+          workoutType: WorkoutType.push,
+          exerciseLogs: const {},
+          displayUnit: WeightUnit.kg,
+        );
 
-      final mockWorkoutRepo = MockWorkoutRepository(sessionToReturn: mockSession);
+        final mockWorkoutRepo = MockWorkoutRepository(
+          sessionToReturn: mockSession,
+        );
 
-      final cubit = DailyReportCubit(
-        mockReportRepo,
-        workoutRepository: mockWorkoutRepo,
-      );
+        final cubit = DailyReportCubit(
+          mockReportRepo,
+          workoutRepository: mockWorkoutRepo,
+        );
 
-      // Wait for async initTodayTrainingDefault
-      await Future.delayed(Duration.zero);
+        // Wait for async initTodayTrainingDefault
+        await Future.delayed(Duration.zero);
 
-      expect(cubit.state.report.training, equals('Push'));
-    });
+        expect(cubit.state.report.training, equals('Push'));
+      },
+    );
   });
 }

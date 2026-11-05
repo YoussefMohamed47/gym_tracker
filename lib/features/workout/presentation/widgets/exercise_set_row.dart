@@ -71,7 +71,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
         : null;
     _weightController = TextEditingController(
       text: weight != null
-          ? (weight % 1 == 0 ? weight.toInt().toString() : weight.toStringAsFixed(1))
+          ? (weight % 1 == 0
+                ? weight.toInt().toString()
+                : weight.toStringAsFixed(1))
           : '',
     );
     _repsController = TextEditingController(
@@ -82,15 +84,16 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _checkScaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.25, end: 1.0), weight: 50),
-    ]).animate(
-      CurvedAnimation(
-        parent: _checkAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _checkScaleAnimation =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 50),
+          TweenSequenceItem(tween: Tween(begin: 1.25, end: 1.0), weight: 50),
+        ]).animate(
+          CurvedAnimation(
+            parent: _checkAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     if (widget.setLog.isPerformed) {
       _checkAnimationController.value = 1.0;
@@ -111,7 +114,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
             )
           : null;
       final newText = weight != null
-          ? (weight % 1 == 0 ? weight.toInt().toString() : weight.toStringAsFixed(1))
+          ? (weight % 1 == 0
+                ? weight.toInt().toString()
+                : weight.toStringAsFixed(1))
           : '';
       if (_weightController.text != newText &&
           !(widget.weightFocusNode?.hasFocus ?? false)) {
@@ -205,7 +210,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
     String lastLabel = '—';
     if (lastWeight != null || lastReps != null) {
       final w = lastWeight != null
-          ? (lastWeight % 1 == 0 ? lastWeight.toInt().toString() : lastWeight.toStringAsFixed(1))
+          ? (lastWeight % 1 == 0
+                ? lastWeight.toInt().toString()
+                : lastWeight.toStringAsFixed(1))
           : '';
       final r = lastReps != null ? '×$lastReps' : '';
       lastLabel = '$w$r'.trim();
@@ -219,7 +226,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
       decoration: BoxDecoration(
         color: isPerformed
             ? AppColors.completedGreen.withValues(alpha: isDark ? 0.12 : 0.08)
-            : (isDark ? AppColors.darkElevated.withValues(alpha: 0.5) : Colors.grey.shade50),
+            : (isDark
+                  ? AppColors.darkElevated.withValues(alpha: 0.5)
+                  : Colors.grey.shade50),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isPerformed
@@ -239,7 +248,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
               style: GoogleFonts.outfit(
                 fontWeight: FontWeight.w800,
                 fontSize: 14,
-                color: isPerformed ? AppColors.completedGreen : theme.colorScheme.onSurface,
+                color: isPerformed
+                    ? AppColors.completedGreen
+                    : theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -252,7 +263,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 11,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.6,
+                ),
                 fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
@@ -268,25 +281,30 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                   ? Builder(
                       builder: (context) {
                         final hasWeightValue =
-                            widget.setLog.weightKg != null && widget.setLog.weightKg! > 0;
+                            widget.setLog.weightKg != null &&
+                            widget.setLog.weightKg! > 0;
 
                         return Container(
                           height: 42,
                           decoration: BoxDecoration(
                             color: isDark
                                 ? (hasWeightValue
-                                    ? AppColors.darkElevated
-                                    : AppColors.darkCard)
+                                      ? AppColors.darkElevated
+                                      : AppColors.darkCard)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isPerformed
-                                  ? AppColors.completedGreen.withValues(alpha: 0.4)
+                                  ? AppColors.completedGreen.withValues(
+                                      alpha: 0.4,
+                                    )
                                   : (hasWeightValue
-                                      ? AppColors.gradientStart.withValues(alpha: 0.5)
-                                      : (isDark
-                                          ? AppColors.borderSubtle
-                                          : AppColors.outline)),
+                                        ? AppColors.gradientStart.withValues(
+                                            alpha: 0.5,
+                                          )
+                                        : (isDark
+                                              ? AppColors.borderSubtle
+                                              : AppColors.outline)),
                               width: hasWeightValue || isPerformed ? 1.5 : 1.0,
                             ),
                           ),
@@ -321,9 +339,10 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                                       textAlign: TextAlign.center,
                                       decoration: InputDecoration(
                                         isDense: true,
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          vertical: 8,
-                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                            ),
                                         border: InputBorder.none,
                                         hintText: '0',
                                         suffixText: widget.displayUnit.name,
@@ -332,7 +351,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                                           fontWeight: FontWeight.bold,
                                           color: hasWeightValue
                                               ? AppColors.gradientStart
-                                              : theme.colorScheme.onSurfaceVariant,
+                                              : theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
                                         ),
                                       ),
                                       style: GoogleFonts.outfit(
@@ -344,8 +365,10 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                                         color: isPerformed
                                             ? AppColors.completedGreen
                                             : (hasWeightValue
-                                                ? theme.colorScheme.onSurface
-                                                : theme.colorScheme.onSurfaceVariant),
+                                                  ? theme.colorScheme.onSurface
+                                                  : theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant),
                                       ),
                                     ),
                                   ),
@@ -389,25 +412,30 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                   ? Builder(
                       builder: (context) {
                         final hasRepsValue =
-                            widget.setLog.actualReps != null && widget.setLog.actualReps! > 0;
+                            widget.setLog.actualReps != null &&
+                            widget.setLog.actualReps! > 0;
 
                         return Container(
                           height: 42,
                           decoration: BoxDecoration(
                             color: isDark
                                 ? (hasRepsValue
-                                    ? AppColors.darkElevated
-                                    : AppColors.darkCard)
+                                      ? AppColors.darkElevated
+                                      : AppColors.darkCard)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isPerformed
-                                  ? AppColors.completedGreen.withValues(alpha: 0.4)
+                                  ? AppColors.completedGreen.withValues(
+                                      alpha: 0.4,
+                                    )
                                   : (hasRepsValue
-                                      ? AppColors.gradientStart.withValues(alpha: 0.5)
-                                      : (isDark
-                                          ? AppColors.borderSubtle
-                                          : AppColors.outline)),
+                                        ? AppColors.gradientStart.withValues(
+                                            alpha: 0.5,
+                                          )
+                                        : (isDark
+                                              ? AppColors.borderSubtle
+                                              : AppColors.outline)),
                               width: hasRepsValue || isPerformed ? 1.5 : 1.0,
                             ),
                           ),
@@ -442,9 +470,10 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                                       textAlign: TextAlign.center,
                                       decoration: InputDecoration(
                                         isDense: true,
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          vertical: 8,
-                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                            ),
                                         border: InputBorder.none,
                                         hintText: '0',
                                         suffixText: 'r',
@@ -453,7 +482,9 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                                           fontWeight: FontWeight.bold,
                                           color: hasRepsValue
                                               ? AppColors.gradientStart
-                                              : theme.colorScheme.onSurfaceVariant,
+                                              : theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
                                         ),
                                       ),
                                       style: GoogleFonts.outfit(
@@ -465,8 +496,10 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                                         color: isPerformed
                                             ? AppColors.completedGreen
                                             : (hasRepsValue
-                                                ? theme.colorScheme.onSurface
-                                                : theme.colorScheme.onSurfaceVariant),
+                                                  ? theme.colorScheme.onSurface
+                                                  : theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant),
                                       ),
                                     ),
                                   ),
@@ -525,15 +558,15 @@ class _ExerciseSetRowState extends State<ExerciseSetRow>
                       border: Border.all(
                         color: isPerformed
                             ? AppColors.completedGreen
-                            : (isDark
-                                ? Colors.white30
-                                : Colors.black26),
+                            : (isDark ? Colors.white30 : Colors.black26),
                         width: 2,
                       ),
                       boxShadow: isPerformed
                           ? [
                               BoxShadow(
-                                color: AppColors.completedGreen.withValues(alpha: 0.3),
+                                color: AppColors.completedGreen.withValues(
+                                  alpha: 0.3,
+                                ),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),

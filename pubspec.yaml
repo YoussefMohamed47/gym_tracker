@@ -48,6 +48,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   flutter_spinkit: ^5.2.1
+  lottie: ^3.3.1
   flutter_animate: ^4.5.2
   animations: ^2.0.11
 
@@ -70,17 +71,35 @@ dev_dependencies:
   mocktail: ^1.0.4
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.6
   hive_ce_generator: 1.11.2
   build_runner: ^2.4.12
 
+# App icon: the LiftFuel logo (dark bolt on the lime tile).
+# Sources come from tool/render_branding.sh. Regenerate with:
+#   dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/app_icon.png"
-  background_color: "#1A46A0"
-  adaptive_icon_background: "#1A46A0"
-  adaptive_icon_foreground: "assets/images/app_icon_foreground.png"
+  image_path: "assets/branding/app_icon.png"
+  background_color: "#C7F476"
+  adaptive_icon_background: "#C7F476"
+  adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"
+
+# Native splash: the still first frame of the animated splash (tile + bolt on
+# the dark background), same size and position, so the hand-over is seamless.
+# Regenerate with: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#090E12"
+  image: assets/branding/splash_logo.png
+  android_12:
+    color: "#090E12"
+    image: assets/branding/splash_logo_android12.png
+  ios: true
+  android: true
+  web: false
+  fullscreen: false
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -93,6 +112,7 @@ flutter:
   # the material Icons class.
   assets:
     - shorebird.yaml
+    - assets/animations/
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

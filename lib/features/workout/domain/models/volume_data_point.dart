@@ -4,10 +4,7 @@ class VolumeDataPoint extends Equatable {
   final DateTime date;
   final double tonnage;
 
-  const VolumeDataPoint({
-    required this.date,
-    required this.tonnage,
-  });
+  const VolumeDataPoint({required this.date, required this.tonnage});
 
   @override
   List<Object?> get props => [date, tonnage];

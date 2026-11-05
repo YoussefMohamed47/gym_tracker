@@ -20,18 +20,23 @@ class MealEntry extends Equatable {
     this.catalogOption,
   });
 
-  MealEntry copyWith({double? quantity, String? unit, String? note}) => MealEntry(
-    name: name,
-    category: category,
-    quantity: quantity ?? this.quantity,
-    unit: unit ?? this.unit,
-    note: note ?? this.note,
-    catalogOption: catalogOption,
-  );
+  MealEntry copyWith({double? quantity, String? unit, String? note}) =>
+      MealEntry(
+        name: name,
+        category: category,
+        quantity: quantity ?? this.quantity,
+        unit: unit ?? this.unit,
+        note: note ?? this.note,
+        catalogOption: catalogOption,
+      );
 
   Map<String, dynamic> toJson() => {
-    'name': name, 'category': category, 'quantity': quantity,
-    'unit': unit, 'note': note, 'catalogOption': catalogOption,
+    'name': name,
+    'category': category,
+    'quantity': quantity,
+    'unit': unit,
+    'note': note,
+    'catalogOption': catalogOption,
   };
 
   factory MealEntry.fromJson(Map<String, dynamic> json) => MealEntry(
@@ -46,7 +51,8 @@ class MealEntry extends Equatable {
   String get displayQuantity {
     if (quantity == null) return '';
     final amount = quantity! == quantity!.roundToDouble()
-        ? quantity!.toInt().toString() : quantity.toString();
+        ? quantity!.toInt().toString()
+        : quantity.toString();
     return '$amount ${unit ?? ''}'.trim();
   }
 
@@ -57,13 +63,22 @@ class MealEntry extends Equatable {
   ].join(' ');
 
   @override
-  List<Object?> get props => [name, category, quantity, unit, note, catalogOption];
+  List<Object?> get props => [
+    name,
+    category,
+    quantity,
+    unit,
+    note,
+    catalogOption,
+  ];
 }
 
 /// Conversion happens only when an old option has ONE unambiguous numeric unit.
 /// Composite alternatives are retained as text; we never guess quantities.
 class FoodOptionParser {
-  static final RegExp _quantityPattern = RegExp(r'\((\d+(?:[.,]\d+)?)\s*(جم|جرام|مل|ml|g|قطعة)\)');
+  static final RegExp _quantityPattern = RegExp(
+    r'\((\d+(?:[.,]\d+)?)\s*(جم|جرام|مل|ml|g|قطعة)\)',
+  );
 
   static MealEntry fromCatalog(String option, String category) {
     final matches = _quantityPattern.allMatches(option).toList();
@@ -91,7 +106,9 @@ String mealEntriesToLegacyText(List<MealEntry> entries) =>
 /// Hive stores each entry independently as JSON, leaving the 15 original
 /// fields unchanged and allowing old records to decode without any migration.
 List<String> encodeMealEntries(List<MealEntry>? entries) =>
-    (entries ?? const <MealEntry>[]).map((entry) => jsonEncode(entry.toJson())).toList();
+    (entries ?? const <MealEntry>[])
+        .map((entry) => jsonEncode(entry.toJson()))
+        .toList();
 
 List<MealEntry> decodeMealEntries(List<String>? encoded) {
   if (encoded == null) return const <MealEntry>[];

@@ -39,7 +39,10 @@ class MealAdherenceRadarChart extends StatelessWidget {
             borderData: FlBorderData(show: false),
             radarBorderData: const BorderSide(color: Colors.transparent),
             tickCount: 5,
-            ticksTextStyle: const TextStyle(color: Colors.transparent, fontSize: 10),
+            ticksTextStyle: const TextStyle(
+              color: Colors.transparent,
+              fontSize: 10,
+            ),
             tickBorderData: BorderSide(
               color: isDark ? Colors.white24 : Colors.black12,
               width: 1,

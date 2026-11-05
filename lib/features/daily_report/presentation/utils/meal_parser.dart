@@ -4,15 +4,15 @@ class ParsedFoodItem {
   final String name;
   final String? quantity;
 
-  const ParsedFoodItem({
-    required this.name,
-    this.quantity,
-  });
+  const ParsedFoodItem({required this.name, this.quantity});
 }
 
 class MealParser {
   /// Parses meal string into a list of food items with clean names & quantity chips
-  static List<ParsedFoodItem> parse(String mealText, {bool useArabicDigits = true}) {
+  static List<ParsedFoodItem> parse(
+    String mealText, {
+    bool useArabicDigits = true,
+  }) {
     if (mealText.trim().isEmpty) return [];
 
     // Split by delimiters
@@ -34,10 +34,12 @@ class MealParser {
           quantity = ReportFormatter.toArabicDigits(quantity);
         }
         if (name.isNotEmpty) {
-          items.add(ParsedFoodItem(
-            name: name,
-            quantity: quantity.isNotEmpty ? quantity : null,
-          ));
+          items.add(
+            ParsedFoodItem(
+              name: name,
+              quantity: quantity.isNotEmpty ? quantity : null,
+            ),
+          );
           continue;
         }
       }
@@ -53,19 +55,23 @@ class MealParser {
           quantity = ReportFormatter.toArabicDigits(quantity);
         }
         if (name.isNotEmpty) {
-          items.add(ParsedFoodItem(
-            name: name,
-            quantity: quantity.isNotEmpty ? quantity : null,
-          ));
+          items.add(
+            ParsedFoodItem(
+              name: name,
+              quantity: quantity.isNotEmpty ? quantity : null,
+            ),
+          );
           continue;
         }
       }
 
       // Plain text without quantity pattern
-      items.add(ParsedFoodItem(
-        name: useArabicDigits ? ReportFormatter.toArabicDigits(part) : part,
-        quantity: null,
-      ));
+      items.add(
+        ParsedFoodItem(
+          name: useArabicDigits ? ReportFormatter.toArabicDigits(part) : part,
+          quantity: null,
+        ),
+      );
     }
 
     return items;
@@ -74,12 +80,27 @@ class MealParser {
   /// Checks if calories/macros are mentioned in the report string and extracts values
   static MacroBreakdown? extractMacros(String fullText) {
     // Looks for numbers associated with cal/kcal, protein, carbs, fat
-    final calMatch = RegExp(r'(\d+)\s*(كالوري|سعرة|kcal|cal)', caseSensitive: false).firstMatch(fullText);
-    final pMatch = RegExp(r'(\d+)\s*(جم\s*بروتين|g\s*protein|بروتين)', caseSensitive: false).firstMatch(fullText);
-    final cMatch = RegExp(r'(\d+)\s*(جم\s*نشويات|g\s*carbs|نشويات)', caseSensitive: false).firstMatch(fullText);
-    final fMatch = RegExp(r'(\d+)\s*(جم\s*دهون|g\s*fat|دهون)', caseSensitive: false).firstMatch(fullText);
+    final calMatch = RegExp(
+      r'(\d+)\s*(كالوري|سعرة|kcal|cal)',
+      caseSensitive: false,
+    ).firstMatch(fullText);
+    final pMatch = RegExp(
+      r'(\d+)\s*(جم\s*بروتين|g\s*protein|بروتين)',
+      caseSensitive: false,
+    ).firstMatch(fullText);
+    final cMatch = RegExp(
+      r'(\d+)\s*(جم\s*نشويات|g\s*carbs|نشويات)',
+      caseSensitive: false,
+    ).firstMatch(fullText);
+    final fMatch = RegExp(
+      r'(\d+)\s*(جم\s*دهون|g\s*fat|دهون)',
+      caseSensitive: false,
+    ).firstMatch(fullText);
 
-    if (calMatch == null && pMatch == null && cMatch == null && fMatch == null) {
+    if (calMatch == null &&
+        pMatch == null &&
+        cMatch == null &&
+        fMatch == null) {
       return null;
     }
 
@@ -105,5 +126,6 @@ class MacroBreakdown {
     required this.fatGrams,
   });
 
-  bool get hasData => calories > 0 || proteinGrams > 0 || carbsGrams > 0 || fatGrams > 0;
+  bool get hasData =>
+      calories > 0 || proteinGrams > 0 || carbsGrams > 0 || fatGrams > 0;
 }

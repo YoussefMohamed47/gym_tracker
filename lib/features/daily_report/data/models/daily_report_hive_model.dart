@@ -89,6 +89,5 @@ class DailyReportHiveModel extends HiveObject {
     this.snackEntries,
     this.beforeTrainingEntries,
     this.afterTrainingEntries,
-
   });
 }

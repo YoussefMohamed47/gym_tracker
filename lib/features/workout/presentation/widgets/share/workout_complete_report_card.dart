@@ -244,8 +244,7 @@ class WorkoutCompleteReportCard extends StatelessWidget {
 
     final warmupRoutines = [
       dailyRoutine,
-      if (session.workoutType.isUpperBody)
-        WorkoutCatalog.getUpperBodyWarmup(),
+      if (session.workoutType.isUpperBody) WorkoutCatalog.getUpperBodyWarmup(),
     ];
 
     for (final routine in warmupRoutines) {

@@ -14,9 +14,6 @@ class ReportImageTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DailyMealsReportCard(
-      report: report,
-      isExportMode: isExportMode,
-    );
+    return DailyMealsReportCard(report: report, isExportMode: isExportMode);
   }
 }

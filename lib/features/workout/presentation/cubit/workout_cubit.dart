@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/rest_time_parser.dart';
 import '../../../../core/utils/weight_converter.dart';
@@ -16,7 +17,60 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   final WorkoutRepository repository;
   final CheckPRUseCase? checkPRUseCase;
 
-  WorkoutCubit({required this.repository, this.checkPRUseCase}) : super(WorkoutState.initial());
+  WorkoutCubit({required this.repository, this.checkPRUseCase})
+    : super(WorkoutState.initial());
+
+  /// Which exercise is performed in each slot on which date; when it changes
+  /// (new day, new workout type, or a swap) "last time" is looked up again.
+  static String _previousLookupKey(WorkoutState s) =>
+      '${s.dateKey}#${s.exerciseLogs.entries.map((e) => '${e.key}:${e.value.performedExerciseId}').join(',')}';
+
+  @override
+  void onChange(Change<WorkoutState> change) {
+    super.onChange(change);
+    final next = change.nextState;
+    if (next.dateKey.isEmpty || next.exerciseLogs.isEmpty) return;
+    if (_previousLookupKey(change.currentState) != _previousLookupKey(next)) {
+      _loadPreviousLogs(next);
+    }
+  }
+
+  Future<void> _loadPreviousLogs(WorkoutState forState) async {
+    try {
+      final history = await repository.getHistory();
+      final earlier =
+          history
+              .where((s) => s.dateKey.compareTo(forState.dateKey) < 0)
+              .toList()
+            ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+      final found = <String, PreviousExerciseLog>{};
+      for (final entry in forState.exerciseLogs.entries) {
+        final id = entry.value.performedExerciseId.toLowerCase();
+        for (final session in earlier) {
+          final match = session.exerciseLogs.values.where(
+            (l) =>
+                l.performedExerciseId.toLowerCase() == id &&
+                l.sets.any((s) => s.isPerformed),
+          );
+          if (match.isNotEmpty) {
+            found[entry.key] = PreviousExerciseLog(
+              dateKey: session.dateKey,
+              log: match.first,
+            );
+            break;
+          }
+        }
+      }
+      // Ignore the result if the user moved to another day meanwhile.
+      if (isClosed ||
+          _previousLookupKey(state) != _previousLookupKey(forState)) {
+        return;
+      }
+      emit(state.copyWith(previousLogs: found));
+    } catch (e, st) {
+      debugPrint('WorkoutCubit: last-time lookup failed: $e\n$st');
+    }
+  }
 
   Future<void> loadDate(DateTime date) async {
     emit(state.copyWith(status: WorkoutStatus.loading, selectedDate: date));
@@ -64,26 +118,30 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         // No session found, determine workout type from sequence
         // Important: Filter history to only include sessions BEFORE the selected date
         final history = await repository.getHistory();
-        final pastTypes = history
-            .where((s) => s.dateKey.compareTo(dateKey) < 0)
-            .toList()
-          ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+        final pastTypes =
+            history.where((s) => s.dateKey.compareTo(dateKey) < 0).toList()
+              ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
 
         final workoutTypes = pastTypes.map((s) => s.workoutType).toList();
-        
+
         WorkoutType suggestedType;
         if (workoutTypes.isEmpty) {
           // Fallback to calendar if no history exists yet
           suggestedType = WorkoutDateUtils.getWorkoutTypeForDay(date);
         } else {
           // Calculate the number of days passed since the last session
-          final lastSessionDate = WorkoutDateUtils.parseDateKey(pastTypes.first.dateKey);
+          final lastSessionDate = WorkoutDateUtils.parseDateKey(
+            pastTypes.first.dateKey,
+          );
           final daysPassed = date.difference(lastSessionDate).inDays;
 
           // Advance the sequence by 'daysPassed' steps
           suggestedType = workoutTypes.first;
           for (int i = 0; i < daysPassed; i++) {
-            suggestedType = WorkoutCatalog.getNextWorkoutType([suggestedType, ...workoutTypes.skip(1)]);
+            suggestedType = WorkoutCatalog.getNextWorkoutType([
+              suggestedType,
+              ...workoutTypes.skip(1),
+            ]);
             // Update history list for the next iteration step to handle Rest days correctly
             workoutTypes.insert(0, suggestedType);
           }
@@ -189,7 +247,8 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final updatedSets = List<ExerciseSetLog>.from(log.sets);
       updatedSets[setIndex] = updatedSets[setIndex].copyWith(
         weightKg: weightKg,
-        isPerformed: updatedSets[setIndex].isPerformed, // Preserves manual toggle state
+        isPerformed:
+            updatedSets[setIndex].isPerformed, // Preserves manual toggle state
       );
 
       final updatedLog = log.copyWith(
@@ -214,7 +273,8 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final updatedSets = List<ExerciseSetLog>.from(log.sets);
       updatedSets[setIndex] = updatedSets[setIndex].copyWith(
         actualReps: reps,
-        isPerformed: updatedSets[setIndex].isPerformed, // Preserves manual toggle state
+        isPerformed:
+            updatedSets[setIndex].isPerformed, // Preserves manual toggle state
       );
 
       final updatedLog = log.copyWith(
@@ -274,7 +334,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           }
         }
 
-        final exerciseDef = WorkoutCatalog.getExerciseById(log.performedExerciseId);
+        final exerciseDef = WorkoutCatalog.getExerciseById(
+          log.performedExerciseId,
+        );
         final workoutDef = WorkoutCatalog.getWorkoutByType(state.workoutType);
         ExerciseSlot? foundSlot;
         if (workoutDef != null) {
@@ -294,7 +356,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           }
         }
 
-        final restSecs = RestTimeParser.parseInSeconds(foundSlot?.prescribedRest);
+        final restSecs = RestTimeParser.parseInSeconds(
+          foundSlot?.prescribedRest,
+        );
         startRestTimer(restSecs, exerciseDef.name);
       }
     }
@@ -314,18 +378,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   void tickRestTimer() {
     if (!state.isRestTimerActive) return;
     if (state.restTimerSeconds <= 1) {
-      emit(
-        state.copyWith(
-          isRestTimerActive: false,
-          restTimerSeconds: 0,
-        ),
-      );
+      emit(state.copyWith(isRestTimerActive: false, restTimerSeconds: 0));
     } else {
-      emit(
-        state.copyWith(
-          restTimerSeconds: state.restTimerSeconds - 1,
-        ),
-      );
+      emit(state.copyWith(restTimerSeconds: state.restTimerSeconds - 1));
     }
   }
 
@@ -340,12 +395,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   }
 
   void skipRestTimer() {
-    emit(
-      state.copyWith(
-        isRestTimerActive: false,
-        restTimerSeconds: 0,
-      ),
-    );
+    emit(state.copyWith(isRestTimerActive: false, restTimerSeconds: 0));
   }
 
   Future<void> copyPreviousSession(String plannedId) async {
@@ -461,7 +511,11 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     if (log != null && log.sets.length > setIndex) {
       final currentReps = log.sets[setIndex].actualReps;
       final int baseReps = currentReps ?? (deltaAmount > 0 ? 10 : 0);
-      final newReps = (currentReps != null ? currentReps + deltaAmount : baseReps).clamp(0, 999);
+      final newReps =
+          (currentReps != null ? currentReps + deltaAmount : baseReps).clamp(
+            0,
+            999,
+          );
       updateSetReps(plannedId, setIndex, newReps);
     }
   }
@@ -564,19 +618,13 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
   void clearError() {
     emit(
-      state.copyWith(
-        status: WorkoutStatus.success,
-        clearErrorMessage: true,
-      ),
+      state.copyWith(status: WorkoutStatus.success, clearErrorMessage: true),
     );
   }
 
   void resetStatus() {
     emit(
-      state.copyWith(
-        status: WorkoutStatus.success,
-        clearErrorMessage: true,
-      ),
+      state.copyWith(status: WorkoutStatus.success, clearErrorMessage: true),
     );
   }
 
@@ -612,10 +660,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
     if (isCompletion) {
       emit(
-        state.copyWith(
-          status: WorkoutStatus.saving,
-          clearErrorMessage: true,
-        ),
+        state.copyWith(status: WorkoutStatus.saving, clearErrorMessage: true),
       );
     }
 
@@ -632,10 +677,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
       if (isCompletion) {
         emit(
-          state.copyWith(
-            status: WorkoutStatus.saved,
-            clearErrorMessage: true,
-          ),
+          state.copyWith(status: WorkoutStatus.saved, clearErrorMessage: true),
         );
       } else {
         emit(
@@ -685,7 +727,10 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   }
 
   Future<void> changeWorkoutType(WorkoutType type) async {
-    if (state.status == WorkoutStatus.loading || state.status == WorkoutStatus.saving) return;
+    if (state.status == WorkoutStatus.loading ||
+        state.status == WorkoutStatus.saving) {
+      return;
+    }
 
     emit(state.copyWith(status: WorkoutStatus.loading));
 
@@ -698,10 +743,11 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           workoutType: type,
           exerciseLogs: logs,
           alternativeDrafts: {
-            for (var log in logs.values) log.plannedExerciseId: {log.performedExerciseId: log},
+            for (var log in logs.values)
+              log.plannedExerciseId: {log.performedExerciseId: log},
           },
-          // We keep the dateKey and isEditMode as is. 
-          // If it was an existing session, changing the type will effectively 
+          // We keep the dateKey and isEditMode as is.
+          // If it was an existing session, changing the type will effectively
           // allow the user to overwrite it with new exercises.
         ),
       );
@@ -709,7 +755,12 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       // Persist the selection immediately so it sticks when navigating
       await saveWorkout(forceSave: true, isCompletion: false);
     } catch (e) {
-      emit(state.copyWith(status: WorkoutStatus.failure, errorMessage: e.toString()));
+      emit(
+        state.copyWith(
+          status: WorkoutStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -728,7 +779,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
-  Future<Map<String, ExerciseLog>> _initializeLogsForType(WorkoutType type) async {
+  Future<Map<String, ExerciseLog>> _initializeLogsForType(
+    WorkoutType type,
+  ) async {
     final workoutDef = WorkoutCatalog.getWorkoutByType(type);
     final Map<String, ExerciseLog> logs = {};
 

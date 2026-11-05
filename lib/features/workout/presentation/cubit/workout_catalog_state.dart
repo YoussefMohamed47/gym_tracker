@@ -26,9 +26,9 @@ class WorkoutCatalogLoaded extends WorkoutCatalogState {
   });
 
   CatalogDay get selectedDay => rotationDays.firstWhere(
-        (d) => d.dayNumber == selectedDayNumber,
-        orElse: () => rotationDays.first,
-      );
+    (d) => d.dayNumber == selectedDayNumber,
+    orElse: () => rotationDays.first,
+  );
 
   WorkoutCatalogLoaded copyWith({
     List<CatalogDay>? rotationDays,

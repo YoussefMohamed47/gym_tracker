@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/report_theme_tokens.dart';
 import '../../../../core/utils/report_formatter.dart';
+import '../../domain/model/water_amount.dart';
 
 class WaterTrackerRow extends StatelessWidget {
   final String waterText;
@@ -9,16 +10,10 @@ class WaterTrackerRow extends StatelessWidget {
 
   int _parseGlasses() {
     if (waterText.trim().isEmpty) return 0;
-    final digitsMatch = RegExp(r'(\d+)').firstMatch(waterText);
-    if (digitsMatch != null) {
-      final val = int.tryParse(digitsMatch.group(1)!) ?? 0;
-      // If entered as liters (e.g. 3L), convert roughly to glasses (1L = 4 glasses)
-      if (waterText.toLowerCase().contains('l') || waterText.contains('لتر')) {
-        return (val * 4).clamp(0, 12);
-      }
-      return val.clamp(0, 12);
-    }
-    return 4; // Default if non-empty string without clear number
+    final liters = WaterAmount.parseLiters(waterText);
+    if (liters == null) return 4; // Non-empty text without a clear number
+    // One glass is 250 ml.
+    return (liters * 4).round().clamp(0, 12);
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'alternatives_library.dart';
 import '../../domain/entities/exercise_definition.dart';
 import '../../domain/entities/workout_definition.dart';
 import '../../domain/entities/workout_type.dart';
@@ -368,7 +369,10 @@ class WorkoutCatalog {
       id: 'c_sa_triceps_push_down',
       name: 'SA Triceps Push Down',
       videoUrl: 'https://youtube.com/shorts/w5a5sErWIEw',
-      alternatives: ['push_triceps_push_down', 'push_sa_triceps_over_head_extension'],
+      alternatives: [
+        'push_triceps_push_down',
+        'push_sa_triceps_over_head_extension',
+      ],
     ),
     ExerciseDefinition(
       id: 'c_rear_delt_machine_fly',
@@ -488,7 +492,10 @@ class WorkoutCatalog {
       name: 'Incline Chest Press Machine',
       videoUrl: 'https://youtube.com/shorts/VXaBbUYMfIs',
       tempoNote: 'Light weight, slow tempo',
-      alternatives: ['c_incline_chest_press_smith', 'alt_db_incline_bench_press'],
+      alternatives: [
+        'c_incline_chest_press_smith',
+        'alt_db_incline_bench_press',
+      ],
     ),
     ExerciseDefinition(
       id: 'c_sa_db_lat_row',
@@ -512,14 +519,21 @@ class WorkoutCatalog {
       id: 'c_sa_cable_preacher_bicep_curl',
       name: 'SA Cable Preacher Bicep Curl',
       videoUrl: 'https://youtube.com/shorts/vyP7ggY_baE',
-      alternatives: ['c_sa_db_bench_preacher_curl', 'c_sa_db_preacher_hammer_curl', 'pull_sa_db_preacher_bicep_curl'],
+      alternatives: [
+        'c_sa_db_bench_preacher_curl',
+        'c_sa_db_preacher_hammer_curl',
+        'pull_sa_db_preacher_bicep_curl',
+      ],
     ),
     // Alternative: SA DB Preacher curl on incline bench (one-arm dumbbell)
     ExerciseDefinition(
       id: 'c_sa_db_bench_preacher_curl',
       name: 'SA DB Bench Preacher Curl',
       videoUrl: 'https://www.instagram.com/reel/De2Dm8_ILOA/',
-      alternatives: ['c_sa_cable_preacher_bicep_curl', 'pull_sa_db_preacher_bicep_curl'],
+      alternatives: [
+        'c_sa_cable_preacher_bicep_curl',
+        'pull_sa_db_preacher_bicep_curl',
+      ],
     ),
     ExerciseDefinition(
       id: 'c_sa_triceps_push_down_uc',
@@ -1227,20 +1241,18 @@ class WorkoutCatalog {
   }
 
   static WorkoutDefinition? getWorkoutByType(WorkoutType type) {
-    try {
-      if (type == WorkoutType.legs) {
-        final legs8Day = workouts.where((w) => w.id == 'legs_8day');
-        if (legs8Day.isNotEmpty) return legs8Day.first;
-      }
-      return workouts.firstWhere(
-        (w) =>
-            w.type == type &&
-            w.id != 'daily_routine' &&
-            w.id != 'upper_body_warmup',
-      );
-    } catch (_) {
-      return null;
+    if (type == WorkoutType.legs) {
+      final legs8Day = workouts.where((w) => w.id == 'legs_8day');
+      if (legs8Day.isNotEmpty) return legs8Day.first;
     }
+    return workouts
+        .where(
+          (w) =>
+              w.type == type &&
+              w.id != 'daily_routine' &&
+              w.id != 'upper_body_warmup',
+        )
+        .firstOrNull;
   }
 
   static WorkoutDefinition getDailyRoutine() {
@@ -1252,9 +1264,21 @@ class WorkoutCatalog {
   }
 
   static ExerciseDefinition getExerciseById(String id) {
-    return exercises.firstWhere(
-      (e) => e.id == id,
-      orElse: () => ExerciseDefinition(id: id, name: 'Unknown Exercise'),
-    );
+    return exercises.where((e) => e.id == id).firstOrNull ??
+        AlternativesLibrary.exercises.where((e) => e.id == id).firstOrNull ??
+        ExerciseDefinition(id: id, name: 'Unknown Exercise');
+  }
+
+  /// Every exercise you can swap to: the plan's own plus the alternatives
+  /// library, without "(Legacy)" duplicates of older programs.
+  static List<ExerciseDefinition> get searchableExercises {
+    final seen = <String>{};
+    return [
+      for (final e in [...exercises, ...AlternativesLibrary.exercises])
+        if (!e.name.contains('(Legacy)') &&
+            e.name != 'Unknown Exercise' &&
+            seen.add(e.id))
+          e,
+    ];
   }
 }

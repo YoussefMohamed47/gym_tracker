@@ -46,7 +46,9 @@ class NumericKeypadSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => NumericKeypadSheet(
         title: title,
-        initialValue: initialValue != null ? formatCleanNumber(initialValue) : '',
+        initialValue: initialValue != null
+            ? formatCleanNumber(initialValue)
+            : '',
         unit: unit,
         isDecimal: true,
       ),

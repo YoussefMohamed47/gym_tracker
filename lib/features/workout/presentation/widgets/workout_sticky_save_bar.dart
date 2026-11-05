@@ -8,10 +8,7 @@ import '../cubit/workout_state.dart';
 class WorkoutStickySaveBar extends StatelessWidget {
   final WorkoutState state;
 
-  const WorkoutStickySaveBar({
-    super.key,
-    required this.state,
-  });
+  const WorkoutStickySaveBar({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +29,9 @@ class WorkoutStickySaveBar extends StatelessWidget {
       performedSets += log.sets.where((s) => s.isPerformed).length;
     }
 
-    final percent = totalCount > 0 ? ((performedCount / totalCount) * 100).toInt() : 0;
+    final percent = totalCount > 0
+        ? ((performedCount / totalCount) * 100).toInt()
+        : 0;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
@@ -84,7 +83,9 @@ class WorkoutStickySaveBar extends StatelessWidget {
                     value: totalCount > 0 ? performedCount / totalCount : 0,
                     minHeight: 8,
                     backgroundColor: AppColors.background,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.success,
+                    ),
                   ),
                 ),
               ],

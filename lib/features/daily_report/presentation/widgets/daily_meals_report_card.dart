@@ -17,20 +17,40 @@ class DailyMealsReportCard extends StatelessWidget {
   final DailyReport report;
   final bool isExportMode;
 
+  /// The in-app quick share button. The Nutrition screen turns it off because
+  /// it has its own "save and share" action that also stores the report.
+  final bool showShareButton;
+
   const DailyMealsReportCard({
     super.key,
     required this.report,
     this.isExportMode = false,
+    this.showShareButton = true,
   });
 
   int _calculateLoggedMealsCount() {
     int count = 0;
-    if (report.breakfast.trim().isNotEmpty || report.breakfastEntries.isNotEmpty) count++;
-    if (report.snack.trim().isNotEmpty || report.snackEntries.isNotEmpty) count++;
-    if (report.beforeTraining.trim().isNotEmpty || report.beforeTrainingEntries.isNotEmpty) count++;
-    if (report.lunch.trim().isNotEmpty || report.lunchEntries.isNotEmpty) count++;
-    if (report.afterTraining.trim().isNotEmpty || report.afterTrainingEntries.isNotEmpty) count++;
-    if (report.dinner.trim().isNotEmpty || report.dinnerEntries.isNotEmpty) count++;
+    if (report.breakfast.trim().isNotEmpty ||
+        report.breakfastEntries.isNotEmpty) {
+      count++;
+    }
+    if (report.snack.trim().isNotEmpty || report.snackEntries.isNotEmpty) {
+      count++;
+    }
+    if (report.beforeTraining.trim().isNotEmpty ||
+        report.beforeTrainingEntries.isNotEmpty) {
+      count++;
+    }
+    if (report.lunch.trim().isNotEmpty || report.lunchEntries.isNotEmpty) {
+      count++;
+    }
+    if (report.afterTraining.trim().isNotEmpty ||
+        report.afterTrainingEntries.isNotEmpty) {
+      count++;
+    }
+    if (report.dinner.trim().isNotEmpty || report.dinnerEntries.isNotEmpty) {
+      count++;
+    }
     return count;
   }
 
@@ -231,33 +251,34 @@ class DailyMealsReportCard extends StatelessWidget {
         ),
 
         // Floating Share Button elevated above FloatingNavBar
-        Positioned(
-          bottom: 92,
-          left: 24,
-          child: FloatingActionButton.extended(
-            heroTag: 'share_daily_meals_report_fab',
-            onPressed: () {
-              ReportExporter.captureAndShare(
-                context: context,
-                builder: (ctx) =>
-                    DailyMealsReportCard(report: report, isExportMode: true),
-                fileName: 'daily_meals_report_${report.id}',
-                shareText: 'تقرير الوجبات اليومي عبر SAMAFIT',
-              );
-            },
-            elevation: 8,
-            backgroundColor: const Color(0xFF3A7052),
-            icon: const Icon(Icons.share_rounded, color: Colors.white),
-            label: Text(
-              'مشاركة التقرير',
-              style: ReportThemeTokens.arabicBody(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
+        if (showShareButton)
+          Positioned(
+            bottom: 92,
+            left: 24,
+            child: FloatingActionButton.extended(
+              heroTag: 'share_daily_meals_report_fab',
+              onPressed: () {
+                ReportExporter.captureAndShare(
+                  context: context,
+                  builder: (ctx) =>
+                      DailyMealsReportCard(report: report, isExportMode: true),
+                  fileName: 'daily_meals_report_${report.id}',
+                  shareText: 'تقرير الوجبات اليومي عبر SAMAFIT',
+                );
+              },
+              elevation: 8,
+              backgroundColor: const Color(0xFF3A7052),
+              icon: const Icon(Icons.share_rounded, color: Colors.white),
+              label: Text(
+                'مشاركة التقرير',
+                style: ReportThemeTokens.arabicBody(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

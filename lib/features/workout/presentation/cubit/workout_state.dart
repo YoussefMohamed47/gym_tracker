@@ -5,6 +5,16 @@ import '../../domain/entities/workout_type.dart';
 
 enum WorkoutStatus { initial, loading, success, failure, saving, saved }
 
+/// The most recent earlier session of an exercise, for the "Last time" panel.
+class PreviousExerciseLog extends Equatable {
+  final String dateKey;
+  final ExerciseLog log;
+  const PreviousExerciseLog({required this.dateKey, required this.log});
+
+  @override
+  List<Object?> get props => [dateKey, log];
+}
+
 class WorkoutState extends Equatable {
   final WorkoutStatus status;
   final DateTime selectedDate;
@@ -29,6 +39,10 @@ class WorkoutState extends Equatable {
   // PR Gamification
   final String? prAchievedForPlannedId;
 
+  /// Key: plannedExerciseId. Filled in after load, only from dates before
+  /// [dateKey], so today's own sets never count as "last time".
+  final Map<String, PreviousExerciseLog> previousLogs;
+
   const WorkoutState({
     required this.status,
     required this.selectedDate,
@@ -44,6 +58,7 @@ class WorkoutState extends Equatable {
     this.restTimerTargetSeconds = 0,
     this.restTimerExerciseName = '',
     this.prAchievedForPlannedId,
+    this.previousLogs = const {},
   });
 
   factory WorkoutState.initial() {
@@ -80,6 +95,7 @@ class WorkoutState extends Equatable {
     String? restTimerExerciseName,
     String? prAchievedForPlannedId,
     bool clearPR = false,
+    Map<String, PreviousExerciseLog>? previousLogs,
   }) {
     return WorkoutState(
       status: status ?? this.status,
@@ -90,15 +106,19 @@ class WorkoutState extends Equatable {
       alternativeDrafts: alternativeDrafts ?? this.alternativeDrafts,
       displayUnit: displayUnit ?? this.displayUnit,
       isEditMode: isEditMode ?? this.isEditMode,
-      errorMessage:
-          clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
+      errorMessage: clearErrorMessage
+          ? null
+          : (errorMessage ?? this.errorMessage),
       isRestTimerActive: isRestTimerActive ?? this.isRestTimerActive,
       restTimerSeconds: restTimerSeconds ?? this.restTimerSeconds,
       restTimerTargetSeconds:
           restTimerTargetSeconds ?? this.restTimerTargetSeconds,
       restTimerExerciseName:
           restTimerExerciseName ?? this.restTimerExerciseName,
-      prAchievedForPlannedId: clearPR ? null : (prAchievedForPlannedId ?? this.prAchievedForPlannedId),
+      prAchievedForPlannedId: clearPR
+          ? null
+          : (prAchievedForPlannedId ?? this.prAchievedForPlannedId),
+      previousLogs: previousLogs ?? this.previousLogs,
     );
   }
 
@@ -118,5 +138,6 @@ class WorkoutState extends Equatable {
     restTimerTargetSeconds,
     restTimerExerciseName,
     prAchievedForPlannedId,
+    previousLogs,
   ];
 }
