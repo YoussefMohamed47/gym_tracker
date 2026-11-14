@@ -34,6 +34,15 @@ class AppColors {
   static const onSurface = Color(0xFF13221F);
   static const onSurfaceVariant = Color(0xFF64776F);
   static const outline = Color(0xFFD8E3DB);
+
+  /// Light mode: fill for chips, steppers and badges on a white card.
+  static const lightElevated = Color(0xFFF0F2F7);
+
+  /// Light mode: a card nested inside a white card.
+  static const lightInset = Color(0xFFF7F8FA);
+
+  /// The upper-body warm-up's accent.
+  static const warmupOrange = Color(0xFFFF9500);
   static const primaryDark = gradientStart;
   static const darkSurface = darkCard;
   static const darkSurfaceVariant = darkElevated;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/app_colors.dart';
@@ -205,23 +206,39 @@ class _Glass extends StatelessWidget {
   }
 }
 
-class _AddButton extends StatelessWidget {
+class _AddButton extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
   const _AddButton({required this.label, required this.onTap});
 
   @override
+  State<_AddButton> createState() => _AddButtonState();
+}
+
+class _AddButtonState extends State<_AddButton> {
+  /// One "+250 ml" bubble per tap, removed when its float-up ends.
+  final List<int> _floats = [];
+  int _nextFloat = 0;
+
+  void _tap() {
+    widget.onTap();
+    // Skipped with reduced motion: the amount above already updates.
+    if (MediaQuery.disableAnimationsOf(context)) return;
+    setState(() => _floats.add(_nextFloat++));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
+    final button = Material(
       color: AppColors.violetAccent.withValues(alpha: .16),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
+        onTap: _tap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
           child: Text(
-            label,
+            widget.label,
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -230,6 +247,42 @@ class _AddButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.topCenter,
+      children: [
+        button,
+        for (final id in _floats)
+          Positioned(
+            top: -6,
+            child: IgnorePointer(
+              child:
+                  Text(
+                        '${widget.label} ml',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.violetAccent,
+                        ),
+                      )
+                      .animate(
+                        key: ValueKey(id),
+                        onComplete: (_) {
+                          if (mounted) setState(() => _floats.remove(id));
+                        },
+                      )
+                      .moveY(
+                        begin: 0,
+                        end: -26,
+                        duration: 600.ms,
+                        curve: Curves.easeOutCubic,
+                      )
+                      .fadeOut(delay: 250.ms, duration: 350.ms),
+            ),
+          ),
+      ],
     );
   }
 }

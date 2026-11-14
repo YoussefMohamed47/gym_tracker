@@ -19,20 +19,16 @@ class BottomDock extends StatelessWidget {
     HapticFeedback.mediumImpact();
     final workoutCubit = context.read<WorkoutCubit>();
 
-    int totalExercises = state.exerciseLogs.length;
-    int performedExercises = state.exerciseLogs.values
-        .where((l) => l.sets.any((s) => s.isPerformed))
-        .length;
+    final main = state.progress;
+    final totalExercises = main.totalExercises;
+    final performedExercises = main.doneExercises;
+    final totalSets = main.totalSets;
+    final performedSets = main.doneSets;
 
-    int totalSets = 0;
-    int performedSets = 0;
     double totalVolumeKg = 0;
-
     for (final log in state.exerciseLogs.values) {
-      totalSets += log.sets.length;
       for (final s in log.sets) {
         if (s.isPerformed) {
-          performedSets++;
           final weight = s.weightKg ?? 0;
           final reps = s.actualReps ?? 1;
           totalVolumeKg += weight * reps;
@@ -208,7 +204,7 @@ class BottomDock extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkElevated : const Color(0xFFF7F8FA),
+        color: isDark ? AppColors.darkElevated : AppColors.lightInset,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -231,7 +227,7 @@ class BottomDock extends StatelessWidget {
           Text(
             title,
             style: ReportThemeTokens.outfitSubtext(
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.5,
               color: AppColors.textSecondary,
@@ -251,21 +247,12 @@ class BottomDock extends StatelessWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    int totalExercises = state.exerciseLogs.length;
-    int performedExercises = state.exerciseLogs.values
-        .where((l) => l.sets.any((s) => s.isPerformed))
-        .length;
-
-    int totalSets = 0;
-    int performedSets = 0;
-    for (final log in state.exerciseLogs.values) {
-      totalSets += log.sets.length;
-      performedSets += log.sets.where((s) => s.isPerformed).length;
-    }
-
-    final double exerciseProgress = totalExercises > 0
-        ? (performedExercises / totalExercises)
-        : 0.0;
+    final main = state.progress;
+    final totalExercises = main.totalExercises;
+    final performedExercises = main.doneExercises;
+    final totalSets = main.totalSets;
+    final performedSets = main.doneSets;
+    final double exerciseProgress = main.exerciseFraction;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -302,7 +289,7 @@ class BottomDock extends StatelessWidget {
                           '$performedExercises/$totalExercises EXERCISES',
                           style: ReportThemeTokens.outfitSubtext(
                             fontWeight: FontWeight.w900,
-                            fontSize: 10,
+                            fontSize: 11,
                             letterSpacing: 0.5,
                             color: AppColors.textSecondary,
                           ),
@@ -311,7 +298,7 @@ class BottomDock extends StatelessWidget {
                           '$performedSets/$totalSets SETS',
                           style: ReportThemeTokens.outfitSubtext(
                             fontWeight: FontWeight.w900,
-                            fontSize: 10,
+                            fontSize: 11,
                             letterSpacing: 0.5,
                             color: AppColors.indigoAccent,
                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_tracker_report/core/widgets/bilingual_label.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -97,13 +98,10 @@ class _SupplementSelectorState extends State<SupplementSelector> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'المكملات والفيتامينات (Supplements / Vitamins)',
-              style: GoogleFonts.notoKufiArabic(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: colorScheme.onSurface,
-              ),
+            const BilingualLabel(
+              arabic: 'المكملات والفيتامينات',
+              english: 'Supplements & vitamins',
+              size: 13,
             ),
             const SizedBox(height: 8),
             Material(
@@ -118,12 +116,11 @@ class _SupplementSelectorState extends State<SupplementSelector> {
               child: Column(
                 children: [
                   CheckboxListTile(
-                    title: Text(
-                      'Zandros (زندروس)',
-                      style: GoogleFonts.notoKufiArabic(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    title: const BilingualLabel(
+                      arabic: 'زندروس',
+                      english: 'Zandros',
+                      size: 13,
+                      weight: FontWeight.w600,
                     ),
                     value: _zandrosChecked,
                     activeColor: colorScheme.primary,
@@ -142,12 +139,11 @@ class _SupplementSelectorState extends State<SupplementSelector> {
                     color: colorScheme.outline.withValues(alpha: 0.2),
                   ),
                   CheckboxListTile(
-                    title: Text(
-                      'Totavit (توتافيت)',
-                      style: GoogleFonts.notoKufiArabic(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    title: const BilingualLabel(
+                      arabic: 'توتافيت',
+                      english: 'Totavit',
+                      size: 13,
+                      weight: FontWeight.w600,
                     ),
                     value: _totavitChecked,
                     activeColor: colorScheme.primary,

@@ -38,9 +38,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // The main screen already loads today at app start; only load here if
-      // nothing has been loaded yet.
-      final cubit = context.read<WorkoutCubit>();
-      if (cubit.state.dateKey.isEmpty) cubit.loadDate(DateTime.now());
+      // nothing has been loaded yet or the day has changed since.
+      context.read<WorkoutCubit>().ensureToday(DateTime.now());
     });
   }
 
@@ -209,6 +208,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       SliverToBoxAdapter(
                         child: WeekDaySelector(
                           selectedDate: state.selectedDate,
+                          openType: state.workoutType,
                           onDateSelected: (date) =>
                               context.read<WorkoutCubit>().loadDate(date),
                         ),

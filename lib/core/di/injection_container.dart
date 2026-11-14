@@ -85,7 +85,12 @@ Future<void> init() async {
     () => HistoryCubit(sl(), get30DayVolume: sl(), getMealAdherence: sl()),
   );
   sl.registerFactory(
-    () => WorkoutCubit(repository: sl(), checkPRUseCase: sl()),
+    () => WorkoutCubit(
+      repository: sl(),
+      getPreviousExerciseLog: sl(),
+      saveWorkoutSession: sl(),
+      checkPRUseCase: sl(),
+    ),
   );
   sl.registerFactory(() => WorkoutCatalogCubit(getWorkoutCatalog: sl()));
 

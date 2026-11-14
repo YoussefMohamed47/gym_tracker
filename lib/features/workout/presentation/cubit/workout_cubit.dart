@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/error/api_result.dart';
 import '../../../../core/utils/rest_time_parser.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../data/datasources/workout_catalog.dart';
@@ -10,15 +13,118 @@ import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../domain/repositories/workout_repository.dart';
 import '../../domain/usecases/check_pr_usecase.dart';
+import '../../domain/usecases/get_previous_exercise_log.dart';
+import '../../domain/usecases/save_workout_session.dart';
 import '../../utils/date_utils.dart';
 import 'workout_state.dart';
 
 class WorkoutCubit extends Cubit<WorkoutState> {
   final WorkoutRepository repository;
+  final GetPreviousExerciseLog getPreviousExerciseLog;
+  final SaveWorkoutSession saveWorkoutSession;
   final CheckPRUseCase? checkPRUseCase;
 
-  WorkoutCubit({required this.repository, this.checkPRUseCase})
-    : super(WorkoutState.initial());
+  /// How long after the last edit the open day saves itself; null turns
+  /// auto-save off (tests).
+  final Duration? autoSaveDelay;
+
+  Timer? _autoSaveTimer;
+
+  WorkoutCubit({
+    required this.repository,
+    required this.getPreviousExerciseLog,
+    required this.saveWorkoutSession,
+    this.checkPRUseCase,
+    this.autoSaveDelay = const Duration(milliseconds: 800),
+  }) : super(WorkoutState.initial());
+
+  /// A day is worth keeping once a set is ticked, or once it was saved
+  /// before. Untouched days are never written, so they don't count as
+  /// trained in the rotation.
+  static bool _worthSaving(WorkoutState s) =>
+      s.isEditMode ||
+      s.exerciseLogs.values.any((log) => log.sets.any((x) => x.isPerformed));
+
+  void _scheduleAutoSave() {
+    final delay = autoSaveDelay;
+    if (delay == null) return;
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer(delay, _autoSave);
+  }
+
+  /// Saves the open day without changing the screen's status.
+  Future<void> _autoSave() async {
+    _autoSaveTimer = null;
+    final snapshot = state;
+    if (isClosed ||
+        snapshot.dateKey.isEmpty ||
+        snapshot.status == WorkoutStatus.loading ||
+        snapshot.status == WorkoutStatus.saving ||
+        !_worthSaving(snapshot)) {
+      return;
+    }
+    try {
+      // Through the use case, which also removes photos you replaced.
+      await saveWorkoutSession(
+        WorkoutSession(
+          dateKey: snapshot.dateKey,
+          workoutType: snapshot.workoutType,
+          exerciseLogs: snapshot.exerciseLogs,
+          displayUnit: snapshot.displayUnit,
+        ),
+      );
+      // The day now exists in storage: keep saving even if every set is
+      // unticked later.
+      if (!isClosed && state.dateKey == snapshot.dateKey && !state.isEditMode) {
+        emit(state.copyWith(isEditMode: true));
+      }
+    } catch (e) {
+      debugPrint('WorkoutCubit: auto-save failed: $e');
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            status: WorkoutStatus.failure,
+            errorMessage: "Couldn't save your workout. Try Finish again.",
+          ),
+        );
+      }
+    }
+  }
+
+  /// Writes an edit still waiting for its auto-save right away.
+  Future<void> _flushPendingAutoSave() async {
+    if (!(_autoSaveTimer?.isActive ?? false)) return;
+    _autoSaveTimer!.cancel();
+    await _autoSave();
+  }
+
+  @override
+  Future<void> close() async {
+    // Don't lose the last edit when the screen goes away.
+    await _flushPendingAutoSave();
+    return super.close();
+  }
+
+  /// The last time each exercise was done, before [beforeDateKey] (today when
+  /// no day is open yet). A failed lookup just means nothing to show.
+  Future<Map<String, PreviousExerciseLog>> _lastPerformed(
+    List<String> exerciseIds,
+    String beforeDateKey,
+  ) async {
+    final result = await getPreviousExerciseLog(
+      exerciseIds,
+      beforeDateKey: beforeDateKey.isEmpty
+          ? WorkoutDateUtils.formatDateKey(DateTime.now())
+          : beforeDateKey,
+    );
+    switch (result) {
+      case ApiSuccess(:final data):
+        return data;
+      case ApiFailure(:final failure):
+        debugPrint('WorkoutCubit: last-time lookup failed: ${failure.message}');
+        return const {};
+    }
+  }
 
   /// Which exercise is performed in each slot on which date; when it changes
   /// (new day, new workout type, or a swap) "last time" is looked up again.
@@ -30,49 +136,68 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     super.onChange(change);
     final next = change.nextState;
     if (next.dateKey.isEmpty || next.exerciseLogs.isEmpty) return;
+    // An edit on the same day (not a day loading): save it shortly.
+    if (!identical(change.currentState.exerciseLogs, next.exerciseLogs) &&
+        change.currentState.dateKey == next.dateKey &&
+        _worthSaving(next)) {
+      _scheduleAutoSave();
+    }
     if (_previousLookupKey(change.currentState) != _previousLookupKey(next)) {
       _loadPreviousLogs(next);
     }
   }
 
   Future<void> _loadPreviousLogs(WorkoutState forState) async {
-    try {
-      final history = await repository.getHistory();
-      final earlier =
-          history
-              .where((s) => s.dateKey.compareTo(forState.dateKey) < 0)
-              .toList()
-            ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
-      final found = <String, PreviousExerciseLog>{};
-      for (final entry in forState.exerciseLogs.entries) {
-        final id = entry.value.performedExerciseId.toLowerCase();
-        for (final session in earlier) {
-          final match = session.exerciseLogs.values.where(
-            (l) =>
-                l.performedExerciseId.toLowerCase() == id &&
-                l.sets.any((s) => s.isPerformed),
-          );
-          if (match.isNotEmpty) {
-            found[entry.key] = PreviousExerciseLog(
-              dateKey: session.dateKey,
-              log: match.first,
-            );
-            break;
-          }
-        }
-      }
-      // Ignore the result if the user moved to another day meanwhile.
-      if (isClosed ||
-          _previousLookupKey(state) != _previousLookupKey(forState)) {
+    final byExercise = await _lastPerformed([
+      for (final log in forState.exerciseLogs.values) log.performedExerciseId,
+    ], forState.dateKey);
+    final found = <String, PreviousExerciseLog>{
+      for (final entry in forState.exerciseLogs.entries)
+        entry.key: ?byExercise[entry.value.performedExerciseId],
+    };
+    // Ignore the result if the user moved to another day meanwhile.
+    if (isClosed || _previousLookupKey(state) != _previousLookupKey(forState)) {
+      return;
+    }
+    emit(state.copyWith(previousLogs: found));
+  }
+
+  /// The calendar day on which [ensureToday] last opened today's workout.
+  String? _openedOnDayKey;
+
+  /// Opens today's workout the first time, and again once the calendar day
+  /// has changed (e.g. the app stayed in memory since the last training).
+  /// On the same day it keeps whatever date you are looking at.
+  ///
+  /// Sets ticked done on the open day are saved before switching, so a
+  /// workout that runs past midnight is not lost.
+  Future<void> ensureToday(DateTime now) async {
+    final todayKey = WorkoutDateUtils.formatDateKey(now);
+    if (state.dateKey.isNotEmpty && _openedOnDayKey == todayKey) return;
+    if (state.status == WorkoutStatus.loading ||
+        state.status == WorkoutStatus.saving) {
+      return;
+    }
+    _openedOnDayKey = todayKey;
+
+    final hasDoneSets = state.exerciseLogs.values.any(
+      (log) => log.sets.any((s) => s.isPerformed),
+    );
+    if (state.dateKey.isNotEmpty && hasDoneSets) {
+      await saveWorkout(forceSave: true, isCompletion: false);
+      if (state.status == WorkoutStatus.failure) {
+        // Keep the unsaved day on screen; try again on the next return.
+        _openedOnDayKey = null;
         return;
       }
-      emit(state.copyWith(previousLogs: found));
-    } catch (e, st) {
-      debugPrint('WorkoutCubit: last-time lookup failed: $e\n$st');
     }
+    await loadDate(now);
   }
 
   Future<void> loadDate(DateTime date) async {
+    // Save the day being left first, so an edit made just before switching
+    // isn't lost.
+    await _flushPendingAutoSave();
     emit(state.copyWith(status: WorkoutStatus.loading, selectedDate: date));
 
     final dateKey = WorkoutDateUtils.formatDateKey(date);
@@ -84,22 +209,14 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       if (session != null) {
         var logs = session.exerciseLogs;
         if (session.workoutType.isUpperBody) {
-          final mutableLogs = Map<String, ExerciseLog>.from(logs);
-          final warmup = WorkoutCatalog.getUpperBodyWarmup();
-          bool missingWarmup = false;
-          for (final slot in warmup.exercises) {
-            if (!mutableLogs.containsKey(slot.exerciseId)) {
-              final log = await _createInitialLog(
-                'upper_body_warmup',
-                slot.exerciseId,
-                slot.prescribedSets,
-              );
-              mutableLogs[slot.exerciseId] = log;
-              missingWarmup = true;
-            }
-          }
-          if (missingWarmup) {
-            logs = mutableLogs;
+          final missing = WorkoutCatalog.getUpperBodyWarmup().exercises
+              .where((slot) => !logs.containsKey(slot.exerciseId))
+              .toList();
+          if (missing.isNotEmpty) {
+            logs = {
+              ...logs,
+              ...await _createInitialLogs(missing, beforeDateKey: dateKey),
+            };
           }
         }
 
@@ -109,6 +226,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
             dateKey: dateKey,
             selectedDate: date,
             workoutType: session.workoutType,
+            mainExerciseIds: _mainExerciseIds(session.workoutType),
             exerciseLogs: logs,
             displayUnit: session.displayUnit,
             isEditMode: true,
@@ -127,7 +245,8 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         WorkoutType suggestedType;
         if (workoutTypes.isEmpty) {
           // Fallback to calendar if no history exists yet
-          suggestedType = WorkoutDateUtils.getWorkoutTypeForDay(date);
+          // No history yet: start the 8-day rotation at day 1.
+          suggestedType = WorkoutCatalog.trainingSequence.first;
         } else {
           // Calculate the number of days passed since the last session
           final lastSessionDate = WorkoutDateUtils.parseDateKey(
@@ -147,7 +266,10 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           }
         }
 
-        final logs = await _initializeLogsForType(suggestedType);
+        final logs = await _initializeLogsForType(
+          suggestedType,
+          beforeDateKey: dateKey,
+        );
 
         emit(
           state.copyWith(
@@ -155,6 +277,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
             dateKey: dateKey,
             selectedDate: date,
             workoutType: suggestedType,
+            mainExerciseIds: _mainExerciseIds(suggestedType),
             exerciseLogs: logs,
             alternativeDrafts: {
               for (var log in logs.values)
@@ -175,16 +298,31 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
-  Future<ExerciseLog> _createInitialLog(
-    String workoutTypeName,
+  /// Fresh logs for [slots], keyed by exercise ID, each prefilled with the
+  /// weight and reps of the last time it was done on any training day before
+  /// [beforeDateKey]. History is read once for all of them.
+  Future<Map<String, ExerciseLog>> _createInitialLogs(
+    List<ExerciseSlot> slots, {
+    required String beforeDateKey,
+  }) async {
+    final previous = await _lastPerformed([
+      for (final slot in slots) slot.exerciseId,
+    ], beforeDateKey);
+    return {
+      for (final slot in slots)
+        slot.exerciseId: _buildInitialLog(
+          slot.exerciseId,
+          slot.prescribedSets,
+          previous[slot.exerciseId]?.log,
+        ),
+    };
+  }
+
+  ExerciseLog _buildInitialLog(
     String exerciseId,
     int prescribedSets,
-  ) async {
-    final prevLog = await repository.getPreviousExerciseLog(
-      workoutTypeName,
-      exerciseId,
-    );
-
+    ExerciseLog? prevLog,
+  ) {
     final List<ExerciseSetLog> sets = [];
     for (int i = 0; i < prescribedSets; i++) {
       double? weightKg;
@@ -402,12 +540,9 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     final log = state.exerciseLogs[plannedId];
     if (log == null) return;
 
-    final prevLog = await repository.getPreviousExerciseLog(
-      state.workoutType == WorkoutType.rest
-          ? 'daily_routine'
-          : state.workoutType.name,
+    final prevLog = (await _lastPerformed([
       log.performedExerciseId,
-    );
+    ], state.dateKey))[log.performedExerciseId]?.log;
 
     if (prevLog == null || prevLog.sets.isEmpty) return;
 
@@ -580,12 +715,11 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       // We can get it from the currentLog since it was initialized with correct sets.
       final prescribedSets = currentLog.sets.length;
 
-      final newLog = await _createInitialLog(
-        state.workoutType == WorkoutType.rest
-            ? 'daily_routine'
-            : state.workoutType.name,
+      final previous = await _lastPerformed([alternativeId], state.dateKey);
+      final newLog = _buildInitialLog(
         alternativeId,
         prescribedSets,
+        previous[alternativeId]?.log,
       );
 
       // Important: Preserve the plannedExerciseId
@@ -635,24 +769,18 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     if (state.exerciseLogs.isEmpty && state.workoutType != WorkoutType.rest) {
       return;
     }
+    // This save covers any pending auto-save.
+    _autoSaveTimer?.cancel();
 
-    // An exercise is considered performed if at least one of its sets is performed.
-    final List<ExerciseLog> performedLogs = [];
-    final List<ExerciseLog> unperformedLogs = [];
+    // An exercise is done once one of its sets is. Only the main lifts are
+    // checked (the routine on a rest day), the same ones the dock counts.
+    final notDone = state.progress.exercisesNotDone;
 
-    for (final log in state.exerciseLogs.values) {
-      if (log.sets.any((s) => s.isPerformed)) {
-        performedLogs.add(log);
-      } else {
-        unperformedLogs.add(log);
-      }
-    }
-
-    if (unperformedLogs.isNotEmpty && !forceSave) {
+    if (notDone > 0 && !forceSave) {
       emit(
         state.copyWith(
           status: WorkoutStatus.failure,
-          errorMessage: 'REVIEW_REQUIRED:${unperformedLogs.length}',
+          errorMessage: 'REVIEW_REQUIRED:$notDone',
         ),
       );
       return;
@@ -735,12 +863,16 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     emit(state.copyWith(status: WorkoutStatus.loading));
 
     try {
-      final logs = await _initializeLogsForType(type);
+      final logs = await _initializeLogsForType(
+        type,
+        beforeDateKey: state.dateKey,
+      );
 
       emit(
         state.copyWith(
           status: WorkoutStatus.success,
           workoutType: type,
+          mainExerciseIds: _mainExerciseIds(type),
           exerciseLogs: logs,
           alternativeDrafts: {
             for (var log in logs.values)
@@ -779,50 +911,31 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     }
   }
 
+  /// The day's planned lifts, without warm-up or routine; none on rest days.
+  static List<String> _mainExerciseIds(WorkoutType type) => [
+    ...?WorkoutCatalog.getWorkoutByType(
+      type,
+    )?.exercises.map((slot) => slot.exerciseId),
+  ];
+
   Future<Map<String, ExerciseLog>> _initializeLogsForType(
-    WorkoutType type,
-  ) async {
+    WorkoutType type, {
+    required String beforeDateKey,
+  }) async {
     final workoutDef = WorkoutCatalog.getWorkoutByType(type);
-    final Map<String, ExerciseLog> logs = {};
-
-    if (workoutDef != null) {
-      for (final slot in workoutDef.exercises) {
-        final log = await _createInitialLog(
-          type.name,
-          slot.exerciseId,
-          slot.prescribedSets,
-        );
-        logs[slot.exerciseId] = log;
-      }
+    // First slot per exercise wins: the day's own, then the upper-body
+    // warm-up if applicable, then the daily routine (always included).
+    final slots = <String, ExerciseSlot>{};
+    for (final slot in [
+      ...?workoutDef?.exercises,
+      if (type.isUpperBody) ...WorkoutCatalog.getUpperBodyWarmup().exercises,
+      ...WorkoutCatalog.getDailyRoutine().exercises,
+    ]) {
+      slots.putIfAbsent(slot.exerciseId, () => slot);
     }
-
-    // Add upper body warm-up items if applicable
-    if (type.isUpperBody) {
-      final warmup = WorkoutCatalog.getUpperBodyWarmup();
-      for (final slot in warmup.exercises) {
-        if (!logs.containsKey(slot.exerciseId)) {
-          final log = await _createInitialLog(
-            'upper_body_warmup',
-            slot.exerciseId,
-            slot.prescribedSets,
-          );
-          logs[slot.exerciseId] = log;
-        }
-      }
-    }
-
-    // Always add daily routine items to logs (Data-Driven)
-    final dailyRoutine = WorkoutCatalog.getDailyRoutine();
-    for (final slot in dailyRoutine.exercises) {
-      if (!logs.containsKey(slot.exerciseId)) {
-        final log = await _createInitialLog(
-          'daily_routine',
-          slot.exerciseId,
-          slot.prescribedSets,
-        );
-        logs[slot.exerciseId] = log;
-      }
-    }
-    return logs;
+    return _createInitialLogs(
+      slots.values.toList(),
+      beforeDateKey: beforeDateKey,
+    );
   }
 }

@@ -78,7 +78,8 @@ class DailyReportCubit extends Cubit<DailyReportState> {
         final workoutTypes = pastTypes.map((s) => s.workoutType).toList();
         WorkoutType suggestedType;
         if (workoutTypes.isEmpty) {
-          suggestedType = WorkoutDateUtils.getWorkoutTypeForDay(now);
+          // No history yet: start the 8-day rotation at day 1.
+          suggestedType = WorkoutCatalog.trainingSequence.first;
         } else {
           final lastSessionDate = WorkoutDateUtils.parseDateKey(
             pastTypes.first.dateKey,

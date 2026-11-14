@@ -9,201 +9,201 @@ class WorkoutCatalog {
     // --- PUSH (Saturday) ---
     ExerciseDefinition(
       id: 'push_chest_press_machine',
-      name: 'chest press machine',
+      name: 'Chest Press Machine',
       videoUrl: 'https://youtu.be/vnd-GBtTMLI?si=QpCyy_EEtcNHVN10',
       alternatives: ['alt_db_bench_press'],
     ),
     ExerciseDefinition(
       id: 'push_incline_chest_press_machine',
-      name: 'Incline chest press machine',
+      name: 'Incline Chest Press Machine',
       videoUrl: 'https://youtu.be/bbbiEEAEsP8?si=Fc0PZfw-NdNg-9ee',
       alternatives: ['alt_db_incline_bench_press'],
     ),
     ExerciseDefinition(
       id: 'push_shoulder_press_machine',
-      name: 'Shoulder press machine',
+      name: 'Shoulder Press Machine',
       videoUrl: 'https://youtu.be/MjVDrYPD7Rs?si=AypoYflVjEL4O4g5',
       alternatives: ['alt_db_shoulder_press'],
     ),
     ExerciseDefinition(
       id: 'push_cable_lateral_raises',
-      name: 'Cable lateral raises',
+      name: 'Cable Lateral Raises',
       videoUrl: 'https://youtu.be/vFODLn4zEHk?si=bHtMI9YkFJaWVWw5',
     ),
     ExerciseDefinition(
       id: 'push_sa_triceps_over_head_extension',
-      name: 'SA triceps over head extension',
+      name: 'SA Triceps Over Head Extension',
       videoUrl: 'https://youtu.be/FE_AsjcTImc?si=83uGv-7ZZqMXtlCn',
     ),
     ExerciseDefinition(
       id: 'push_triceps_push_down',
-      name: 'Triceps push down',
+      name: 'Triceps Push Down',
       videoUrl: 'https://youtube.com/shorts/WjLJ7zIppXQ?si=2F4GVDQYVmElNolD',
     ),
     ExerciseDefinition(
       id: 'push_forearm_exercise_variations',
-      name: 'Forearm exercise variations',
+      name: 'Forearm Exercise Variations',
       videoUrl: 'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
     ),
 
     // --- PULL (Sunday) ---
     ExerciseDefinition(
       id: 'pull_t_bar_row',
-      name: 'T-bar row',
+      name: 'T-Bar Row',
       videoUrl: 'https://youtu.be/BVSTYt02SuY?si=V4wqQxy6ryCl9idR',
       alternatives: ['alt_chest_supported_db_row'],
     ),
     ExerciseDefinition(
       id: 'pull_sa_lat_pull_down',
-      name: 'SA lat pull down',
+      name: 'SA Lat Pull Down',
       videoUrl: 'https://youtu.be/bCjRRJ2lI8Y?si=iXhhCxKgogimdqyH',
     ),
     ExerciseDefinition(
       id: 'pull_sa_iso_lateral_lat_row',
-      name: 'SA iso-lateral lat row',
+      name: 'SA Iso-Lateral Lat Row',
       videoUrl: 'https://youtu.be/SJRCqL85ypE?si=WUQbYJEoANYH6pGe',
       alternatives: ['alt_sa_db_row'],
     ),
     ExerciseDefinition(
       id: 'pull_cable_rear_delt_fly',
-      name: 'Cable rear delt fly',
+      name: 'Cable Rear Delt Fly',
       videoUrl: 'https://youtube.com/shorts/P5CXx_jgTDE?si=qOrErIqzLz2Y4bIk',
     ),
     ExerciseDefinition(
       id: 'pull_sa_db_preacher_bicep_curl',
-      name: 'SA DB preacher bicep curl',
+      name: 'SA DB Preacher Bicep Curl',
       videoUrl: 'https://youtube.com/shorts/oHHNXMLvs1c?si=H2RRkomltgOITqGf',
     ),
     ExerciseDefinition(
       id: 'pull_cable_hammer_curl',
-      name: 'Cable hammer curl',
+      name: 'Cable Hammer Curl',
       videoUrl: 'https://youtube.com/shorts/FO5UpcspYpE?si=qpnKWY_y00v_FGRo',
     ),
     ExerciseDefinition(
       id: 'pull_db_shrugs',
-      name: 'DB shrugs',
+      name: 'DB Shrugs',
       videoUrl: 'https://youtube.com/shorts/rFsSeClGnNA?si=vLn4ffTmYiezyOah',
     ),
     ExerciseDefinition(
       id: 'pull_forearm_exercise_variations',
-      name: 'Forearm exercise variations',
+      name: 'Forearm Exercise Variations',
       videoUrl: 'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
     ),
 
     // --- LEGS (Monday) ---
     ExerciseDefinition(
       id: 'legs_body_weighted_squat',
-      name: 'Body weighted squat',
+      name: 'Body Weighted Squat',
       videoUrl: 'https://youtube.com/shorts/-5LhNSMBrEs?si=iQZlcmTllyBih47K',
     ),
     ExerciseDefinition(
       id: 'legs_leg_extension',
-      name: 'Leg extension',
+      name: 'Leg Extension',
       videoUrl: 'https://youtube.com/shorts/2zZ3vkPsExQ?si=2VhT0zPCafluamKJ',
       alternatives: ['alt_goblet_squat'],
     ),
     ExerciseDefinition(
       id: 'legs_adduction_machine',
-      name: 'Adduction machine',
+      name: 'Adduction Machine',
       videoUrl: 'https://youtu.be/mvIxYwz-Vkg?si=WLG9CIR_9PEBC_0_',
       alternatives: ['alt_banded_adduction'],
     ),
     ExerciseDefinition(
       id: 'legs_body_weighted_hip_thrust',
-      name: 'Body weighted hip thrust',
+      name: 'Body Weighted Hip Thrust',
       videoUrl: 'https://youtube.com/shorts/rc9O9xpwqUY?si=new5g778w3nPQjbh',
     ),
     ExerciseDefinition(
       id: 'legs_seated_leg_press_calve_raises',
-      name: 'Seated leg press calve raises',
+      name: 'Seated Leg Press Calf Raises',
       videoUrl: 'https://youtu.be/dhRz1Ns60Zg?si=Snzzr5L6zQnf1-Sy',
     ),
     ExerciseDefinition(
       id: 'legs_child_pose',
-      name: 'Child pose',
+      name: 'Child Pose',
       videoUrl: 'https://youtu.be/_ZX_zTOBgp8?si=XTaRA5V3t5o40T19',
       isWeightAllowed: false,
     ),
     ExerciseDefinition(
       id: 'legs_banded_pallof_twist',
-      name: 'Banded pallof twist',
+      name: 'Banded Pallof Twist',
       videoUrl: 'https://youtube.com/shorts/KqjqO96zRrw?si=pFdbtJ2aM8mmE4Nc',
     ),
 
     // --- UPPER (Wednesday) ---
     ExerciseDefinition(
       id: 'upper_chest_fly_machine',
-      name: 'Chest fly machine',
+      name: 'Chest Fly Machine',
       videoUrl: 'https://youtube.com/shorts/fEdkcOlW8EA?si=FsrUnpglhF4nnI-8',
     ),
     ExerciseDefinition(
       id: 'upper_cable_pull_over',
-      name: 'Cable pull over',
+      name: 'Cable Pull Over',
       videoUrl: 'https://youtube.com/shorts/lFyE8SXUNg4?si=CV5_3TawaXwW7rFL',
     ),
     ExerciseDefinition(
       id: 'upper_cable_lateral_raises',
-      name: 'Cable lateral raises',
+      name: 'Cable Lateral Raises',
       videoUrl: 'https://youtube.com/shorts/PTuTD6q4kPY?si=CNDIRM0ILAzC66Hb',
     ),
     ExerciseDefinition(
       id: 'upper_no_cheat_db_bicep_curl',
-      name: 'No cheat DB bicep curl',
+      name: 'No Cheat DB Bicep Curl',
       videoUrl: 'https://youtube.com/shorts/sCn19vd8kVI?si=9F1euEysCBypd3Ia',
     ),
     ExerciseDefinition(
       id: 'upper_sa_triceps_over_head_extension',
-      name: 'SA triceps over head extension',
+      name: 'SA Triceps Over Head Extension',
       videoUrl: 'https://youtu.be/FE_AsjcTImc?si=83uGv-7ZZqMXtlCn',
     ),
     ExerciseDefinition(
       id: 'upper_reverse_curl',
-      name: 'Reverse curl',
+      name: 'Reverse Curl',
       videoUrl: 'https://youtu.be/HwB-DevuJjU?si=k8UUoCpggYyUbM6F',
     ),
     ExerciseDefinition(
       id: 'upper_db_shrugs',
-      name: 'DB shrugs',
+      name: 'DB Shrugs',
       videoUrl: 'https://youtube.com/shorts/rFsSeClGnNA?si=vLn4ffTmYiezyOah',
     ),
     ExerciseDefinition(
       id: 'upper_forearm_exercise_variations',
-      name: 'Forearm exercise variations',
+      name: 'Forearm Exercise Variations',
       videoUrl: 'https://youtube.com/shorts/d5YiFNoiCa0?si=CHJQ5lqA1SJd-l_w',
     ),
 
     // --- LOWER (Thursday) ---
     ExerciseDefinition(
       id: 'lower_body_weighted_rdl',
-      name: 'Body weighted RDL',
+      name: 'Body Weighted RDL',
       videoUrl: 'https://youtu.be/wFF_ZUaaObc?si=UQF6lQOJbX4GnMXW',
     ),
     ExerciseDefinition(
       id: 'lower_seated_leg_curl',
-      name: 'Seated leg curl',
+      name: 'Seated Leg Curl',
       videoUrl: 'https://youtube.com/shorts/mh7hFEsTFbw?si=aT4zjtNlxGMq8-NO',
       alternatives: ['alt_db_leg_curl'],
     ),
     ExerciseDefinition(
       id: 'lower_adduction_machine',
-      name: 'Adduction machine',
+      name: 'Adduction Machine',
       videoUrl: 'https://youtube.com/shorts/K0tIapJBLS4?si=5dsWYf7V6Fbjscqp',
       alternatives: ['alt_banded_adduction'],
     ),
     ExerciseDefinition(
       id: 'lower_seated_leg_press_calve_raises',
-      name: 'Seated leg press calve raises',
+      name: 'Seated Leg Press Calf Raises',
       videoUrl: 'https://youtu.be/dhRz1Ns60Zg?si=Snzzr5L6zQnf1-Sy',
     ),
     ExerciseDefinition(
       id: 'lower_dead_bug',
-      name: 'Dead bug',
+      name: 'Dead Bug',
       videoUrl: 'https://youtu.be/jbWmbhElf3Q?si=n7rAuGqfLAqz9RJd',
       isWeightAllowed: false,
     ),
     ExerciseDefinition(
       id: 'lower_standing_ql_db_extension',
-      name: 'Standing QL DB extension',
+      name: 'Standing QL DB Extension',
       videoUrl: 'https://youtu.be/YjuUrq0nir0?si=AfQDXEKjzL98iyLQ',
     ),
 
@@ -216,25 +216,25 @@ class WorkoutCatalog {
     ),
     ExerciseDefinition(
       id: 'routine_clam_shell',
-      name: 'Clam shell',
+      name: 'Clam Shell',
       videoUrl: 'https://youtu.be/DAAjOdwZdks?si=Kpxnx6gcebrxr4d5',
       isWeightAllowed: false,
     ),
     ExerciseDefinition(
       id: 'routine_neurodynamic_sciatic_nerve',
-      name: 'neurodynamic sciatic nerve',
+      name: 'Neurodynamic Sciatic Nerve',
       videoUrl: 'https://youtube.com/shorts/hvXv_Pm63Gg?si=aNB3AnDleusgf2nZ',
       isWeightAllowed: false,
     ),
     ExerciseDefinition(
       id: 'routine_trunk_rotation',
-      name: 'Trunk rotation',
+      name: 'Trunk Rotation',
       videoUrl: 'https://youtu.be/IhP0LP-wyxQ?si=By5boLC7DGyZH6Hg',
       isWeightAllowed: false,
     ),
     ExerciseDefinition(
       id: 'routine_double_knee_to_chest',
-      name: 'Double knee to chest',
+      name: 'Double Knee to Chest',
       videoUrl: 'https://youtu.be/5R7eWaNWO3U?si=qBA8FC2j5sivSn7h',
       isWeightAllowed: false,
     ),
@@ -279,7 +279,7 @@ class WorkoutCatalog {
     ExerciseDefinition(id: 'alt_sa_db_row', name: 'SA DB Row'),
     ExerciseDefinition(
       id: 'alt_goblet_squat',
-      name: 'Goblet Squat (Quad focus)',
+      name: 'Goblet Squat (Quad Focus)',
     ),
     ExerciseDefinition(id: 'alt_db_leg_curl', name: 'DB Leg Curl'),
     ExerciseDefinition(id: 'alt_banded_adduction', name: 'Banded Adduction'),
@@ -1209,6 +1209,17 @@ class WorkoutCatalog {
     WorkoutType.rest,
   ];
 
+  /// The rotation day [dayOffset] days away from a day of [openType], or
+  /// null when it can't be told: the rotation has several rest days, so an
+  /// open rest day (or an old-plan day) doesn't say where you are in it.
+  static WorkoutType? projectedType(WorkoutType openType, int dayOffset) {
+    if (openType == WorkoutType.rest) return null;
+    final start = trainingSequence.indexOf(openType);
+    if (start == -1) return null;
+    final n = trainingSequence.length;
+    return trainingSequence[((start + dayOffset) % n + n) % n];
+  }
+
   static WorkoutType getNextWorkoutType(List<WorkoutType> history) {
     if (history.isEmpty) return trainingSequence.first;
 
@@ -1268,6 +1279,34 @@ class WorkoutCatalog {
         AlternativesLibrary.exercises.where((e) => e.id == id).firstOrNull ??
         ExerciseDefinition(id: id, name: 'Unknown Exercise');
   }
+
+  /// The same exercise is planned under a different ID on each training day
+  /// it appears. History ("Last time", prefill) treats every ID here as the
+  /// exercise it points to. Add new duplicates here; a test checks that
+  /// same-named exercises are listed.
+  static const Map<String, String> _sameExerciseAs = {
+    'push_incline_chest_press_machine': 'c_incline_chest_press_machine',
+    'upper_cable_lateral_raises': 'push_cable_lateral_raises',
+    'upper_sa_triceps_over_head_extension':
+        'push_sa_triceps_over_head_extension',
+    'pull_forearm_exercise_variations': 'push_forearm_exercise_variations',
+    'upper_forearm_exercise_variations': 'push_forearm_exercise_variations',
+    'upper_db_shrugs': 'pull_db_shrugs',
+    'legs_leg_extension': 'c_leg_extension',
+    'legs_adduction_machine': 'c_adduction_machine',
+    'lower_adduction_machine': 'c_adduction_machine',
+    'lower_seated_leg_press_calve_raises': 'legs_seated_leg_press_calve_raises',
+    'upper_chest_fly_machine': 'c_chest_fly_machine',
+    'lower_seated_leg_curl': 'c_seated_leg_curl',
+    'c_scapular_plane_db_lateral_raises_uc':
+        'c_scapular_plane_db_lateral_raises',
+    'c_sa_triceps_push_down_uc': 'c_sa_triceps_push_down',
+    'c_rear_delt_machine_fly_fb': 'c_rear_delt_machine_fly',
+    'c_standing_calf_raises_machine_uc': 'c_standing_calf_raises_machine',
+  };
+
+  /// One ID per real exercise, whichever training day it was logged on.
+  static String sharedExerciseId(String id) => _sameExerciseAs[id] ?? id;
 
   /// Every exercise you can swap to: the plan's own plus the alternatives
   /// library, without "(Legacy)" duplicates of older programs.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/report_theme_tokens.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/utils/plural.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/exercise_definition.dart';
@@ -338,7 +339,7 @@ class ExerciseCard extends StatelessWidget {
                       child: Text(
                         tags.first,
                         style: ReportThemeTokens.outfitSubtext(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: _getTagColor(tags.first),
                         ),
@@ -358,7 +359,7 @@ class ExerciseCard extends StatelessWidget {
                           ? AppColors.completedGreen.withValues(alpha: 0.15)
                           : (isDark
                                 ? AppColors.darkElevated
-                                : const Color(0xFFF0F2F7)),
+                                : AppColors.lightElevated),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -390,7 +391,7 @@ class ExerciseCard extends StatelessWidget {
                   child: Text(
                     tempoNote,
                     style: ReportThemeTokens.outfitSubtext(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.warningAmber,
                     ),
@@ -445,35 +446,40 @@ class ExerciseCard extends StatelessWidget {
           // Header Row: Tags + Collapse Toggle
           Row(
             children: [
-              Wrap(
-                spacing: 6,
-                children: tags.map((t) {
-                  final color = _getTagColor(t);
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: color.withValues(alpha: 0.3),
-                        width: 1,
+              // Takes the width left by the unit toggle, so tags wrap to a
+              // second line on narrow phones instead of overflowing.
+              Expanded(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: tags.map((t) {
+                    final color = _getTagColor(t);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
                       ),
-                    ),
-                    child: Text(
-                      t,
-                      style: ReportThemeTokens.outfitSubtext(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: color,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: color.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                      child: Text(
+                        t,
+                        style: ReportThemeTokens.outfitSubtext(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
 
               // KG / LB Unit Toggle with lightweight sliding animation
               _buildUnitToggle(isDark),
@@ -501,7 +507,7 @@ class ExerciseCard extends StatelessWidget {
                       Text(
                         positionLabel!,
                         style: ReportThemeTokens.outfitSubtext(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: Theme.of(context).colorScheme.primary,
                         ).copyWith(letterSpacing: 1.6),
@@ -521,7 +527,7 @@ class ExerciseCard extends StatelessWidget {
                       Text(
                         'Alternative for: ${originalExercise.name}',
                         style: ReportThemeTokens.outfitSubtext(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.indigoAccent,
                         ),
@@ -559,7 +565,7 @@ class ExerciseCard extends StatelessWidget {
                     child: Text(
                       tempoNote,
                       style: ReportThemeTokens.outfitSubtext(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: AppColors.warningAmber,
                       ),
@@ -625,7 +631,7 @@ class ExerciseCard extends StatelessWidget {
 
           // Prescribed info text
           Text(
-            'Target: ${slot.prescribedSets} sets × ${slot.prescribedReps} reps • Rest: ${slot.prescribedRest}',
+            'Target: ${countOf(slot.prescribedSets, 'set')} × ${slot.prescribedReps} reps • Rest: ${slot.prescribedRest}',
             style: ReportThemeTokens.outfitSubtext(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -638,7 +644,7 @@ class ExerciseCard extends StatelessWidget {
             Text(
               'Suggested for this swap: ${performedExercise.repRange} reps',
               style: ReportThemeTokens.outfitSubtext(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.indigoAccent,
               ),
@@ -709,6 +715,7 @@ class ExerciseCard extends StatelessWidget {
                 setLog: setLog,
                 isActive: setIndex == activeSetIndex,
                 isPersonalRecord: setIndex == prSetIndex,
+                needsTick: log.setLooksForgotten(setIndex),
                 previousSetLog: prevLog,
                 displayUnit: displayUnit,
                 isWeightAllowed: performedExercise.isWeightAllowed,
@@ -771,7 +778,10 @@ class ExerciseCard extends StatelessWidget {
                       onAddSet!();
                     },
                     icon: const Icon(Icons.add_rounded, size: 16),
-                    label: const Text('Set', overflow: TextOverflow.ellipsis),
+                    label: const Text(
+                      'Add set',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.indigoAccent,
                       textStyle: ReportThemeTokens.outfitSubtext(
@@ -820,7 +830,7 @@ class ExerciseCard extends StatelessWidget {
       width: 72,
       height: 30,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7),
+        color: isDark ? AppColors.darkElevated : AppColors.lightElevated,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
           color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -858,7 +868,7 @@ class ExerciseCard extends StatelessWidget {
                     child: Text(
                       'KG',
                       style: ReportThemeTokens.outfitNumber(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w800,
                         color: isKg ? Colors.white : AppColors.textSecondary,
                       ),
@@ -877,7 +887,7 @@ class ExerciseCard extends StatelessWidget {
                     child: Text(
                       'LB',
                       style: ReportThemeTokens.outfitNumber(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w800,
                         color: !isKg ? Colors.white : AppColors.textSecondary,
                       ),
@@ -924,7 +934,7 @@ class ExerciseCard extends StatelessWidget {
               Text(
                 label,
                 style: ReportThemeTokens.outfitSubtext(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: AppColors.indigoAccent,
                 ),
@@ -953,7 +963,7 @@ class ExerciseCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7),
+            color: isDark ? AppColors.darkElevated : AppColors.lightElevated,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -968,7 +978,7 @@ class ExerciseCard extends StatelessWidget {
               Text(
                 label,
                 style: ReportThemeTokens.outfitSubtext(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),

@@ -341,7 +341,7 @@ class DailyMealsReportCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReportThemeTokens.cardBackground,
         borderRadius: ReportThemeTokens.cardBorderRadius,
-        border: Border.all(color: ReportThemeTokens.borderSubtle),
+        border: Border.all(color: ReportThemeTokens.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +451,7 @@ class DailyMealsReportCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReportThemeTokens.cardBackground,
         borderRadius: ReportThemeTokens.cardBorderRadius,
-        border: Border.all(color: ReportThemeTokens.borderSubtle),
+        border: Border.all(color: ReportThemeTokens.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

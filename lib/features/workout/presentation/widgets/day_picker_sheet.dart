@@ -191,7 +191,9 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                   crossAxisCount: 4,
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
-                  childAspectRatio: 0.95,
+                  // Fixed height, not a width ratio: icon, "DAY n" and a
+                  // two-line title must fit even on a 320 dp phone.
+                  mainAxisExtent: 92,
                 ),
                 itemCount: _rotationDays.length,
                 itemBuilder: (context, index) {
@@ -254,7 +256,7 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                           Text(
                             'DAY ${day.dayNum}',
                             style: ReportThemeTokens.outfitSubtext(
-                              fontSize: 9,
+                              fontSize: 11,
                               fontWeight: FontWeight.w800,
                               color: isSelected
                                   ? day.tint
@@ -268,7 +270,7 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: ReportThemeTokens.outfitSubtext(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: isSelected
                                   ? FontWeight.w900
                                   : FontWeight.bold,
@@ -312,7 +314,7 @@ class _DayPickerSheetState extends State<DayPickerSheet> {
                               Text(
                                 '${_exercises.length} exercises',
                                 style: ReportThemeTokens.outfitSubtext(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: AppColors.textMuted,
                                 ),
                               ),

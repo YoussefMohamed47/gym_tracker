@@ -13,6 +13,8 @@ abstract class WorkoutLocalDataSource {
   Future<WorkoutSession?> getSessionForDate(String dateKey);
   Future<void> saveSession(WorkoutSession session);
   Future<void> deleteSession(String dateKey);
+
+  /// All saved sessions, newest first.
   Future<List<WorkoutSession>> getHistory();
 
   Future<WeightUnit> getPreferredUnit();

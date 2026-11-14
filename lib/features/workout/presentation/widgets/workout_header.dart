@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/theme_transition_controller.dart';
 import '../../../settings/presentation/cubit/theme_cubit.dart';
+import '../../../../core/utils/animations.dart';
 import '../../../../core/utils/app_colors.dart';
-import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../domain/repositories/workout_catalog_repository.dart';
 import '../cubit/workout_state.dart';
@@ -31,21 +31,11 @@ class _WorkoutHeaderState extends State<WorkoutHeader> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    var all = 0;
-    var done = 0;
-    for (final log in widget.state.exerciseLogs.values) {
-      all += log.sets.length;
-      done += log.sets.where((s) => s.isPerformed).length;
-    }
-    final progress = all == 0 ? 0.0 : done / all;
+    final main = widget.state.progress;
+    final progress = main.setFraction;
     // One segment per exercise: done, started, or not yet.
-    final mainIds =
-        WorkoutCatalog.getWorkoutByType(
-          widget.state.workoutType,
-        )?.exercises.map((e) => e.exerciseId).toList() ??
-        const <String>[];
     final segments = [
-      for (final id in mainIds)
+      for (final id in widget.state.mainExerciseIds)
         if (widget.state.exerciseLogs[id] case final log?
             when log.sets.isNotEmpty)
           log.sets.every((s) => s.isPerformed)
@@ -136,18 +126,30 @@ class _WorkoutHeaderState extends State<WorkoutHeader> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    '$done',
-                    style: GoogleFonts.outfit(
-                      fontSize: 72,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -3,
-                      height: .94,
-                      color: scheme.primary,
+                  // Counts up (or down) to the new total when a set is
+                  // ticked, instead of jumping. Keyed by day and type, so
+                  // opening another day shows its count straight away.
+                  TweenAnimationBuilder<double>(
+                    key: ValueKey(
+                      '${widget.state.dateKey}#${widget.state.workoutType.name}',
+                    ),
+                    tween: Tween(end: main.doneSets.toDouble()),
+                    duration: context.motion(const Duration(milliseconds: 350)),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, _) => Text(
+                      '${value.round()}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 72,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -3,
+                        height: .94,
+                        color: scheme.primary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                   Text(
-                    'OF $all SETS',
+                    'OF ${main.totalSets} SETS',
                     style: GoogleFonts.outfit(
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
@@ -193,10 +195,10 @@ class _WorkoutHeaderState extends State<WorkoutHeader> {
             ),
           const SizedBox(height: 5),
           Text(
-            'SESSION PROGRESS  ·  ${(progress * 100).round()}%',
+            '${type == WorkoutType.rest ? 'ROUTINE' : 'MAIN LIFTS'}  ·  ${(progress * 100).round()}%',
             textAlign: TextAlign.end,
             style: GoogleFonts.outfit(
-              fontSize: 10,
+              fontSize: 11,
               color: scheme.onSurfaceVariant,
               fontWeight: FontWeight.w800,
             ),

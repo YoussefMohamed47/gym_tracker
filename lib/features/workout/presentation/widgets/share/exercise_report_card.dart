@@ -84,7 +84,7 @@ class ExerciseReportCard extends StatelessWidget {
         border: Border.all(
           color: isPR
               ? ReportThemeTokens.violetAccent.withValues(alpha: 0.3)
-              : ReportThemeTokens.borderSubtle,
+              : ReportThemeTokens.glassBorder,
           width: 1.0,
         ),
       ),
@@ -118,7 +118,7 @@ class ExerciseReportCard extends StatelessWidget {
                         color: ReportThemeTokens.elevatedCard,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: ReportThemeTokens.borderSubtle,
+                          color: ReportThemeTokens.glassBorder,
                         ),
                       ),
                       child: Text(

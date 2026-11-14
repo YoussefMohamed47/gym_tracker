@@ -30,6 +30,18 @@ class ExerciseLog extends Equatable {
     this.displayUnit = WeightUnit.kg,
   });
 
+  /// Set [index] has numbers but isn't ticked while a later set is: it was
+  /// most likely done and the tick forgotten, so it would go uncounted.
+  /// (New sets are prefilled from last time, so numbers alone mean nothing.)
+  bool setLooksForgotten(int index) {
+    if (index < 0 || index >= sets.length) return false;
+    final set = sets[index];
+    final hasNumbers = (set.weightKg ?? 0) > 0 || (set.actualReps ?? 0) > 0;
+    return !set.isPerformed &&
+        hasNumbers &&
+        sets.skip(index + 1).any((s) => s.isPerformed);
+  }
+
   ExerciseLog copyWith({
     String? plannedExerciseId,
     String? performedExerciseId,

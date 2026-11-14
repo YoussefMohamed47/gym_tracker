@@ -148,7 +148,7 @@ class _RestTimerPillState extends State<RestTimerPill> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: ReportThemeTokens.outfitSubtext(
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: Colors.white60,
                             ),

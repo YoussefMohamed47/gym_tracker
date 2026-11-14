@@ -12,11 +12,11 @@ import 'package:gym_tracker_report/features/workout/presentation/widgets/exercis
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  for (final dark in [true, false]) {
-    testWidgets('focused exercise card lays out on a phone (dark: $dark)', (
-      tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(360, 1600));
+  // 320 dp is the narrowest common Android phone width.
+  for (final (dark, width) in [(true, 360.0), (false, 360.0), (true, 320.0)]) {
+    testWidgets('focused exercise card lays out on a phone '
+        '(dark: $dark, ${width.toInt()} dp)', (tester) async {
+      await tester.binding.setSurfaceSize(Size(width, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       final slot = WorkoutCatalog.getWorkoutByType(

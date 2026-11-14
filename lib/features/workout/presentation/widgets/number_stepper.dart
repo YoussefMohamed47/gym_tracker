@@ -61,7 +61,7 @@ class _NumberStepperState extends State<NumberStepper> {
           ? BoxConstraints(minWidth: widget.width)
           : null,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkElevated : const Color(0xFFF0F2F7),
+        color: isDark ? AppColors.darkElevated : AppColors.lightElevated,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark ? AppColors.borderSubtle : AppColors.outline,
@@ -129,7 +129,7 @@ class _NumberStepperState extends State<NumberStepper> {
                             Text(
                               widget.unit!,
                               style: GoogleFonts.outfit(
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: isDark
                                     ? AppColors.gradientStart

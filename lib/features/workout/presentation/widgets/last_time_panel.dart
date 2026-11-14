@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/utils/animations.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/entities/exercise_set_log.dart';
@@ -70,12 +71,16 @@ class LastTimePanel extends StatelessWidget {
     final before = estimatedOneRepMaxKg(previousSets);
     final today = estimatedOneRepMaxKg(currentSets.where((s) => s.isPerformed));
     final delta = (before != null && today != null) ? today - before : null;
+    final beating = delta != null && delta > 0;
 
-    return Container(
+    final panel = AnimatedContainer(
+      duration: context.motion(const Duration(milliseconds: 250)),
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkElevated : Colors.grey.shade100,
+        color: beating
+            ? AppColors.completedGreen.withValues(alpha: isDark ? 0.14 : 0.18)
+            : (isDark ? AppColors.darkElevated : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(13),
       ),
       child: Row(
@@ -87,7 +92,7 @@ class LastTimePanel extends StatelessWidget {
                 Text(
                   'LAST TIME · $previousDate',
                   style: GoogleFonts.outfit(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: .6,
                     color: scheme.onSurfaceVariant,
@@ -125,7 +130,7 @@ class LastTimePanel extends StatelessWidget {
                       ],
                     ),
                     style: GoogleFonts.outfit(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurfaceVariant,
                     ),
@@ -145,7 +150,7 @@ class LastTimePanel extends StatelessWidget {
               label: Text(
                 'Copy',
                 style: GoogleFonts.outfit(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: AppColors.gradientStart,
                 ),
@@ -154,6 +159,16 @@ class LastTimePanel extends StatelessWidget {
         ],
       ),
     );
+
+    // Turns green and gives one short pulse the moment today beats last
+    // time; the confetti stays for real PRs.
+    if (!beating) return panel;
+    final pulse = context.motion(const Duration(milliseconds: 160));
+    return panel
+        .animate(key: const ValueKey('beating-last-time'))
+        .scaleXY(end: 1.03, duration: pulse, curve: Curves.easeOut)
+        .then()
+        .scaleXY(end: 1 / 1.03, duration: pulse, curve: Curves.easeIn);
   }
 }
 
@@ -207,7 +222,7 @@ class PrBanner extends StatelessWidget {
                       '${_w(newKg, unit)} ${unit.name} beats your last best of '
                       '${_w(oldKg, unit)} ${unit.name}',
                       style: GoogleFonts.outfit(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: scheme.onSurfaceVariant,
                       ),
                     ),

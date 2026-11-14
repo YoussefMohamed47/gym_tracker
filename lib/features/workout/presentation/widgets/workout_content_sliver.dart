@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/animations.dart';
 import '../../../../core/theme/report_theme_tokens.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../data/datasources/workout_catalog.dart';
@@ -35,12 +37,25 @@ class WorkoutContentSliver extends StatefulWidget {
 class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
   int _expandedIndex = 0;
 
+  /// Whether the last move went to a later exercise; sets the slide side.
+  bool _movedForward = true;
+
+  void _goTo(int index) {
+    if (index == _expandedIndex) return;
+    setState(() {
+      _movedForward = index > _expandedIndex;
+      _expandedIndex = index;
+    });
+  }
+
   @override
   void didUpdateWidget(covariant WorkoutContentSliver oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.state.dateKey != widget.state.dateKey ||
         oldWidget.state.workoutType != widget.state.workoutType) {
       _expandedIndex = 0;
+      // A new day's first exercise comes in as a step forward.
+      _movedForward = true;
     }
   }
 
@@ -65,11 +80,27 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
 
       if (newPerformedCount == log.sets.length &&
           exerciseIndex < totalExercises - 1) {
-        setState(() {
-          _expandedIndex = exerciseIndex + 1;
-        });
+        _goTo(exerciseIndex + 1);
       }
     }
+  }
+
+  /// Sections fade up one after another when a day opens. Keyed by the day,
+  /// so it plays again on switching day but not on every rebuild.
+  Widget _enter(BuildContext context, int order, Widget child) {
+    final day = '${widget.state.dateKey}#${widget.state.workoutType.name}';
+    return child
+        .animate(key: ValueKey('enter-$day-$order'))
+        .fadeIn(
+          delay: context.motion(Duration(milliseconds: 40 * order)),
+          duration: context.motion(const Duration(milliseconds: 220)),
+        )
+        .slideY(
+          begin: 0.04,
+          end: 0,
+          duration: context.motion(const Duration(milliseconds: 220)),
+          curve: Curves.easeOutCubic,
+        );
   }
 
   @override
@@ -104,115 +135,123 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
         // Rest Day Empty State
         if (widget.state.workoutType == WorkoutType.rest)
           SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCard : Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: isDark ? AppColors.borderSubtle : AppColors.outline,
-                  width: 1,
+            child: _enter(
+              context,
+              0,
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkCard : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isDark ? AppColors.borderSubtle : AppColors.outline,
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: AppColors.completedGreen.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.spa_rounded,
-                      size: 34,
-                      color: AppColors.completedGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'Rest & Recovery',
-                    style: ReportThemeTokens.outfitHeader(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.completedGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Enjoy your recovery! Muscle grows during rest. Focus on hydration, mobility, and high-quality protein today.',
-                    textAlign: TextAlign.center,
-                    style: ReportThemeTokens.outfitSubtext(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  ElevatedButton.icon(
-                    onPressed: () => DayPickerSheet.show(context),
-                    icon: const Icon(Icons.fitness_center_rounded, size: 16),
-                    label: const Text('Start a workout anyway'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.indigoAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: AppColors.completedGreen.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                      child: const Icon(
+                        Icons.spa_rounded,
+                        size: 34,
+                        color: AppColors.completedGreen,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 14),
+                    Text(
+                      'Rest & Recovery',
+                      style: ReportThemeTokens.outfitHeader(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.completedGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Enjoy your recovery! Muscle grows during rest. Focus on hydration, mobility, and high-quality protein today.',
+                      textAlign: TextAlign.center,
+                      style: ReportThemeTokens.outfitSubtext(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    ElevatedButton.icon(
+                      onPressed: () => DayPickerSheet.show(context),
+                      icon: const Icon(Icons.fitness_center_rounded, size: 16),
+                      label: const Text('Start a workout anyway'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.indigoAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
 
         // Warm-up & Rehab Section (Reskinned, same data/logic)
-        const SliverToBoxAdapter(child: RoutineSection()),
+        SliverToBoxAdapter(child: _enter(context, 1, const RoutineSection())),
         if (widget.state.workoutType.isUpperBody)
-          const SliverToBoxAdapter(child: WarmupSection()),
+          SliverToBoxAdapter(child: _enter(context, 2, const WarmupSection())),
 
         // Main Exercises Section (Focus Mode)
         if (widget.state.workoutType != WorkoutType.rest &&
             workoutDef != null &&
             workoutDef.exercises.isNotEmpty) ...[
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Row(
-                children: [
-                  Text(
-                    'WORKOUT EXERCISES',
-                    style: ReportThemeTokens.outfitHeader(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                      color: isDark ? AppColors.textPrimary : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.indigoAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${workoutDef.exercises.length}',
-                      style: ReportThemeTokens.outfitNumber(
-                        fontSize: 11,
+            child: _enter(
+              context,
+              3,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Row(
+                  children: [
+                    Text(
+                      'WORKOUT EXERCISES',
+                      style: ReportThemeTokens.outfitHeader(
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.indigoAccent,
+                        letterSpacing: 0.8,
+                        color: isDark ? AppColors.textPrimary : Colors.black87,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.indigoAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${workoutDef.exercises.length}',
+                        style: ReportThemeTokens.outfitNumber(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.indigoAccent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -263,7 +302,7 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                         color: selected ? colors.primary : colors.surface,
                         borderRadius: BorderRadius.circular(12),
                         child: InkWell(
-                          onTap: () => setState(() => _expandedIndex = index),
+                          onTap: () => _goTo(index),
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
                             width: 185,
@@ -331,7 +370,13 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                       log.performedExerciseId,
                     );
                     final previous = widget.state.previousLogs[slot.exerciseId];
-                    return ExerciseCard(
+                    final card = ExerciseCard(
+                      // Day and type are part of the key, so another day's
+                      // exercise at the same position still slides in.
+                      key: ValueKey(
+                        '${widget.state.dateKey}#'
+                        '${widget.state.workoutType.name}#$index',
+                      ),
                       log: log,
                       slot: slot,
                       displayUnit: log.displayUnit,
@@ -404,6 +449,38 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                           .read<WorkoutCubit>()
                           .removeSet(slot.exerciseId, setIndex),
                     );
+                    // Slide the next exercise in from the side you're moving
+                    // to, and the old one out the other way.
+                    final shift = _movedForward ? 0.12 : -0.12;
+                    return AnimatedSwitcher(
+                      duration: context.motion(
+                        const Duration(milliseconds: 240),
+                      ),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      layoutBuilder: (current, previous) => Stack(
+                        alignment: Alignment.topCenter,
+                        children: [...previous, ?current],
+                      ),
+                      transitionBuilder: (child, animation) {
+                        final incoming = child.key == card.key;
+                        // The leaving card can't take taps while it fades.
+                        return IgnorePointer(
+                          ignoring: !incoming,
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween(
+                                begin: Offset(incoming ? shift : -shift, 0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          ),
+                        );
+                      },
+                      child: card,
+                    );
                   },
                 ),
                 const SizedBox(height: 18),
@@ -415,7 +492,7 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                         child: OutlinedButton.icon(
                           onPressed: _expandedIndex <= 0
                               ? null
-                              : () => setState(() => _expandedIndex--),
+                              : () => _goTo(_expandedIndex - 1),
                           icon: const Icon(Icons.arrow_back_rounded, size: 16),
                           label: const Text('Back'),
                         ),
@@ -426,7 +503,7 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                           onPressed:
                               _expandedIndex >= workoutDef.exercises.length - 1
                               ? null
-                              : () => setState(() => _expandedIndex++),
+                              : () => _goTo(_expandedIndex + 1),
                           icon: const Icon(
                             Icons.arrow_forward_rounded,
                             size: 16,
@@ -443,7 +520,7 @@ class _WorkoutContentSliverState extends State<WorkoutContentSliver> {
                   current: _expandedIndex
                       .clamp(0, workoutDef.exercises.length - 1)
                       .toInt(),
-                  onOpen: (i) => setState(() => _expandedIndex = i),
+                  onOpen: _goTo,
                 ),
               ],
             ),
@@ -519,7 +596,7 @@ class _UpNext extends StatelessWidget {
               Text(
                 '$left LEFT',
                 style: ReportThemeTokens.outfitSubtext(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w900,
                   color: scheme.onSurfaceVariant,
                 ).copyWith(letterSpacing: 1.4),
@@ -576,7 +653,7 @@ class _UpNext extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark
                         ? AppColors.darkElevated
-                        : const Color(0xFFF0F2F7),
+                        : AppColors.lightElevated,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -608,7 +685,7 @@ class _UpNext extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: ReportThemeTokens.outfitSubtext(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: scheme.onSurfaceVariant,
                         ),

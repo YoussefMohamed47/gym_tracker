@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../data/datasources/workout_catalog.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../utils/date_utils.dart';
 
@@ -9,11 +10,29 @@ import '../../utils/date_utils.dart';
 class WeekDaySelector extends StatelessWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateSelected;
+
+  /// The open day's training; the bar under each other day shows where the
+  /// 8-day rotation puts it (lime for training, grey for rest).
+  final WorkoutType openType;
+
   const WeekDaySelector({
     super.key,
     required this.selectedDate,
     required this.onDateSelected,
+    required this.openType,
   });
+
+  /// Whole days from the open day to [day], ignoring the time of day.
+  int _offsetFromOpenDay(DateTime day) =>
+      DateTime.utc(day.year, day.month, day.day)
+          .difference(
+            DateTime.utc(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+            ),
+          )
+          .inDays;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +58,7 @@ class WeekDaySelector extends StatelessWidget {
               Text(
                 DateFormat('MMMM yyyy').format(selectedDate).toUpperCase(),
                 style: GoogleFonts.outfit(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                   color: colors.primary,
                 ),
@@ -57,9 +76,12 @@ class WeekDaySelector extends StatelessWidget {
                           day.year == selectedDate.year &&
                           day.month == selectedDate.month &&
                           day.day == selectedDate.day;
-                      final rest =
-                          WorkoutDateUtils.getWorkoutTypeForDay(day) ==
-                          WorkoutType.rest;
+                      final projected = WorkoutCatalog.projectedType(
+                        openType,
+                        _offsetFromOpenDay(day),
+                      );
+                      final rest = projected == WorkoutType.rest;
+                      final unknown = projected == null;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2),
                         child: Material(
@@ -79,7 +101,7 @@ class WeekDaySelector extends StatelessWidget {
                                   Text(
                                     DateFormat('E').format(day).substring(0, 1),
                                     style: GoogleFonts.outfit(
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: active
                                           ? colors.onPrimary
@@ -104,6 +126,10 @@ class WeekDaySelector extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: active
                                           ? colors.onPrimary
+                                          : unknown
+                                          ? colors.primary.withValues(
+                                              alpha: 0.3,
+                                            )
                                           : rest
                                           ? colors.outline
                                           : colors.primary,

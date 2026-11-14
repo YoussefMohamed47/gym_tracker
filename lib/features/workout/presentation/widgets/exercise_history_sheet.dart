@@ -138,7 +138,7 @@ class ExerciseHistorySheet extends StatelessWidget {
                             child: Text(
                               entry.workoutTypeName.toUpperCase(),
                               style: GoogleFonts.inter(
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w900,
                                 color: Theme.of(context).colorScheme.primary,
                                 letterSpacing: 0.5,

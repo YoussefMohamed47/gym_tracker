@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../utils/app_colors.dart';
+
+/// Typography, radii and sheet surfaces. Palette colours come from
+/// [AppColors], the single source of truth; the names here are kept so
+/// existing widgets keep compiling.
 class ReportThemeTokens {
   // Dark Premium Palette
-  static const Color background = Color(0xFF090E12);
-  static const Color cardBackground = Color(0xFF121B20);
-  static const Color elevatedCard = Color(0xFF1C292D);
+  static const Color background = AppColors.darkBackground;
+  static const Color cardBackground = AppColors.darkCard;
+  static const Color elevatedCard = AppColors.darkElevated;
 
-  // Borders & Dividers
-  static const Color borderSubtle = Color(0x0FFFFFFF); // White @ 6%
-  static const Color borderMedium = Color(0x1AFFFFFF); // White @ 10%
+  /// White hairlines for dark glass cards and sheets. Not the same as
+  /// [AppColors.borderSubtle], which is the themed card border.
+  static const Color glassBorder = Color(0x0FFFFFFF); // White @ 6%
+  static const Color glassBorderStrong = Color(0x1AFFFFFF); // White @ 10%
 
   // Brand Accent Gradient
-  static const Color indigoAccent = Color(0xFFC7F476);
-  static const Color violetAccent = Color(0xFF99B8EF);
+  static const Color indigoAccent = AppColors.indigoAccent;
+  static const Color violetAccent = AppColors.violetAccent;
 
-  static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF3A7052), Color(0xFF1E514A)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  static const LinearGradient primaryGradient = AppColors.primaryGradient;
 
   // Status Colors
-  static const Color completedGreen = Color(0xFF76DDAB);
-  static const Color warningAmber = Color(0xFFFFB800);
-  static const Color destructiveRed = Color(0xFFFF5252);
+  static const Color completedGreen = AppColors.completedGreen;
+  static const Color warningAmber = AppColors.warningAmber;
+  static const Color destructiveRed = AppColors.destructiveRed;
 
   // Text Colors
-  static const Color textPrimary = Color(0xFFF0F4EE);
-  static const Color textSecondary = Color(0xFF9BAEA9);
-  static const Color textMuted = Color(0xFF6B8280);
+  static const Color textPrimary = AppColors.textPrimary;
+  static const Color textSecondary = AppColors.textSecondary;
+  static const Color textMuted = AppColors.textMuted;
 
   // Standard Radii & Dimensions
   static const double cardRadius = 22.0;

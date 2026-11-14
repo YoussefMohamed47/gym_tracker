@@ -304,7 +304,7 @@ class WorkoutCompleteReportCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReportThemeTokens.cardBackground,
         borderRadius: ReportThemeTokens.cardBorderRadius,
-        border: Border.all(color: ReportThemeTokens.borderSubtle),
+        border: Border.all(color: ReportThemeTokens.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,7 +329,7 @@ class WorkoutCompleteReportCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Divider(height: 1, color: ReportThemeTokens.borderSubtle),
+          const Divider(height: 1, color: ReportThemeTokens.glassBorder),
           const SizedBox(height: 8),
           ...warmupRows,
         ],

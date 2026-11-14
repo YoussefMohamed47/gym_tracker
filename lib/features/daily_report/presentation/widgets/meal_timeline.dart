@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_tracker_report/core/widgets/bilingual_label.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -152,32 +153,11 @@ class _MealTitle extends StatelessWidget {
   const _MealTitle({required this.slot, this.size = 14});
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          slot.arabicName,
-          style: GoogleFonts.cairo(
-            fontSize: size,
-            fontWeight: FontWeight.w800,
-            height: 1.25,
-          ),
-        ),
-        Text(
-          slot.englishName.toUpperCase(),
-          style: GoogleFonts.outfit(
-            fontSize: 9.5,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1,
-            color: scheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => BilingualLabel(
+    arabic: slot.arabicName,
+    english: slot.englishName,
+    size: size,
+  );
 }
 
 class _CollapsedMeal extends StatelessWidget {

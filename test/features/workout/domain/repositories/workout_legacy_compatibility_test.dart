@@ -6,7 +6,9 @@ import 'package:gym_tracker_report/features/workout/domain/entities/workout_sess
 import 'package:gym_tracker_report/features/workout/domain/entities/workout_type.dart';
 import 'package:gym_tracker_report/features/workout/data/datasources/workout_local_datasource.dart';
 import 'package:gym_tracker_report/features/workout/data/models/workout_session_model.dart';
+import 'package:gym_tracker_report/core/error/api_result.dart';
 import 'package:gym_tracker_report/core/utils/weight_converter.dart';
+import 'package:gym_tracker_report/features/workout/domain/entities/previous_exercise_log.dart';
 
 class MockWorkoutLocalDataSource extends Mock
     implements WorkoutLocalDataSource {}
@@ -111,13 +113,14 @@ void main() {
       );
 
       // Search for the NEW canonical ID, it should find the OLD legacy one
-      final prevLog = await repository.getPreviousExerciseLog(
-        'push',
+      final result = await repository.getLastPerformedExerciseLogs([
         'push_cable_lateral_raises',
-      );
+      ], beforeDateKey: '');
+      final prevLog = (result as ApiSuccess<Map<String, PreviousExerciseLog>>)
+          .data['push_cable_lateral_raises'];
 
       expect(prevLog, isNotNull);
-      expect(prevLog?.weightKg, 12.0);
+      expect(prevLog?.log.weightKg, 12.0);
     });
   });
 }

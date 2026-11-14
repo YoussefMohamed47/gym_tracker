@@ -26,7 +26,7 @@ class SetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: ReportThemeTokens.elevatedCard.withValues(alpha: 0.5),
           borderRadius: ReportThemeTokens.chipBorderRadius,
-          border: Border.all(color: ReportThemeTokens.borderSubtle),
+          border: Border.all(color: ReportThemeTokens.glassBorder),
         ),
         child: Text(
           'S${setIndex + 1}: -',
@@ -80,7 +80,7 @@ class SetChip extends StatelessWidget {
         border: Border.all(
           color: isBestSet
               ? ReportThemeTokens.indigoAccent.withValues(alpha: 0.6)
-              : ReportThemeTokens.borderSubtle,
+              : ReportThemeTokens.glassBorder,
           width: isBestSet ? 1.5 : 1.0,
         ),
       ),

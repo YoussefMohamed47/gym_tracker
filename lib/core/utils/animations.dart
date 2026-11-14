@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+extension ReducedMotion on BuildContext {
+  /// [duration], or zero when the phone asks for reduced motion.
+  Duration motion(Duration duration) =>
+      MediaQuery.disableAnimationsOf(this) ? Duration.zero : duration;
+}
+
 class FadeRoute<T> extends PageRouteBuilder<T> {
   final Widget child;
   FadeRoute({required this.child})

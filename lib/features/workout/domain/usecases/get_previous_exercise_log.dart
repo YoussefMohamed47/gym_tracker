@@ -1,4 +1,5 @@
-import '../entities/exercise_log.dart';
+import '../../../../core/error/api_result.dart';
+import '../entities/previous_exercise_log.dart';
 import '../repositories/workout_repository.dart';
 
 class GetPreviousExerciseLog {
@@ -6,9 +7,16 @@ class GetPreviousExerciseLog {
 
   GetPreviousExerciseLog(this.repository);
 
-  /// Gets the previous log for an exercise in a specific workout type.
-  /// This is used for prefilling "Today's Weight".
-  Future<ExerciseLog?> call(String workoutType, String exerciseId) async {
-    return await repository.getPreviousExerciseLog(workoutType, exerciseId);
+  /// For each exercise, the newest session before [beforeDateKey] in which
+  /// it was done, on any training day. Used for "Last time" and to prefill
+  /// weight and reps.
+  Future<ApiResult<Map<String, PreviousExerciseLog>>> call(
+    List<String> exerciseIds, {
+    required String beforeDateKey,
+  }) {
+    return repository.getLastPerformedExerciseLogs(
+      exerciseIds,
+      beforeDateKey: beforeDateKey,
+    );
   }
 }

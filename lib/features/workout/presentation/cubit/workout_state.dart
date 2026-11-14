@@ -1,19 +1,14 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/entities/exercise_log.dart';
+import '../../domain/entities/previous_exercise_log.dart';
+import '../../domain/entities/workout_progress.dart';
 import '../../domain/entities/workout_type.dart';
 
+export '../../domain/entities/previous_exercise_log.dart';
+export '../../domain/entities/workout_progress.dart';
+
 enum WorkoutStatus { initial, loading, success, failure, saving, saved }
-
-/// The most recent earlier session of an exercise, for the "Last time" panel.
-class PreviousExerciseLog extends Equatable {
-  final String dateKey;
-  final ExerciseLog log;
-  const PreviousExerciseLog({required this.dateKey, required this.log});
-
-  @override
-  List<Object?> get props => [dateKey, log];
-}
 
 class WorkoutState extends Equatable {
   final WorkoutStatus status;
@@ -43,6 +38,14 @@ class WorkoutState extends Equatable {
   /// [dateKey], so today's own sets never count as "last time".
   final Map<String, PreviousExerciseLog> previousLogs;
 
+  /// The planned lifts of [workoutType], without warm-up or routine; empty
+  /// on a rest day. Set by the cubit whenever the day changes.
+  final List<String> mainExerciseIds;
+
+  /// Progress through the main lifts (or the routine on a rest day).
+  WorkoutProgress get progress =>
+      WorkoutProgress.fromLogs(exerciseLogs, mainExerciseIds);
+
   const WorkoutState({
     required this.status,
     required this.selectedDate,
@@ -59,6 +62,7 @@ class WorkoutState extends Equatable {
     this.restTimerExerciseName = '',
     this.prAchievedForPlannedId,
     this.previousLogs = const {},
+    this.mainExerciseIds = const [],
   });
 
   factory WorkoutState.initial() {
@@ -96,6 +100,7 @@ class WorkoutState extends Equatable {
     String? prAchievedForPlannedId,
     bool clearPR = false,
     Map<String, PreviousExerciseLog>? previousLogs,
+    List<String>? mainExerciseIds,
   }) {
     return WorkoutState(
       status: status ?? this.status,
@@ -119,6 +124,7 @@ class WorkoutState extends Equatable {
           ? null
           : (prAchievedForPlannedId ?? this.prAchievedForPlannedId),
       previousLogs: previousLogs ?? this.previousLogs,
+      mainExerciseIds: mainExerciseIds ?? this.mainExerciseIds,
     );
   }
 
@@ -139,5 +145,6 @@ class WorkoutState extends Equatable {
     restTimerExerciseName,
     prAchievedForPlannedId,
     previousLogs,
+    mainExerciseIds,
   ];
 }

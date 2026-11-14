@@ -71,7 +71,7 @@ class MealTimelineItem extends StatelessWidget {
                   Container(
                     width: 1,
                     height: foods.length * 30.0 + 18,
-                    color: ReportThemeTokens.borderMedium,
+                    color: ReportThemeTokens.glassBorderStrong,
                   ),
               ],
             ),
@@ -112,7 +112,7 @@ class MealTimelineItem extends StatelessWidget {
                 else
                   ...foods.map((f) => FoodRow(item: f)),
                 const SizedBox(height: 10),
-                Container(height: 1, color: ReportThemeTokens.borderSubtle),
+                Container(height: 1, color: ReportThemeTokens.glassBorder),
               ],
             ),
           ),

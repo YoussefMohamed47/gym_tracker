@@ -56,6 +56,48 @@ class _DailyReportFormState extends State<DailyReportForm> {
     widget.onChanged(widget.report.copyWith(water: WaterAmount.format(next)));
   }
 
+  static const _otherHeader = '__other__';
+  static const _cardio = 'Cardio';
+
+  /// The 8-day plan's days first, then an "Other" group with Cardio and,
+  /// if this day still has one, a day from the old plan.
+  List<DropdownMenuItem<String>> _trainingItems(
+    String current,
+    ColorScheme scheme,
+  ) {
+    final rotation = [
+      for (final o in widget.trainingOptions)
+        if (o != _cardio) o,
+    ];
+    final oldPlanDay =
+        current.isNotEmpty && current != _cardio && !rotation.contains(current)
+        ? current
+        : null;
+    DropdownMenuItem<String> item(String value, [String? label]) =>
+        DropdownMenuItem(
+          value: value,
+          child: Text(label ?? value, overflow: TextOverflow.ellipsis),
+        );
+    return [
+      for (final o in rotation) item(o),
+      DropdownMenuItem(
+        value: _otherHeader,
+        enabled: false,
+        child: Text(
+          'OTHER',
+          style: GoogleFonts.outfit(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+      item(_cardio),
+      if (oldPlanDay != null) item(oldPlanDay, '$oldPlanDay (old plan)'),
+    ];
+  }
+
   Widget _field(
     String label,
     String value,
@@ -140,16 +182,7 @@ class _DailyReportFormState extends State<DailyReportForm> {
                 isExpanded: true,
                 isDense: true,
                 icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                items: [
-                  for (final e in {
-                    ...widget.trainingOptions,
-                    if (report.training.trim().isNotEmpty) report.training,
-                  })
-                    DropdownMenuItem(
-                      value: e,
-                      child: Text(e, overflow: TextOverflow.ellipsis),
-                    ),
-                ],
+                items: _trainingItems(report.training.trim(), scheme),
                 onChanged: (v) =>
                     widget.onChanged(report.copyWith(training: v ?? '')),
               ),

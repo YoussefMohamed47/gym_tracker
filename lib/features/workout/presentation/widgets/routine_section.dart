@@ -5,21 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gym_tracker_report/features/workout/data/datasources/workout_catalog.dart';
 import '../../../../core/theme/report_theme_tokens.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/utils/plural.dart';
+import '../../../../core/widgets/auto_fold.dart';
 import '../../domain/entities/workout_definition.dart';
 import '../cubit/workout_cubit.dart';
 import '../cubit/workout_state.dart';
 import '../utils/video_launcher.dart';
+import 'set_check_button.dart';
 
-class RoutineSection extends StatefulWidget {
+class RoutineSection extends StatelessWidget {
   const RoutineSection({super.key});
-
-  @override
-  State<RoutineSection> createState() => _RoutineSectionState();
-}
-
-class _RoutineSectionState extends State<RoutineSection> {
-  bool _isExpanded = true;
-  bool _hasAutoCollapsed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +23,15 @@ class _RoutineSectionState extends State<RoutineSection> {
 
     return BlocBuilder<WorkoutCubit, WorkoutState>(
       buildWhen: (prev, curr) {
+        // Rest-timer ticks keep the same logs: nothing to redo here.
+        if (identical(prev.exerciseLogs, curr.exerciseLogs) &&
+            prev.dateKey == curr.dateKey) {
+          return false;
+        }
+        if (prev.dateKey != curr.dateKey ||
+            prev.progress.liftsStarted != curr.progress.liftsStarted) {
+          return true;
+        }
         // Only rebuild if routine logs changed
         for (final slot in dailyRoutine.exercises) {
           if (prev.exerciseLogs[slot.exerciseId] !=
@@ -53,162 +57,157 @@ class _RoutineSectionState extends State<RoutineSection> {
         final isAllComplete =
             totalRoutineItems > 0 && completedRoutineItems == totalRoutineItems;
 
-        // Auto-collapse once all completed if not already collapsed
-        if (isAllComplete && !_hasAutoCollapsed && _isExpanded) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _isExpanded = false;
-                _hasAutoCollapsed = true;
-              });
-            }
-          });
-        }
-
         final progress = totalRoutineItems > 0
             ? completedRoutineItems / totalRoutineItems
             : 0.0;
 
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: isAllComplete
-                  ? AppColors.completedGreen.withValues(alpha: 0.6)
-                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
-              width: isAllComplete ? 1.5 : 1.0,
+        // Fold once done, or once the main lifts have started; a tap on the
+        // header holds for the day it was made on.
+        return AutoFold(
+          resetKey: state.dateKey,
+          shouldFold: isAllComplete || state.progress.liftsStarted,
+          builder: (context, isExpanded, toggle) => Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isAllComplete
+                    ? AppColors.completedGreen.withValues(alpha: 0.6)
+                    : (isDark ? AppColors.borderSubtle : AppColors.outline),
+                width: isAllComplete ? 1.5 : 1.0,
+              ),
             ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: Column(
-              children: [
-                // Collapsible Header Bar
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      setState(() {
-                        _isExpanded = !_isExpanded;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(22),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: isAllComplete
-                                      ? AppColors.completedGreen.withValues(
-                                          alpha: 0.15,
-                                        )
-                                      : AppColors.indigoAccent.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                  shape: BoxShape.circle,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Column(
+                children: [
+                  // Collapsible Header Bar
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        toggle();
+                      },
+                      borderRadius: BorderRadius.circular(22),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: isAllComplete
+                                        ? AppColors.completedGreen.withValues(
+                                            alpha: 0.15,
+                                          )
+                                        : AppColors.indigoAccent.withValues(
+                                            alpha: 0.15,
+                                          ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isAllComplete
+                                        ? Icons.check_circle_rounded
+                                        : Icons.accessibility_new_rounded,
+                                    size: 18,
+                                    color: isAllComplete
+                                        ? AppColors.completedGreen
+                                        : AppColors.indigoAccent,
+                                  ),
                                 ),
-                                child: Icon(
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Warm-up & Rehab (Daily Routine)',
+                                        style: ReportThemeTokens.outfitHeader(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w900,
+                                          color: isAllComplete
+                                              ? AppColors.completedGreen
+                                              : (isDark
+                                                    ? AppColors.textPrimary
+                                                    : Colors.black87),
+                                        ),
+                                      ),
+                                      Text(
+                                        isExpanded || isAllComplete
+                                            ? '$completedRoutineItems of $totalRoutineItems done'
+                                            : '$completedRoutineItems of $totalRoutineItems done · tap to open',
+                                        style: ReportThemeTokens.outfitSubtext(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                AnimatedRotation(
+                                  turns: isExpanded ? 0.5 : 0.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 4,
+                                backgroundColor: isDark
+                                    ? Colors.white10
+                                    : Colors.black12,
+                                valueColor: AlwaysStoppedAnimation<Color>(
                                   isAllComplete
-                                      ? Icons.check_circle_rounded
-                                      : Icons.accessibility_new_rounded,
-                                  size: 18,
-                                  color: isAllComplete
                                       ? AppColors.completedGreen
                                       : AppColors.indigoAccent,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Warm-up & Rehab (Daily Routine)',
-                                      style: ReportThemeTokens.outfitHeader(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w900,
-                                        color: isAllComplete
-                                            ? AppColors.completedGreen
-                                            : (isDark
-                                                  ? AppColors.textPrimary
-                                                  : Colors.black87),
-                                      ),
-                                    ),
-                                    Text(
-                                      '$completedRoutineItems of $totalRoutineItems done',
-                                      style: ReportThemeTokens.outfitSubtext(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              AnimatedRotation(
-                                turns: _isExpanded ? 0.5 : 0.0,
-                                duration: const Duration(milliseconds: 200),
-                                child: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              minHeight: 4,
-                              backgroundColor: isDark
-                                  ? Colors.white10
-                                  : Colors.black12,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                isAllComplete
-                                    ? AppColors.completedGreen
-                                    : AppColors.indigoAccent,
-                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                // Collapsible Body
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                  child: _isExpanded
-                      ? Column(
-                          children: [
-                            Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: isDark
-                                  ? AppColors.borderSubtle
-                                  : AppColors.outline,
-                            ),
-                            ...dailyRoutine.exercises.map((slot) {
-                              return _RoutineItemCard(slot: slot);
-                            }),
-                            const SizedBox(height: 8),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ],
+                  // Collapsible Body
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    child: isExpanded
+                        ? Column(
+                            children: [
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: isDark
+                                    ? AppColors.borderSubtle
+                                    : AppColors.outline,
+                              ),
+                              ...dailyRoutine.exercises.map((slot) {
+                                return _RoutineItemCard(slot: slot);
+                              }),
+                              const SizedBox(height: 8),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -242,7 +241,7 @@ class _RoutineItemCard extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkElevated : const Color(0xFFF7F8FA),
+            color: isDark ? AppColors.darkElevated : AppColors.lightInset,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isFullyDone
@@ -287,9 +286,9 @@ class _RoutineItemCard extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      '${slot.prescribedSets} sets • ${slot.prescribedReps} • Rest ${slot.prescribedRest}',
+                                      '${countOf(slot.prescribedSets, 'set')} • ${slot.prescribedReps} • Rest ${slot.prescribedRest}',
                                       style: ReportThemeTokens.outfitSubtext(
-                                        fontSize: 11,
+                                        fontSize: 12,
                                         color: AppColors.textSecondary,
                                       ),
                                     ),
@@ -339,7 +338,7 @@ class _RoutineItemCard extends StatelessWidget {
                                 );
                               }
 
-                              return _StandardSetCircle(
+                              return SetCheckButton(
                                 exerciseId: slot.exerciseId,
                                 setIndex: index,
                                 isPerformed: isPerformed,
@@ -356,73 +355,6 @@ class _RoutineItemCard extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _StandardSetCircle extends StatelessWidget {
-  final String exerciseId;
-  final int setIndex;
-  final bool isPerformed;
-
-  const _StandardSetCircle({
-    required this.exerciseId,
-    required this.setIndex,
-    required this.isPerformed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return RepaintBoundary(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.read<WorkoutCubit>().toggleSetPerformed(exerciseId, setIndex);
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 52,
-          height: 48,
-          decoration: BoxDecoration(
-            color: isPerformed
-                ? AppColors.completedGreen
-                : (isDark ? AppColors.darkCard : Colors.white),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isPerformed
-                  ? AppColors.completedGreen
-                  : (isDark ? AppColors.borderSubtle : AppColors.outline),
-              width: 1.5,
-            ),
-          ),
-          child: Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) =>
-                  ScaleTransition(scale: animation, child: child),
-              child: isPerformed
-                  ? const Icon(
-                      Icons.check_rounded,
-                      key: ValueKey('done'),
-                      size: 20,
-                      color: Colors.black,
-                    )
-                  : Text(
-                      'S${setIndex + 1}',
-                      key: const ValueKey('undone'),
-                      style: ReportThemeTokens.outfitNumber(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? AppColors.textPrimary : Colors.black87,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

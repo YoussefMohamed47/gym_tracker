@@ -420,7 +420,7 @@ class _AlternativesSheetState extends State<AlternativesSheet> {
     child: Text(
       text,
       style: ReportThemeTokens.outfitSubtext(
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: FontWeight.w900,
         color: AppColors.textSecondary,
       ).copyWith(letterSpacing: 1.4),
@@ -528,7 +528,7 @@ class _AlternativesSheetState extends State<AlternativesSheet> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: ReportThemeTokens.outfitSubtext(
-                          fontSize: 10,
+                          fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -536,7 +536,7 @@ class _AlternativesSheetState extends State<AlternativesSheet> {
                         Text(
                           isOpen ? 'Hide how to ▴' : 'How to ▾',
                           style: ReportThemeTokens.outfitSubtext(
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.w800,
                             color: AppColors.indigoAccent,
                           ),
@@ -579,7 +579,7 @@ class _AlternativesSheetState extends State<AlternativesSheet> {
                   child: Text(
                     'Doing',
                     style: ReportThemeTokens.outfitSubtext(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: AppColors.indigoAccent,
                     ),
@@ -637,7 +637,7 @@ class _AlternativesSheetState extends State<AlternativesSheet> {
     child: Text(
       text,
       style: ReportThemeTokens.outfitSubtext(
-        fontSize: 9,
+        fontSize: 11,
         fontWeight: FontWeight.bold,
         color: AppColors.indigoAccent,
       ),

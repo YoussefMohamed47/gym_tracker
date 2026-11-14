@@ -1,11 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:gym_tracker_report/core/error/api_result.dart';
 import 'package:gym_tracker_report/core/utils/weight_converter.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/exercise_log.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/exercise_set_log.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/workout_session.dart';
 import 'package:gym_tracker_report/features/workout/domain/entities/workout_type.dart';
 import 'package:gym_tracker_report/features/workout/domain/repositories/workout_repository.dart';
+import 'package:gym_tracker_report/features/workout/domain/usecases/get_previous_exercise_log.dart';
+import 'package:gym_tracker_report/features/workout/domain/usecases/save_workout_session.dart';
 import 'package:gym_tracker_report/features/workout/presentation/cubit/workout_cubit.dart';
 import 'package:gym_tracker_report/features/workout/presentation/cubit/workout_state.dart';
 import 'package:gym_tracker_report/features/workout/utils/date_utils.dart';
@@ -24,7 +27,19 @@ void main() {
 
   setUp(() {
     mockRepository = MockWorkoutRepository();
-    cubit = WorkoutCubit(repository: mockRepository);
+    // No earlier sessions unless a test says otherwise.
+    when(
+      () => mockRepository.getLastPerformedExerciseLogs(
+        any(),
+        beforeDateKey: any(named: 'beforeDateKey'),
+      ),
+    ).thenAnswer((_) async => const ApiSuccess({}));
+    cubit = WorkoutCubit(
+      repository: mockRepository,
+      getPreviousExerciseLog: GetPreviousExerciseLog(mockRepository),
+      saveWorkoutSession: SaveWorkoutSession(mockRepository),
+      autoSaveDelay: null,
+    );
   });
 
   group('WorkoutCubit - Partial Completion & Reps', () {
@@ -73,6 +88,33 @@ void main() {
       cubit.resetStatus();
       expect(cubit.state.status, WorkoutStatus.success);
       expect(cubit.state.errorMessage, isNull);
+    });
+
+    test('finishing asks only about main lifts, not warm-up', () async {
+      ExerciseLog log(String id, {required bool done}) => ExerciseLog(
+        plannedExerciseId: id,
+        performedExerciseId: id,
+        sets: [ExerciseSetLog(isPerformed: done)],
+        timestamp: DateTime.now(),
+      );
+      cubit.emit(
+        cubit.state.copyWith(
+          status: WorkoutStatus.success,
+          dateKey: '2026-08-19',
+          workoutType: WorkoutType.push,
+          mainExerciseIds: ['lift_a', 'lift_b'],
+          exerciseLogs: {
+            'lift_a': log('lift_a', done: true),
+            'lift_b': log('lift_b', done: false),
+            'warmup': log('warmup', done: false),
+            'routine': log('routine', done: false),
+          },
+        ),
+      );
+
+      await cubit.saveWorkout();
+
+      expect(cubit.state.errorMessage, 'REVIEW_REQUIRED:1');
     });
 
     test(
@@ -153,8 +195,15 @@ void main() {
       );
 
       when(
-        () => mockRepository.getPreviousExerciseLog(any(), any()),
-      ).thenAnswer((_) async => prevLog);
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer(
+        (_) async => ApiSuccess({
+          'ex1': PreviousExerciseLog(dateKey: '2026-08-12', log: prevLog),
+        }),
+      );
       when(
         () => mockRepository.getPreferredUnit(),
       ).thenAnswer((_) async => WeightUnit.kg);
@@ -169,8 +218,11 @@ void main() {
       'changeWorkoutType should update state, fetch history and persist',
       () async {
         when(
-          () => mockRepository.getPreviousExerciseLog(any(), any()),
-        ).thenAnswer((_) async => null);
+          () => mockRepository.getLastPerformedExerciseLogs(
+            any(),
+            beforeDateKey: any(named: 'beforeDateKey'),
+          ),
+        ).thenAnswer((_) async => const ApiSuccess({}));
         when(
           () => mockRepository.saveSession(any()),
         ).thenAnswer((_) async => {});
@@ -194,11 +246,24 @@ void main() {
       );
 
       when(
-        () => mockRepository.getPreviousExerciseLog(any(), any()),
-      ).thenAnswer((_) async => null);
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer((_) async => const ApiSuccess({}));
       when(
-        () => mockRepository.getPreviousExerciseLog('push', any()),
-      ).thenAnswer((_) async => prevLog);
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer(
+        (_) async => ApiSuccess({
+          'push_chest_press_machine': PreviousExerciseLog(
+            dateKey: '2026-08-12',
+            log: prevLog,
+          ),
+        }),
+      );
 
       await cubit.changeWorkoutType(WorkoutType.push);
 
@@ -233,8 +298,11 @@ void main() {
           () => mockRepository.getPreferredUnit(),
         ).thenAnswer((_) async => WeightUnit.kg);
         when(
-          () => mockRepository.getPreviousExerciseLog(any(), any()),
-        ).thenAnswer((_) async => null);
+          () => mockRepository.getLastPerformedExerciseLogs(
+            any(),
+            beforeDateKey: any(named: 'beforeDateKey'),
+          ),
+        ).thenAnswer((_) async => const ApiSuccess({}));
 
         await cubit.loadDate(today);
 
@@ -272,8 +340,11 @@ void main() {
         () => mockRepository.getPreferredUnit(),
       ).thenAnswer((_) async => WeightUnit.kg);
       when(
-        () => mockRepository.getPreviousExerciseLog(any(), any()),
-      ).thenAnswer((_) async => null);
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer((_) async => const ApiSuccess({}));
 
       await cubit.loadDate(today);
       expect(cubit.state.workoutType, WorkoutType.fullBody);
@@ -304,8 +375,11 @@ void main() {
   group('WorkoutCubit - Upper Body Warm-up Routine', () {
     test('Push, Pull, Upper should include warm-up exercises', () async {
       when(
-        () => mockRepository.getPreviousExerciseLog(any(), any()),
-      ).thenAnswer((_) async => null);
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer((_) async => const ApiSuccess({}));
       when(() => mockRepository.saveSession(any())).thenAnswer((_) async => {});
 
       // Push
@@ -344,8 +418,11 @@ void main() {
 
     test('Legs, Lower, Rest should NOT include warm-up exercises', () async {
       when(
-        () => mockRepository.getPreviousExerciseLog(any(), any()),
-      ).thenAnswer((_) async => null);
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer((_) async => const ApiSuccess({}));
       when(() => mockRepository.saveSession(any())).thenAnswer((_) async => {});
 
       // Legs
@@ -369,5 +446,119 @@ void main() {
         isFalse,
       );
     });
+  });
+
+  group('WorkoutCubit - Opening today', () {
+    void givenEmptyHistory() {
+      when(
+        () => mockRepository.getSessionForDate(any()),
+      ).thenAnswer((_) async => null);
+      when(() => mockRepository.getHistory()).thenAnswer((_) async => []);
+      when(
+        () => mockRepository.getPreferredUnit(),
+      ).thenAnswer((_) async => WeightUnit.kg);
+      when(
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey'),
+        ),
+      ).thenAnswer((_) async => const ApiSuccess({}));
+    }
+
+    test('ensureToday moves to the new day after the date changes', () async {
+      givenEmptyHistory();
+
+      await cubit.ensureToday(DateTime(2026, 11, 13, 22));
+      await cubit.ensureToday(DateTime(2026, 11, 14, 8));
+
+      expect(cubit.state.dateKey, '2026-11-14');
+    });
+
+    test('ensureToday keeps a browsed date on the same day', () async {
+      givenEmptyHistory();
+
+      await cubit.ensureToday(DateTime(2026, 11, 14, 8));
+      await cubit.loadDate(DateTime(2026, 11, 10));
+      await cubit.ensureToday(DateTime(2026, 11, 14, 20));
+
+      expect(cubit.state.dateKey, '2026-11-10');
+    });
+
+    test('a new day is prefilled only from sessions before it', () async {
+      givenEmptyHistory();
+
+      await cubit.loadDate(DateTime(2026, 11, 14));
+
+      verify(
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: '2026-11-14',
+        ),
+      ).called(greaterThan(0));
+      verifyNever(
+        () => mockRepository.getLastPerformedExerciseLogs(
+          any(),
+          beforeDateKey: any(named: 'beforeDateKey', that: isNot('2026-11-14')),
+        ),
+      );
+    });
+
+    /// Opens 13 Nov, then ticks the first set of the first exercise.
+    Future<void> openDayWithOneSetDone() async {
+      await cubit.ensureToday(DateTime(2026, 11, 13, 22));
+      final first = cubit.state.exerciseLogs.keys.first;
+      await cubit.toggleSetPerformed(first, 0);
+    }
+
+    test('with no history the 8-day rotation starts at day 1', () async {
+      givenEmptyHistory();
+
+      // A Saturday: the old weekly plan would have picked Push.
+      await cubit.loadDate(DateTime(2026, 11, 14));
+
+      expect(cubit.state.workoutType, WorkoutType.chestAndBack);
+    });
+
+    test('ensureToday saves done sets before moving to the new day', () async {
+      givenEmptyHistory();
+      when(() => mockRepository.saveSession(any())).thenAnswer((_) async {});
+      await openDayWithOneSetDone();
+
+      await cubit.ensureToday(DateTime(2026, 11, 14, 0, 5));
+
+      final saved =
+          verify(() => mockRepository.saveSession(captureAny())).captured.single
+              as WorkoutSession;
+      expect(saved.dateKey, '2026-11-13');
+      expect(cubit.state.dateKey, '2026-11-14');
+    });
+
+    test('ensureToday stays on the open day when saving fails', () async {
+      givenEmptyHistory();
+      when(() => mockRepository.saveSession(any())).thenThrow(Exception('io'));
+      await openDayWithOneSetDone();
+
+      await cubit.ensureToday(DateTime(2026, 11, 14, 0, 5));
+
+      expect(cubit.state.dateKey, '2026-11-13');
+    });
+
+    test(
+      'before any day is open, prefill uses sessions before today',
+      () async {
+        givenEmptyHistory();
+        when(() => mockRepository.saveSession(any())).thenAnswer((_) async {});
+
+        await cubit.changeWorkoutType(WorkoutType.push);
+
+        final today = WorkoutDateUtils.formatDateKey(DateTime.now());
+        verifyNever(
+          () => mockRepository.getLastPerformedExerciseLogs(
+            any(),
+            beforeDateKey: any(named: 'beforeDateKey', that: isNot(today)),
+          ),
+        );
+      },
+    );
   });
 }

@@ -1,8 +1,12 @@
+import '../../../../core/error/api_result.dart';
 import '../../../../core/utils/weight_converter.dart';
 import '../../domain/entities/exercise_log.dart';
+import '../../domain/entities/exercise_set_log.dart';
+import '../../domain/entities/previous_exercise_log.dart';
 import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/workout_type.dart';
 import '../../domain/repositories/workout_repository.dart';
+import '../datasources/workout_catalog.dart';
 import '../datasources/workout_local_datasource.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
@@ -59,27 +63,60 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
-  Future<ExerciseLog?> getPreviousExerciseLog(
-    String workoutType,
-    String exerciseId,
-  ) async {
-    final history = await getHistory();
-    final canonicalId = _normalizeId(exerciseId);
+  Future<ApiResult<Map<String, PreviousExerciseLog>>>
+  getLastPerformedExerciseLogs(
+    List<String> exerciseIds, {
+    required String beforeDateKey,
+  }) async {
+    try {
+      // Newest first, per the data source contract.
+      final history = await getHistory();
+      final wanted = <String, List<String>>{};
+      for (final id in exerciseIds) {
+        wanted.putIfAbsent(_historyId(id), () => []).add(id);
+      }
 
-    // Filter by workout type and search for the exercise in logs
-    for (final session in history) {
-      if (session.workoutType.name == workoutType) {
+      final found = <String, PreviousExerciseLog>{};
+      for (final session in history) {
+        if (wanted.isEmpty) break;
+        if (beforeDateKey.isNotEmpty &&
+            session.dateKey.compareTo(beforeDateKey) >= 0) {
+          continue;
+        }
         for (final log in session.exerciseLogs.values) {
           final isEffectivelyPerformed =
               log.isPerformed || log.sets.any((s) => s.isPerformed);
-          if (_normalizeId(log.performedExerciseId) == canonicalId &&
-              isEffectivelyPerformed) {
-            return log;
+          if (!isEffectivelyPerformed) continue;
+          final ids = wanted.remove(_historyId(log.performedExerciseId));
+          if (ids == null) continue;
+          final previous = PreviousExerciseLog(
+            dateKey: session.dateKey,
+            log: _doneSetsOnly(log),
+          );
+          for (final id in ids) {
+            found[id] = previous;
           }
         }
       }
+      return ApiSuccess(found);
+    } catch (_) {
+      return const ApiFailure(CacheFailure('Could not read workout history'));
     }
-    return null;
+  }
+
+  String _historyId(String exerciseId) =>
+      WorkoutCatalog.sharedExerciseId(_normalizeId(exerciseId));
+
+  /// Keeps set positions but drops the numbers of sets not ticked done, so a
+  /// skipped set is never shown or prefilled as "last time".
+  ExerciseLog _doneSetsOnly(ExerciseLog log) {
+    if (log.sets.every((s) => s.isPerformed)) return log;
+    return log.copyWith(
+      sets: [
+        for (final s in log.sets)
+          s.isPerformed ? s : const ExerciseSetLog(isPerformed: false),
+      ],
+    );
   }
 
   @override

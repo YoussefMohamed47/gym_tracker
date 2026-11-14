@@ -41,7 +41,7 @@ class StatTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: ReportThemeTokens.cardBackground,
           borderRadius: ReportThemeTokens.cardBorderRadius,
-          border: Border.all(color: ReportThemeTokens.borderSubtle, width: 1.0),
+          border: Border.all(color: ReportThemeTokens.glassBorder, width: 1.0),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

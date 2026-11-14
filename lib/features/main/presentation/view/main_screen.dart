@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:gym_tracker_report/core/widgets/app_resume_listener.dart';
 import 'package:gym_tracker_report/features/daily_report/presentation/cubit/daily_report_cubit.dart';
 import 'package:gym_tracker_report/features/daily_report/presentation/view/daily_report_screen.dart';
 import 'package:gym_tracker_report/features/workout/presentation/cubit/workout_cubit.dart';
@@ -35,8 +36,7 @@ class _MainScreenState extends State<MainScreen> {
     // first opened), so Nutrition shows the same training from the start.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final workout = context.read<WorkoutCubit>();
-      if (workout.state.dateKey.isEmpty) workout.loadDate(DateTime.now());
+      context.read<WorkoutCubit>().ensureToday(DateTime.now());
     });
   }
 
@@ -68,65 +68,70 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     // Back never leaves the app by accident: on Workout it goes to Nutrition,
     // on Nutrition it asks for a second press within 2 seconds to exit.
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        if (_selectedIndex != 0) {
-          _onDestinationSelected(0);
-          return;
-        }
-        final now = DateTime.now();
-        final last = _lastBackPress;
-        if (last != null && now.difference(last) < _exitWindow) {
-          SystemNavigator.pop();
-          return;
-        }
-        _lastBackPress = now;
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            const SnackBar(
-              duration: _exitWindow,
-              content: Text('اضغط رجوع مرة تانية للخروج'),
-            ),
-          );
-      },
-      // Nutrition's training type follows the day the Workout tab shows for
-      // today, as soon as it loads or you switch it.
-      child: BlocListener<WorkoutCubit, WorkoutState>(
-        listenWhen: (before, now) =>
-            now.status == WorkoutStatus.success &&
-            now.dateKey == WorkoutDateUtils.formatDateKey(DateTime.now()) &&
-            (before.workoutType != now.workoutType ||
-                before.dateKey != now.dateKey ||
-                before.status != now.status),
-        listener: (context, state) => context
-            .read<DailyReportCubit>()
-            .syncTrainingFromWorkout(state.workoutType.displayName),
-        child: Scaffold(
-          extendBody: true,
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              for (int index = 0; index < _screens.length; index++)
-                if (_initializedTabs[index])
-                  Offstage(
-                    offstage: _selectedIndex != index,
-                    child: TickerMode(
-                      enabled: _selectedIndex == index,
-                      child: FocusScope(
-                        canRequestFocus: _selectedIndex == index,
-                        descendantsAreFocusable: _selectedIndex == index,
-                        child: _screens[index],
+    return AppResumeListener(
+      // The app often stays in memory between training days: move to today
+      // on return, so the new session is prefilled from the last one.
+      onResumed: () => context.read<WorkoutCubit>().ensureToday(DateTime.now()),
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (_selectedIndex != 0) {
+            _onDestinationSelected(0);
+            return;
+          }
+          final now = DateTime.now();
+          final last = _lastBackPress;
+          if (last != null && now.difference(last) < _exitWindow) {
+            SystemNavigator.pop();
+            return;
+          }
+          _lastBackPress = now;
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              const SnackBar(
+                duration: _exitWindow,
+                content: Text('اضغط رجوع مرة تانية للخروج'),
+              ),
+            );
+        },
+        // Nutrition's training type follows the day the Workout tab shows for
+        // today, as soon as it loads or you switch it.
+        child: BlocListener<WorkoutCubit, WorkoutState>(
+          listenWhen: (before, now) =>
+              now.status == WorkoutStatus.success &&
+              now.dateKey == WorkoutDateUtils.formatDateKey(DateTime.now()) &&
+              (before.workoutType != now.workoutType ||
+                  before.dateKey != now.dateKey ||
+                  before.status != now.status),
+          listener: (context, state) => context
+              .read<DailyReportCubit>()
+              .syncTrainingFromWorkout(state.workoutType.displayName),
+          child: Scaffold(
+            extendBody: true,
+            body: Stack(
+              fit: StackFit.expand,
+              children: [
+                for (int index = 0; index < _screens.length; index++)
+                  if (_initializedTabs[index])
+                    Offstage(
+                      offstage: _selectedIndex != index,
+                      child: TickerMode(
+                        enabled: _selectedIndex == index,
+                        child: FocusScope(
+                          canRequestFocus: _selectedIndex == index,
+                          descendantsAreFocusable: _selectedIndex == index,
+                          child: _screens[index],
+                        ),
                       ),
                     ),
-                  ),
-            ],
-          ),
-          bottomNavigationBar: FloatingNavBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: _onDestinationSelected,
+              ],
+            ),
+            bottomNavigationBar: FloatingNavBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _onDestinationSelected,
+            ),
           ),
         ),
       ),
