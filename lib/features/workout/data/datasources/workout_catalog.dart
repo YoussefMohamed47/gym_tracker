@@ -265,6 +265,44 @@ class WorkoutCatalog {
       isWeightAllowed: false,
     ),
 
+    // --- SHOULDER REHAB & WARM-UP ADDITIONS ---
+    ExerciseDefinition(
+      id: 'warmup_wall_angels',
+      name: 'Wall Angels',
+      videoUrl: 'https://youtube.com/shorts/BdEXk-wHyfE',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'warmup_shoulder_scaption',
+      name: 'Shoulder Scaption',
+      videoUrl: 'https://youtube.com/shorts/TPXDhl9kTuI',
+      tempoNote: 'Light weight, slow tempo',
+    ),
+    ExerciseDefinition(
+      id: 'warmup_prone_y_raises',
+      name: 'Prone Y-Raises (Lower Trap)',
+      videoUrl: 'https://youtube.com/shorts/6uh8S0Ab8Iw',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'warmup_prone_t_raises',
+      name: 'Prone T-Raises (Mid Trap)',
+      videoUrl: 'https://youtube.com/shorts/j9V5NCeDpYw',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'rehab_shoulder_extension_prone',
+      name: 'Shoulder Extension Prone',
+      videoUrl: 'https://youtube.com/shorts/BNm4ITWq1jI',
+      isWeightAllowed: false,
+    ),
+    ExerciseDefinition(
+      id: 'rehab_banded_triceps_extension',
+      name: 'Banded Triceps Extension',
+      videoUrl: 'https://youtube.com/shorts/xPgtezPGbOk',
+      isWeightAllowed: false,
+    ),
+
     // --- ALTERNATIVES ---
     ExerciseDefinition(id: 'alt_db_bench_press', name: 'DB Bench Press'),
     ExerciseDefinition(
@@ -885,32 +923,96 @@ class WorkoutCatalog {
       type: WorkoutType.upper,
       exercises: [
         ExerciseSlot(
-          exerciseId: 'warmup_banded_shoulder_circles',
+          exerciseId: 'warmup_wall_angels',
           order: 1,
           prescribedSets: 1,
           prescribedReps: '10–12',
           prescribedRest: '30s',
         ),
         ExerciseSlot(
-          exerciseId: 'warmup_banded_external_rotation',
+          exerciseId: 'warmup_banded_shoulder_circles',
           order: 2,
-          prescribedSets: 2,
-          prescribedReps: '12–15 / arm',
-          prescribedRest: '30s',
-        ),
-        ExerciseSlot(
-          exerciseId: 'warmup_banded_scapula_push_up',
-          order: 3,
           prescribedSets: 1,
           prescribedReps: '10–12',
           prescribedRest: '30s',
         ),
         ExerciseSlot(
-          exerciseId: 'warmup_banded_single_arm_row',
-          order: 4,
+          exerciseId: 'warmup_banded_external_rotation',
+          order: 3,
           prescribedSets: 2,
-          prescribedReps: '12 / arm',
+          prescribedReps: '12–15 / arm',
           prescribedRest: '30s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_shoulder_scaption',
+          order: 4,
+          prescribedSets: 1,
+          prescribedReps: '12–15',
+          prescribedRest: '30s',
+          tempoNote: 'Light weight, slow tempo',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_prone_y_raises',
+          order: 5,
+          prescribedSets: 1,
+          prescribedReps: '10–12',
+          prescribedRest: '30s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_prone_t_raises',
+          order: 6,
+          prescribedSets: 1,
+          prescribedReps: '10–12',
+          prescribedRest: '30s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_banded_scapula_push_up',
+          order: 7,
+          prescribedSets: 1,
+          prescribedReps: '10–12',
+          prescribedRest: '30s',
+        ),
+      ],
+    ),
+    WorkoutDefinition(
+      id: 'shoulder_rehab',
+      name: 'Shoulder Rehabilitation',
+      type: WorkoutType.rest,
+      exercises: [
+        ExerciseSlot(
+          exerciseId: 'rehab_shoulder_extension_prone',
+          order: 1,
+          prescribedSets: 3,
+          prescribedReps: '12–15',
+          prescribedRest: '30–60s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_prone_y_raises',
+          order: 2,
+          prescribedSets: 3,
+          prescribedReps: '10–15',
+          prescribedRest: '30–60s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_prone_t_raises',
+          order: 3,
+          prescribedSets: 3,
+          prescribedReps: '10–15',
+          prescribedRest: '30–60s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'warmup_banded_external_rotation',
+          order: 4,
+          prescribedSets: 3,
+          prescribedReps: '12–15',
+          prescribedRest: '30–60s',
+        ),
+        ExerciseSlot(
+          exerciseId: 'rehab_banded_triceps_extension',
+          order: 5,
+          prescribedSets: 3,
+          prescribedReps: '12–15',
+          prescribedRest: '30–60s',
         ),
       ],
     ),
@@ -1261,7 +1363,8 @@ class WorkoutCatalog {
           (w) =>
               w.type == type &&
               w.id != 'daily_routine' &&
-              w.id != 'upper_body_warmup',
+              w.id != 'upper_body_warmup' &&
+              w.id != 'shoulder_rehab',
         )
         .firstOrNull;
   }
@@ -1272,6 +1375,10 @@ class WorkoutCatalog {
 
   static WorkoutDefinition getUpperBodyWarmup() {
     return workouts.firstWhere((w) => w.id == 'upper_body_warmup');
+  }
+
+  static WorkoutDefinition getShoulderRehab() {
+    return workouts.firstWhere((w) => w.id == 'shoulder_rehab');
   }
 
   static ExerciseDefinition getExerciseById(String id) {

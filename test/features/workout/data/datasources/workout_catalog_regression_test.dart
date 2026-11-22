@@ -164,23 +164,35 @@ void main() {
 
     test('Upper Body Warm-up Routine Canonical Content & Isolation', () {
       final warmup = WorkoutCatalog.getUpperBodyWarmup();
-      expect(warmup.exercises.length, 4);
+      expect(warmup.exercises.length, 7);
 
-      expect(warmup.exercises[0].exerciseId, 'warmup_banded_shoulder_circles');
+      expect(warmup.exercises[0].exerciseId, 'warmup_wall_angels');
       expect(warmup.exercises[0].prescribedSets, 1);
       expect(warmup.exercises[0].prescribedReps, '10–12');
 
-      expect(warmup.exercises[1].exerciseId, 'warmup_banded_external_rotation');
-      expect(warmup.exercises[1].prescribedSets, 2);
-      expect(warmup.exercises[1].prescribedReps, '12–15 / arm');
+      expect(warmup.exercises[1].exerciseId, 'warmup_banded_shoulder_circles');
+      expect(warmup.exercises[1].prescribedSets, 1);
+      expect(warmup.exercises[1].prescribedReps, '10–12');
 
-      expect(warmup.exercises[2].exerciseId, 'warmup_banded_scapula_push_up');
-      expect(warmup.exercises[2].prescribedSets, 1);
-      expect(warmup.exercises[2].prescribedReps, '10–12');
+      expect(warmup.exercises[2].exerciseId, 'warmup_banded_external_rotation');
+      expect(warmup.exercises[2].prescribedSets, 2);
+      expect(warmup.exercises[2].prescribedReps, '12–15 / arm');
 
-      expect(warmup.exercises[3].exerciseId, 'warmup_banded_single_arm_row');
-      expect(warmup.exercises[3].prescribedSets, 2);
-      expect(warmup.exercises[3].prescribedReps, '12 / arm');
+      expect(warmup.exercises[3].exerciseId, 'warmup_shoulder_scaption');
+      expect(warmup.exercises[3].prescribedSets, 1);
+      expect(warmup.exercises[3].prescribedReps, '12–15');
+
+      expect(warmup.exercises[4].exerciseId, 'warmup_prone_y_raises');
+      expect(warmup.exercises[4].prescribedSets, 1);
+      expect(warmup.exercises[4].prescribedReps, '10–12');
+
+      expect(warmup.exercises[5].exerciseId, 'warmup_prone_t_raises');
+      expect(warmup.exercises[5].prescribedSets, 1);
+      expect(warmup.exercises[5].prescribedReps, '10–12');
+
+      expect(warmup.exercises[6].exerciseId, 'warmup_banded_scapula_push_up');
+      expect(warmup.exercises[6].prescribedSets, 1);
+      expect(warmup.exercises[6].prescribedReps, '10–12');
 
       // Verify excluded exercises are NOT included in warmup
       for (final slot in warmup.exercises) {
@@ -194,6 +206,52 @@ void main() {
 
       // Verify video URLs exist for all warmup exercises
       for (final slot in warmup.exercises) {
+        final def = WorkoutCatalog.getExerciseById(slot.exerciseId);
+        expect(def.videoUrl, isNotNull);
+        expect(def.videoUrl, contains('youtube.com/'));
+      }
+    });
+
+    test('Shoulder Rehabilitation Routine Canonical Content & Isolation', () {
+      final rehab = WorkoutCatalog.getShoulderRehab();
+      expect(rehab.exercises.length, 5);
+
+      expect(
+        rehab.exercises[0].exerciseId,
+        'rehab_shoulder_extension_prone',
+      );
+      expect(rehab.exercises[0].prescribedSets, 3);
+      expect(rehab.exercises[0].prescribedReps, '12–15');
+      expect(rehab.exercises[0].prescribedRest, '30–60s');
+
+      expect(rehab.exercises[1].exerciseId, 'warmup_prone_y_raises');
+      expect(rehab.exercises[1].prescribedSets, 3);
+      expect(rehab.exercises[1].prescribedReps, '10–15');
+      expect(rehab.exercises[1].prescribedRest, '30–60s');
+
+      expect(rehab.exercises[2].exerciseId, 'warmup_prone_t_raises');
+      expect(rehab.exercises[2].prescribedSets, 3);
+      expect(rehab.exercises[2].prescribedReps, '10–15');
+      expect(rehab.exercises[2].prescribedRest, '30–60s');
+
+      expect(
+        rehab.exercises[3].exerciseId,
+        'warmup_banded_external_rotation',
+      );
+      expect(rehab.exercises[3].prescribedSets, 3);
+      expect(rehab.exercises[3].prescribedReps, '12–15');
+      expect(rehab.exercises[3].prescribedRest, '30–60s');
+
+      expect(
+        rehab.exercises[4].exerciseId,
+        'rehab_banded_triceps_extension',
+      );
+      expect(rehab.exercises[4].prescribedSets, 3);
+      expect(rehab.exercises[4].prescribedReps, '12–15');
+      expect(rehab.exercises[4].prescribedRest, '30–60s');
+
+      // Verify video URLs exist for all rehab exercises
+      for (final slot in rehab.exercises) {
         final def = WorkoutCatalog.getExerciseById(slot.exerciseId);
         expect(def.videoUrl, isNotNull);
         expect(def.videoUrl, contains('youtube.com/'));

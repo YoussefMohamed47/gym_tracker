@@ -385,6 +385,10 @@ void main() {
       // Push
       await cubit.changeWorkoutType(WorkoutType.push);
       expect(
+        cubit.state.exerciseLogs.containsKey('warmup_wall_angels'),
+        isTrue,
+      );
+      expect(
         cubit.state.exerciseLogs.containsKey('warmup_banded_shoulder_circles'),
         isTrue,
       );
@@ -393,11 +397,19 @@ void main() {
         isTrue,
       );
       expect(
-        cubit.state.exerciseLogs.containsKey('warmup_banded_scapula_push_up'),
+        cubit.state.exerciseLogs.containsKey('warmup_shoulder_scaption'),
         isTrue,
       );
       expect(
-        cubit.state.exerciseLogs.containsKey('warmup_banded_single_arm_row'),
+        cubit.state.exerciseLogs.containsKey('warmup_prone_y_raises'),
+        isTrue,
+      );
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_prone_t_raises'),
+        isTrue,
+      );
+      expect(
+        cubit.state.exerciseLogs.containsKey('warmup_banded_scapula_push_up'),
         isTrue,
       );
 
